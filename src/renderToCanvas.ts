@@ -138,15 +138,9 @@ export default function renderToCanvas(
   const advancedTexture = G.AdvancedDynamicTexture.CreateFullscreenUI("myUI", true, scene);
   advancedTexture.rootContainer.scaleX = window.devicePixelRatio;
   advancedTexture.rootContainer.scaleY = window.devicePixelRatio;
-  
+
   const edgeMaterial = standardMaterial("edgeMaterial", {
     diffuseColor: B.Color3.Green(),
-  }, scene);
-
-  const arcMaterial = standardMaterial("arcMaterial", {
-    diffuseColor: B.Color3.Green(),
-    transparencyMode: B.Material.MATERIAL_ALPHABLEND,
-    alpha: .5,
   }, scene);
 
   const tipMaterial = standardMaterial("tipMaterial", {
@@ -178,15 +172,28 @@ export default function renderToCanvas(
   const root = new B.TransformNode("root", scene);
   root.position = v2ToV3(starCenter.negate());
 
-  // if (showVertices) {
-    star.forEach(({name, pos}, i) => {
-      const ball = B.MeshBuilder.CreateIcoSphere("vtx" + i, {radius: .05});
-      ball.position = v2ToV3(pos);
-      ball.parent = root;
-      ball.material = name.includes("^") ? tipMaterial : innerMaterial;
-    });
-  // }
-  // if (showVertexNames) {
+  // if (showVertices)
+  {
+    const vertexPatterns = [innerMaterial, tipMaterial].map(mat =>
+      Object.assign(
+        B.MeshBuilder.CreateIcoSphere("tip", {
+          radius: .05,
+          // subdivisions: 6,
+        }, scene), {
+          parent: root,
+          material: mat,
+          isVisible: false,
+        }
+      )
+    );
+    star.forEach(({name, pos}, i) => Object.assign(
+      vertexPatterns[i % 2].createInstance(name), {
+        position: v2ToV3(pos),
+      }
+    ));
+  }
+  // if (showVertexNames)
+  {
     star.forEach(({pos, name}, i) => {
       const labelText = name;
       if (labelText.includes("^")) return;
@@ -199,16 +206,15 @@ export default function renderToCanvas(
       advancedTexture.addControl(label);
       label.linkWithMesh(labelPos);
     });
-  // }
+  }
   // if (showStarFace)
   {
     const triangles = triangulate(star.map(v => v.pos));
     const mesh = new B.Mesh("triangles", scene);
-    const vertexData = new B.VertexData();
-    vertexData.positions =
-      triangles.flatMap(triangle => triangle.flatMap(v => [v.x, v.y, 0]));
-    vertexData.indices =
-      Array.from({length: 3*triangles.length}, (_, i) => i);
+    const vertexData = Object.assign(new B.VertexData(), {
+      positions: triangles.flatMap(triangle => triangle.flatMap(v => [v.x, v.y, 0])),
+      indices: Array.from({length: 3*triangles.length}, (_, i) => i),
+    });
     vertexData.applyToMesh(mesh);
     mesh.material = faceMaterial;
     mesh.parent = root;
@@ -218,13 +224,14 @@ export default function renderToCanvas(
     for (const {segments} of starEdges) {
       for (const {from, to} of segments) {
         Object.assign(
-            B.MeshBuilder.CreateTube("seg", {
+          B.MeshBuilder.CreateTube("seg", {
             path: [v2ToV3(from.pos), v2ToV3(to.pos)],
-            radius: .015,
+            radius: .01,
           }, scene), {
-          material: edgeMaterial,
-          parent: root,
-        });
+            material: edgeMaterial,
+            parent: root,
+          }
+        );
       }
     }
     task.edges.forEach((e, i) => {
@@ -237,11 +244,12 @@ export default function renderToCanvas(
         const index = starIndex.get(name);
         const center = star[2*index].pos;
         Object.assign(
-          B.MeshBuilder.CreateTube("arc", {
-            path: arcPath(center, from, to, 10).map(v2ToV3),
-            radius: .015,
-          }), {
-            material: arcMaterial,
+          B.CreateGreasedLine(`arc${i}_${j}`, {
+            points: arcPath(center, from, to, 10).map(v2ToV3),
+          }, {
+            width: .01,
+            color: B.Color3.Green(),
+          }, scene), {
             parent: root,
           }
         );
@@ -279,18 +287,6 @@ export default function renderToCanvas(
     const l = new B.PointLight("light" + i, pos, scene);
     l.radius = 5;
   });
-
-  if (false) [[1,0,0], [0,1,0], [0,0,1]].forEach(([x,y,z], i) =>
-    Object.assign(
-      B.MeshBuilder.CreateTube("axis" + i, {
-        path: [new V3(), new V3(x,y,z).scaleInPlace(5)],
-        radius: 0.02,
-      }, scene), {
-      material: standardMaterial("axisMat" + i, {
-        diffuseColor: new B.Color3(x,y,z),
-      }, scene),
-    })
-  );
 
   const renderScene = () => scene.render()
   engine.runRenderLoop(renderScene);
