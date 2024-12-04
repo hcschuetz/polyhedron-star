@@ -65,13 +65,13 @@ export default function renderToCanvas(
     }°`
   );
 
-  const starEdges: StarEdge[] = [];
+  const edges: StarEdge[] = [];
   for (const e of task.edges) {
     if (typeof e === "string") {
       const index = gapIndex.get(e);
       const length = star[2*index].pos.subtract(star.at(2*index-1).pos).length();
       // TODO remove one of the segments?
-      starEdges.push({kind: "alongGap", angle: 0, length, segments: [{
+      edges.push({kind: "alongGap", angle: 0, length, segments: [{
         from: {gapName: e, offset:  0, pos: star[2*index].pos},
         to  : {gapName: e, offset: +1, pos: star[(2*index+1) % star.length].pos},
       }, {
@@ -125,7 +125,7 @@ export default function renderToCanvas(
         to  : {gapName: to      , offset: 0,
           pos: toPos},
       });
-      starEdges.push({
+      edges.push({
         kind: segments.length === 0 ? "inStar" : "acrossGaps",
         angle: angleToRad(e.angle),
         length,
@@ -229,7 +229,7 @@ export default function renderToCanvas(
   }
   // if (showStarEdges)
   {
-    for (const {segments} of starEdges) {
+    for (const {segments} of edges) {
       for (const {from, to} of segments) {
         Object.assign(
           B.MeshBuilder.CreateTube("seg", {
@@ -245,7 +245,7 @@ export default function renderToCanvas(
     task.edges.forEach((e, i) => {
       if (typeof e === "string") return;
       if (!e.through) return;
-      const edge = starEdges[i];
+      const edge = edges[i];
       e.through.forEach((name, j) => {
         const from = edge.segments[j].to.pos;
         const to = edge.segments[j+1].from.pos;
