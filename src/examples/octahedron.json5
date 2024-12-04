@@ -1,0 +1,32 @@
+{
+  star: {
+    gaps: [
+      {name: "a", angleDeficit: {num: 120, unit: "deg"}, steps: ["8h", "8h", "8h"]},
+      {name: "b", angleDeficit: {num: 120, unit: "deg"}, steps: ["6h", "4h"]},
+      {name: "c", angleDeficit: {num: 120, unit: "deg"}, steps: ["4h", "2h"]},
+      {name: "d", angleDeficit: {num: 120, unit: "deg"}, steps: ["2h", "12h"]},
+      {name: "e", angleDeficit: {num: 120, unit: "deg"}, steps: ["12h", "10h"]},
+    ],
+  },
+  edges: [
+    "b", "c", "d", "e",
+    {angle: {num: 30, unit: "deg"}, from: "a", to: "b"},
+    {angle: {num: 30, unit: "deg"}, from: "a", to: "c"},
+    {angle: {num: 30, unit: "deg"}, from: "a", to: "d"},
+    {angle: {num: 30, unit: "deg"}, from: "a", to: "e"},
+    {angle: {num: 30, unit: "deg"}, from: "b", to: "c"},
+    {angle: {num: 30, unit: "deg"}, from: "c", to: "d"},
+    {angle: {num: 30, unit: "deg"}, from: "d", to: "e"},
+    {angle: {num: 30, unit: "deg"}, from: "e", to: "b", through: ["a"]},
+  ],
+  triangles: [
+    ["a", "b", "c"],
+    ["a", "c", "d"],
+    ["a", "d", "e"],
+    ["a", "e", "b"],
+    ["b", "^", "c"],
+    ["c", "^", "d"],
+    ["d", "^", "e"],
+    ["e", "^", "b"],
+  ],
+}

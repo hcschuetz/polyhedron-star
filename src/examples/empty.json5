@@ -1,0 +1,11 @@
+{
+  star: {
+    gaps: [
+      {name: "a", angleDeficit: {num: 360, unit: "deg"}, steps: []},
+    ]
+  },
+  edges: [
+  ],
+  triangles: [
+  ],
+}

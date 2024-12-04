@@ -1,0 +1,113 @@
+// This star definition is based on "Shapes of polyhedra and triangulations of
+// the sphere" by William P Thurston, Figure 15 on page 540 (PDF page 30),
+// https://arxiv.org/pdf/math/9801088
+
+
+// The following specification uses JSON5 syntax, which is similar to JSON but
+// a bit more permissive.  For example:
+// - It supports comments.
+// - It allows to omit the quotes around a property key if it is an identifier.
+// - It allows trailing commas in objects and arrays.
+{
+  star: {
+    gaps: [
+      // Each object in this list defines a side of the polygon around the
+      // star tips and the corresponding gap between the star's jags.
+      // - Each name is used for a polygon side, the corresponding gap,
+      //   and the gap's apex (that is, an inward-pointing vertex of the star).
+      // - The length and orientation of a polygon side is given as a sequence
+      //   of steps.  For example, ["12h", "10h"] means "go one unit in the
+      //   "12 o'clock direction" of a clock dial and then one unit in the
+      //   "10 o'clock direction".
+      //   (A syntax for arbitrary step directions and lengths is also available
+      //   but not used here.)
+      // - The angleDeficit is the apex angle of the isosceles gap triangle.
+      //   It also tells how much rotation is missing to a full 360° turn
+      //   when you walk around the corresponding polyhedron vertex or manifold
+      //   cone.  (Units "deg" and "rad" are supported.)
+      //
+      // The polygon should be closed
+      //
+      // This example walks around the polygon in counter-clockwise direction.
+      // You can also walk around in clockwise direction.  The direction used
+      // here will be called the "positive" direction.  Certain later parts of
+      // the specification will require to use this positive direction.
+      {name: "a", angleDeficit: {num: 60, unit: "deg"}, steps: ["12h", "10h"]},
+      {name: "b", angleDeficit: {num: 60, unit: "deg"}, steps: ["10h"]},
+      {name: "c", angleDeficit: {num: 60, unit: "deg"}, steps: ["10h", "10h", "8h"]},
+      {name: "d", angleDeficit: {num: 60, unit: "deg"}, steps: ["10h", "8h", "8h"]},
+      {name: "e", angleDeficit: {num: 60, unit: "deg"}, steps: ["8h", "6h"]},
+      {name: "f", angleDeficit: {num: 60, unit: "deg"}, steps: ["6h", "6h"]},
+      {name: "g", angleDeficit: {num: 60, unit: "deg"}, steps: ["6h", "4h"]},
+      {name: "h", angleDeficit: {num: 60, unit: "deg"}, steps: ["4h", "4h"]},
+      {name: "i", angleDeficit: {num: 60, unit: "deg"}, steps: ["4h", "4h", "2h"]},
+      {name: "j", angleDeficit: {num: 60, unit: "deg"}, steps: ["2h", "2h"]},
+      {name: "k", angleDeficit: {num: 60, unit: "deg"}, steps: ["2h", "12h", "12h", "12h"]},
+    ],
+  },
+  // Actually only the star above is from the Thurston paper.
+  // The 30 edges below are one possible set of bendable edges.
+  // Different choices are possible.
+  edges: [
+    // Some bending edges are along a cut from v_0 to some v_i.  They are
+    // just represented by the corresponding gap name.
+    // (The remaining gaps will be glued flat.  That is, the neighboring spikes
+    // of such a gap are merged into the same polyhedron face.)
+    "a", "b", "e", "f", "g", "h", "j",
+
+    // The following edges are completely inside the star (except that their
+    // end points are of course on the star boundary.)
+    // The given angles are used as a starting point for an approximation 
+    {angle: {num: 30, unit: "deg"}, from: "a", to: "b"},
+    {angle: {num: 30, unit: "deg"}, from: "a", to: "c"},
+    {angle: {num: 30, unit: "deg"}, from: "a", to: "k"},
+    {angle: {num: 30, unit: "deg"}, from: "b", to: "c"},
+    {angle: {num: 30, unit: "deg"}, from: "c", to: "d"},
+    {angle: {num: 30, unit: "deg"}, from: "c", to: "k"},
+    {angle: {num: 30, unit: "deg"}, from: "d", to: "e"},
+    {angle: {num: 30, unit: "deg"}, from: "d", to: "f"},
+    {angle: {num: 30, unit: "deg"}, from: "d", to: "h"},
+    {angle: {num: 30, unit: "deg"}, from: "d", to: "k"},
+    {angle: {num: 30, unit: "deg"}, from: "e", to: "f"},
+    {angle: {num: 30, unit: "deg"}, from: "f", to: "g"},
+    {angle: {num: 30, unit: "deg"}, from: "f", to: "h"},
+    {angle: {num: 30, unit: "deg"}, from: "g", to: "h"},
+    {angle: {num: 30, unit: "deg"}, from: "h", to: "i"},
+    {angle: {num: 30, unit: "deg"}, from: "h", to: "k"},
+    {angle: {num: 30, unit: "deg"}, from: "i", to: "j"},
+    {angle: {num: 30, unit: "deg"}, from: "i", to: "k"},
+
+    // The remaining edges cross one or more gaps.  Each of them is divided into
+    // two or more segments, each crossing a spike of the star.
+    // On the folded polyhedron the segments of an edge align to a straight
+    // edge.  Edges of this type must walk around the star in the "positive"
+    // direction. (See above.)
+    {angle: {num: 30, unit: "deg"}, from: "b", to: "e", through: ["c", "d"]},
+    {angle: {num: 30, unit: "deg"}, from: "c", to: "e", through: ["d"]},
+    {angle: {num: 30, unit: "deg"}, from: "h", to: "j", through: ["i"]},
+    {angle: {num: 30, unit: "deg"}, from: "i", to: "a", through: ["k"]},
+    {angle: {num: 30, unit: "deg"}, from: "j", to: "a", through: ["k"]},
+  ],
+  triangles: [
+    ["d", "h", "k"],
+    ["a", "^", "b"],
+    ["a", "b", "c"],
+    ["a", "c", "k"],
+    ["a", "k", "i"],
+    ["a", "i", "j"],
+    ["a", "j", "^"],
+    ["b", "^", "e"],
+    ["b", "e", "c"],
+    ["c", "e", "d"],
+    ["c", "d", "k"],
+    ["d", "e", "f"],
+    ["d", "f", "h"],
+    ["e", "^", "f"],
+    ["f", "^", "g"],
+    ["f", "g", "h"],
+    ["g", "^", "h"],
+    ["h", "^", "j"],
+    ["h", "j", "i"],
+    ["h", "i", "k"],
+  ],
+}

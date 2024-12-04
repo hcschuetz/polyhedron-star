@@ -1,0 +1,21 @@
+{
+  star: {
+    gaps: [
+      {name: "a", angleDeficit: {num: 180, unit: "deg"}, steps: ["8h", "8h"]},
+      {name: "b", angleDeficit: {num: 180, unit: "deg"}, steps: ["4h", "4h"]},
+      {name: "c", angleDeficit: {num: 180, unit: "deg"}, steps: ["12h", "12h"]},
+    ],
+  },
+  edges: [
+    "a", "b", "c",
+    {angle: {num: 30, unit: "deg"}, from: "a", to: "b"},
+    {angle: {num: 30, unit: "deg"}, from: "a", to: "c"},
+    {angle: {num: 30, unit: "deg"}, from: "b", to: "c"},
+  ],
+  triangles: [
+    ["a", "b", "c"],
+    ["a", "^", "b"],
+    ["b", "^", "c"],
+    ["c", "^", "a"],
+  ],
+}
