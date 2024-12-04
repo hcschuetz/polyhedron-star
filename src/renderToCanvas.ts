@@ -37,7 +37,7 @@ export default function renderToCanvas(
 
   // ---------------------------------------------------------------------------
 
-  const starIndex = new Map(task.star.gaps.map((v, i) => [v.name, i]));
+  const gapIndex = new Map(task.star.gaps.map((v, i) => [v.name, i]));
 
   const star: StarVertex[] = [];
   let pos = V2.Zero();
@@ -66,7 +66,7 @@ export default function renderToCanvas(
   const starEdges: StarEdge[] = [];
   for (const e of task.edges) {
     if (typeof e === "string") {
-      const index = starIndex.get(e);
+      const index = gapIndex.get(e);
       const length = star[2*index].pos.subtract(star.at(2*index-1).pos).length();
       // TODO remove one of the segments?
       starEdges.push({angle: 0, length, segments: [{
@@ -78,11 +78,11 @@ export default function renderToCanvas(
       }]});
     } else {
       const {from, to, through = []} = e;
-      const toPos = star[2*starIndex.get(to)].pos;
+      const toPos = star[2*gapIndex.get(to)].pos;
       let toRot = toPos.clone();
       const rotHistory: {name: string, from: V2, to: V2}[] = [];
       for (const thr of through.toReversed()) {
-        const index = starIndex.get(thr);
+        const index = gapIndex.get(thr);
         const pivot = star[2*index].pos;
         const angleDefNeg = -angleToRad(task.star.gaps[index].angleDeficit);
         rotateAroundInPlace(toRot, pivot, angleDefNeg);
@@ -92,7 +92,7 @@ export default function renderToCanvas(
         }
         rotHistory.unshift({name: thr, from: pivot.clone(), to: star.at(2*index-1).pos.clone()});
       }
-      const fromIndex = starIndex.get(from);
+      const fromIndex = gapIndex.get(from);
       const fromPos = star[2*fromIndex].pos;
       const length = toRot.subtract(fromPos).length();
 
@@ -100,7 +100,7 @@ export default function renderToCanvas(
       let prevName = task.star.gaps[fromIndex].name;
       let prevLambda = 0;
       const segments = rotHistory.map(({name, from, to}) => {
-        const index = starIndex.get(name);
+        const index = gapIndex.get(name);
         const [np,, d] = intersectLineSegments(from, to, fromPos, toRot);
         const lambda = np / d;
         if (lambda < 1e-8 || lambda > 1 - 1e-8) console.error(
@@ -242,7 +242,7 @@ export default function renderToCanvas(
       e.through.forEach((name, j) => {
         const from = edge.segments[j].to.pos;
         const to = edge.segments[j+1].from.pos;
-        const index = starIndex.get(name);
+        const index = gapIndex.get(name);
         const center = star[2*index].pos;
         Object.assign(
           B.CreateGreasedLine(`arc${i}_${j}`, {
