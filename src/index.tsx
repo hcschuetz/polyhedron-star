@@ -7,13 +7,19 @@ import renderToCanvas from './renderToCanvas';
 
 
 export function App() {
-  const [exampleIdx, setExampleIdx] = useState(0)
+  const [exampleIdx, setExampleIdx] = useState(0);
+  const [count, setCount] = useState(0);
   const textarea = useRef<HTMLTextAreaElement>();
   const canvas = useRef<HTMLCanvasElement>();
 
-  function run() { renderToCanvas(canvas.current, textarea.current.value); }
-
-  useEffect(run, []);
+  useEffect(
+    () => { textarea.current.value = examples[exampleIdx].value.trim(); },
+    [exampleIdx]
+  );
+  useEffect(
+    () => renderToCanvas(canvas.current, textarea.current.value),
+    [count],
+  );
 
   return (
     <div>
@@ -25,11 +31,9 @@ export function App() {
         ))}
         </select>
       <br />
-      <textarea ref={textarea} cols={100} rows={20}>
-        {examples[exampleIdx].value.trim()}
-      </textarea>
+      <textarea ref={textarea} cols={100} rows={20} />
       <br />
-      <button onClick={run}>run</button>
+      <button onClick={() => setCount(c => c+1)}>run</button>
       <br />
       <canvas ref={canvas}/>
     </div>
