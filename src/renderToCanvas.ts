@@ -23,7 +23,9 @@ type StarBoundaryPoint = {
   pos: V2,
 };
 type StarEdgeSegment = {from: StarBoundaryPoint, to: StarBoundaryPoint};
+type StarEdgeKind = "inStar" | "acrossGaps" | "alongGap";
 type StarEdge = {
+  kind: StarEdgeKind,
   angle: number,
   length: number,
   segments: StarEdgeSegment[],
@@ -69,7 +71,7 @@ export default function renderToCanvas(
       const index = gapIndex.get(e);
       const length = star[2*index].pos.subtract(star.at(2*index-1).pos).length();
       // TODO remove one of the segments?
-      starEdges.push({angle: 0, length, segments: [{
+      starEdges.push({kind: "alongGap", angle: 0, length, segments: [{
         from: {gapName: e, offset:  0, pos: star[2*index].pos},
         to  : {gapName: e, offset: +1, pos: star[(2*index+1) % star.length].pos},
       }, {
@@ -123,7 +125,12 @@ export default function renderToCanvas(
         to  : {gapName: to      , offset: 0,
           pos: toPos},
       });
-      starEdges.push({angle: angleToRad(e.angle), length, segments});
+      starEdges.push({
+        kind: segments.length === 0 ? "inStar" : "acrossGaps",
+        angle: angleToRad(e.angle),
+        length,
+        segments,
+      });
     }
   }
 
