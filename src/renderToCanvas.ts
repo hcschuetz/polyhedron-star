@@ -227,6 +227,25 @@ export default function renderToCanvas(
     mesh.material = faceMaterial;
     mesh.parent = root;
   }
+  {
+    for (let i = 0; i < star.length; i += 2) {
+      Object.assign(
+        B.CreateGreasedLine(`flower${i}`, {
+          points: arcPath(
+            star[i].pos,
+            star.at(i-1).pos,
+            star[i+1].pos,
+            20,
+          ).map(v2ToV3),
+        }, {
+          width: .01,
+          color: B.Color3.Red(),
+        }, scene), {
+          parent: root,
+        }
+      );
+    }
+  }
   // if (showStarEdges)
   {
     for (const {segments} of edges) {
