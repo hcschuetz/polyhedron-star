@@ -178,7 +178,8 @@ export default function renderToCanvas(
       Object.assign(
         B.MeshBuilder.CreateIcoSphere("tip", {
           radius: .05,
-          // subdivisions: 6,
+          subdivisions: 3,
+          flat: false,
         }, scene), {
           parent: root,
           material: mat,
