@@ -142,7 +142,8 @@ export default function renderToCanvas(
         to: outer,
         alongCut: true,
         length: outer.pos2D.subtract(inner.pos2D).length(),
-        segments: [seg]});
+        segments: [seg],
+      });
     } else {
       const {from, to, through = []} = e;
       const fromIndex = gapIndex.get(from);
