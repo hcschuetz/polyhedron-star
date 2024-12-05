@@ -5,30 +5,85 @@ import JSON5 from 'json5';
 
 import { assert, fail } from './utils';
 import { angleToRad, Task, stepToV2 } from './taskspec';
-import triangulate from './triangulate';
 import { arcPath, interpolateV2, intersectLineSegments, rotateAroundInPlace, v2, v2ToV3, v3 } from './geom-utils';
 
 const TAU = 2 * Math.PI;
-const r3 = Math.sqrt(3);
 
-type StarVertex = {name: string, pos: V2, isTip: boolean};
-
-type StarBoundaryPoint = {
-  gapName: string,
-  // between -1 and +1;
-  // - negative: along the preceding spike
-  // - zero: at the inner vertex
-  // - positive: along the subsequent spike
-  offset: number,
-  pos: V2,
+type Vertex = {
+  name: string;
+  /**
+   * position along the star boundary
+   * 
+   * odd: tip; even: gap apex; non-integer: intersection with edge
+   */
+  pos1D: number;
+  pos2D: V2;
+  // pos3D: V3;
+  firstHalfEdgeOut?: HalfEdge;
 };
-type StarEdgeSegment = {from: StarBoundaryPoint, to: StarBoundaryPoint};
-type StarEdgeKind = "inStar" | "acrossGaps" | "alongGap";
-type StarEdge = {
-  kind: StarEdgeKind,
-  angle: number,
+
+type Loop = {
+  name: string;
+  firstHalfEdge: HalfEdge;
+  minStepsToTip?: number;
+};
+
+// Actually a "HalfSegment":
+type HalfEdge = {
+  to: Vertex;
+  loop?: Loop;
+  twin?: HalfEdge;
+  next?: HalfEdge;
+  // prev: HalfEdge;
+
+  length: number;
+  /** Angle from positive x axis to this half edge, in radians */
+  direction: number;
+};
+
+function makeSegment(v0: Vertex, v1: Vertex): HalfEdge {
+  const diff = v1.pos2D.subtract(v0.pos2D);
+  const length = diff.length();
+  const direction = Math.atan2(diff.y, diff.x);
+  const he0: HalfEdge = {to: v1, length, direction};
+  const he1: HalfEdge = {to: v0, length, direction: (direction + TAU/2) % TAU};
+  he0.twin = he1; he1.twin = he0;
+  return he0;
+}
+
+function* loopHalfEdges(loop: Loop): Generator<HalfEdge, void, void> {
+  let he = loop.firstHalfEdge, count: 0;
+  do {
+    yield he;
+    if (count++ > 50) fail(`run-away iteration around loop`);
+    he = he.next;
+  } while (he !== loop.firstHalfEdge);
+}
+
+function* vertexHalfEdges(v: Vertex): Generator<HalfEdge, void, void> {
+  let he = v.firstHalfEdgeOut, count: 0;
+  do {
+    yield he;
+    if (count++ > 50) fail(`run-away iteration around loop`);
+    he = he.twin.next;
+  } while (he !== v.firstHalfEdgeOut);
+}
+
+function propagateShortestPath(face: Loop, nSteps: number) {
+  if (nSteps >= face.minStepsToTip) return;
+  face.minStepsToTip = nSteps;
+  for (const he of loopHalfEdges(face)) {
+    propagateShortestPath(he.twin.loop, nSteps + 1);
+  }
+}
+
+type EdgeKind = "inStar" | "acrossGaps" | "alongGap";
+type Edge = {
+  from: Vertex,
+  to: Vertex,
+  kind: EdgeKind,
   length: number,
-  segments: StarEdgeSegment[],
+  segments: HalfEdge[],
 };
 
 export default function renderToCanvas(
@@ -37,11 +92,14 @@ export default function renderToCanvas(
 ) {
   const task: Task = JSON5.parse(taskString);
 
+  // TODO type-check task
+
   // ---------------------------------------------------------------------------
 
   const gapIndex = new Map(task.star.gaps.map((v, i) => [v.name, i]));
 
-  const star: StarVertex[] = [];
+  const primaryVertices = new Array<Vertex>();
+
   let pos = V2.Zero();
   let totalAngleDeficit = 0;
   task.star.gaps.forEach(({name, angleDeficit, steps}, i, array) => {
@@ -54,90 +112,188 @@ export default function renderToCanvas(
     const baseAngle = (Math.PI - gapAngle) / 2;
     const inner = pos.add(stepTotal.rotateToRef(baseAngle, v2()).scaleInPlace(.5/Math.cos(baseAngle)));
     pos = pos.add(stepTotal);
-    star.push(
-      {name, pos: inner, isTip: false},
-      {name: `${name}^${array[(i+1)%array.length]}`, pos, isTip: true},
-    );
+    const tipName = `${name}^${array[(i+1)%array.length].name}`;
+    primaryVertices.push({name         , pos1D: primaryVertices.length, pos2D: inner});
+    primaryVertices.push({name: tipName, pos1D: primaryVertices.length, pos2D: pos  });
   });
+  const remainingAngleDeficit = 2*TAU - totalAngleDeficit;
   console.log(
     `Total angle deficit: ${totalAngleDeficit} = ${
       (totalAngleDeficit*(360/TAU)).toFixed(5)
-    }°`
+    }°\nremaining:           ${remainingAngleDeficit} = ${
+      (remainingAngleDeficit*(360/TAU)).toFixed(5)}°`
   );
 
-  const edges: StarEdge[] = [];
+  const vertices: Vertex[] = primaryVertices.slice();
+  const edges: Edge[] = [];
   for (const e of task.edges) {
     if (typeof e === "string") {
       const index = gapIndex.get(e);
-      const length = star[2*index].pos.subtract(star.at(2*index-1).pos).length();
-      // TODO remove one of the segments?
-      edges.push({kind: "alongGap", angle: 0, length, segments: [{
-        from: {gapName: e, offset:  0, pos: star[2*index].pos},
-        to  : {gapName: e, offset: +1, pos: star[(2*index+1) % star.length].pos},
-      }, {
-        from: {gapName: e, offset: -1, pos: star.at(2*index-1).pos},
-        to  : {gapName: e, offset:  0, pos: star[2*index].pos},
-      }]});
+      const inner = primaryVertices[2*index];
+      const outer = primaryVertices[2*index+1];
+      const seg = makeSegment(inner, outer);
+      edges.push({
+        from: inner,
+        to: outer,
+        kind: "alongGap",
+        length: seg.length,
+        segments: [seg]});
     } else {
       const {from, to, through = []} = e;
-      const toPos = star[2*gapIndex.get(to)].pos;
-      let toRot = toPos.clone();
-      const rotHistory: {name: string, from: V2, to: V2}[] = [];
+      const fromIndex = gapIndex.get(from);
+      const fromVertex = primaryVertices[2*fromIndex];
+      const fromPos = fromVertex.pos2D;
+      const toVertex = primaryVertices[2*gapIndex.get(to)];
+
+      let toPosRotated = toVertex.pos2D.clone();
+      const rotations: {index: number, inner: V2, outer: V2}[] = [];
       for (const thr of through.toReversed()) {
         const index = gapIndex.get(thr);
-        const pivot = star[2*index].pos;
+        const pivot = primaryVertices[2*index].pos2D;
         const angleDefNeg = -angleToRad(task.star.gaps[index].angleDeficit);
-        rotateAroundInPlace(toRot, pivot, angleDefNeg);
-        for (const {from, to} of rotHistory) {
-          rotateAroundInPlace(from, pivot, angleDefNeg);
-          rotateAroundInPlace(to, pivot, angleDefNeg);
+        rotateAroundInPlace(toPosRotated, pivot, angleDefNeg);
+        for (const {inner, outer} of rotations) {
+          rotateAroundInPlace(inner, pivot, angleDefNeg);
+          rotateAroundInPlace(outer, pivot, angleDefNeg);
         }
-        rotHistory.unshift({name: thr, from: pivot.clone(), to: star.at(2*index-1).pos.clone()});
+        rotations.unshift({
+          index,
+          inner: pivot.clone(),
+          outer: primaryVertices.at(2*index-1).pos2D.clone(),
+        });
       }
-      const fromIndex = gapIndex.get(from);
-      const fromPos = star[2*fromIndex].pos;
-      const length = toRot.subtract(fromPos).length();
+      const length = toPosRotated.subtract(fromPos).length();
 
-      let prevIndex = fromIndex;
-      let prevName = task.star.gaps[fromIndex].name;
-      let prevLambda = 0;
-      const segments = rotHistory.map(({name, from, to}) => {
-        const index = gapIndex.get(name);
-        const [np,, d] = intersectLineSegments(from, to, fromPos, toRot);
+      let prevVertex = fromVertex;
+      const segments = rotations.map(({index, inner, outer}) => {
+        const [np,, d] = intersectLineSegments(inner, outer, fromPos, toPosRotated);
         const lambda = np / d;
         if (lambda < 1e-8 || lambda > 1 - 1e-8) console.error(
-          `edge ${e.from}-${e.to} does not pass through gap ${name}`
+          `edge ${from}-${to} does not pass through gap ${name}`
         );
-        const seg = {
-          from: {gapName: prevName, offset: prevLambda,
-            pos: interpolateV2(star[2*prevIndex].pos, star[(2*prevIndex+1) % star.length].pos, prevLambda)},
-          to  : {gapName: name    , offset: lambda    ,
-            pos: interpolateV2(star[2*index].pos, star.at(2*index-1).pos, lambda)},
+        const pivot = primaryVertices[2*index];
+        const v0: Vertex = {
+          name: `${pivot.name}#${fromVertex.name}<${toVertex.name}`,
+          pos1D: 2*index - lambda,
+          pos2D: interpolateV2(
+            pivot.pos2D,
+            primaryVertices.at(2*index-1).pos2D,
+            lambda,
+          ),
         };
-        prevIndex = index;
-        prevName = name;
-        prevLambda = lambda;
+        const v1: Vertex = {
+          name: `${pivot.name}#${fromVertex.name}>${toVertex.name}`,
+          pos1D: 2*index + lambda,
+          pos2D: interpolateV2(
+            pivot.pos2D,
+            primaryVertices[(2*index+1) % primaryVertices.length].pos2D,
+            lambda
+          ),
+        };
+        vertices.push(v0, v1);
+        const seg = makeSegment(prevVertex, v0);
+
+        prevVertex = v1;
         return seg;
       });
-      segments.push({
-        from: {gapName: prevName, offset: prevLambda,
-          pos: interpolateV2(star[2*prevIndex].pos, star.at(2*prevIndex+1).pos, prevLambda)},
-        to  : {gapName: to      , offset: 0,
-          pos: toPos},
-      });
+      segments.push(makeSegment(prevVertex, toVertex));
       edges.push({
+        from: fromVertex,
+        to: toVertex,
         kind: segments.length === 0 ? "inStar" : "acrossGaps",
-        angle: angleToRad(e.angle),
         length,
         segments,
       });
     }
   }
 
+  vertices.sort((v0, v1) => v0.pos1D - v1.pos1D);
+  console.log(vertices.map(v => `${v.name.padEnd(8)} @ ${v.pos1D.toFixed(3)} / (${v.pos2D.x.toFixed(2)}, ${v.pos2D.y.toFixed(2)})`).join("\n"))
+  const cuts = vertices.map((v, i) => makeSegment(vertices.at(i-1), v));
+
+  const segmentIndex = Map.groupBy<Vertex, HalfEdge>(
+    [
+      ...edges.flatMap(edge =>
+        edge.kind === "alongGap" ? [] :
+        edge.segments.flatMap(he0 => [he0, he0.twin])
+      ),
+      ...cuts.flatMap(cut => [cut, cut.twin]),
+    ],
+    entry => entry.twin.to,
+  );
+  const allSegments = segmentIndex.values().flatMap(hes => hes).toArray();
+
+  const subfaces = new Array<Loop>();
+  foo: for (const he of allSegments) {
+    if (he.loop) continue;
+    let loopName = "loop#" + subfaces.length + ": " + he.twin.to.name;
+    const loop: Loop = {
+      name: "tempName",
+      firstHalfEdge: he,
+    };
+    subfaces.push(loop);
+
+    let heTmp = he, count = 0;
+    do {
+      loopName += " -- " + heTmp.to.name;
+      let nextAngle = Number.POSITIVE_INFINITY;
+      let nextHE: HalfEdge;
+      for (const heOut of segmentIndex.get(heTmp.to)) {
+        const outAngle = (heTmp.direction - heOut.direction + 3*TAU/2) % TAU;
+        if (1e-8 < outAngle && outAngle < nextAngle) {
+          nextAngle = outAngle;
+          nextHE = heOut;
+        }
+      }
+      heTmp.next = nextHE;
+      nextHE.loop = loop;
+      heTmp = nextHE;
+      if (++count > 50) {console.error("runaway iteration"); break foo;}
+    } while (heTmp !== he);
+    loop.name = loopName;
+  }
+
+  for (const seg of allSegments) {
+    seg.to.firstHalfEdgeOut = seg.twin;
+  }
+
+  const boundary = cuts[0].twin.loop;
+
+  primaryVertices.forEach((v, i) => {
+    if (i % 2 === 0) return;
+    const loop = vertexHalfEdges(v).map(he => he.loop).find(loop => loop !== boundary);
+    propagateShortestPath(loop, 0);
+  });
+  boundary.minStepsToTip = -1; // only needed for some edge cases
+
+  subfaces.forEach((f, i) =>
+    console.log(`${i}: [${f === boundary ? "boundary" : f.minStepsToTip}] (${
+      loopHalfEdges(f).toArray().length}) ${f.name}`)
+  );
+
+  let centerFace: Loop = undefined;
+  for (const loop of subfaces) {
+    if (centerFace === undefined || loop.minStepsToTip > centerFace.minStepsToTip) {
+      centerFace = loop;
+    }
+  }
+
+  console.log("centerFace:", centerFace.name);
+
   // ---------------------------------------------------------------------------
 
   const noBubble = (e: Event) => e.preventDefault();
   canvas.addEventListener("wheel", noBubble);
+
+  const colors = {
+    edge: B.Color3.Green(),
+    cut: B.Color3.Red(),
+    tip: B.Color3.Red(),
+    inner: B.Color3.Blue(),
+    face: B.Color3.Yellow(),
+    grid: B.Color3.Black(),
+    flower: B.Color3.Red(),
+  };
 
   const engine = new B.Engine(canvas, true);
   const scene = new B.Scene(engine);
@@ -147,19 +303,19 @@ export default function renderToCanvas(
   advancedTexture.rootContainer.scaleY = window.devicePixelRatio;
 
   const edgeMaterial = standardMaterial("edgeMaterial", {
-    diffuseColor: B.Color3.Green(),
+    diffuseColor: colors.edge,
   }, scene);
 
   const tipMaterial = standardMaterial("tipMaterial", {
-    diffuseColor: B.Color3.Red(),
+    diffuseColor: colors.tip,
   }, scene);
 
   const innerMaterial = standardMaterial("innerMaterial", {
-    diffuseColor: B.Color3.Blue(),
+    diffuseColor: colors.inner,
   }, scene);
 
   const faceMaterial = standardMaterial("faceMaterial", {
-    diffuseColor: B.Color3.Yellow(),
+    diffuseColor: colors.face,
     roughness: 100,
     transparencyMode: B.Material.MATERIAL_ALPHABLEND,
     alpha: 0.6,
@@ -169,12 +325,12 @@ export default function renderToCanvas(
   }, scene);
 
   const gridMaterial = standardMaterial("gridMaterial", {
-    diffuseColor: B.Color3.Black(),
+    diffuseColor: colors.grid,
   }, scene);
 
-  const starCenter = star
-    .reduce((acc, vtx) => acc.addInPlace(vtx.pos), V2.Zero())
-    .scaleInPlace(1 / star.length);
+  const starCenter = primaryVertices
+    .reduce((acc, vtx) => acc.addInPlace(vtx.pos2D), V2.Zero())
+    .scaleInPlace(1 / primaryVertices.length);
 
   const root = new B.TransformNode("root", scene);
   root.position = v2ToV3(starCenter.negate());
@@ -194,65 +350,64 @@ export default function renderToCanvas(
         }
       )
     );
-    star.forEach(({name, pos}, i) => Object.assign(
+    primaryVertices.forEach(({name, pos2D}, i) => Object.assign(
       vertexPatterns[i % 2].createInstance(name), {
-        position: v2ToV3(pos),
+        position: v2ToV3(pos2D),
       }
     ));
   }
-  // if (showVertexNames)
   {
-    star.forEach(({pos, name}, i) => {
-      const labelText = name;
-      if (labelText.includes("^")) return;
-      const labelPos = new B.TransformNode("labelPos" + i, scene);
-      labelPos.parent = root;
-      labelPos.position = v3(0, .2, 0).addInPlace(v2ToV3(pos));
-      const label = new G.TextBlock("label" + i, labelText);
-      label.color = "#fff";
-      label.fontSize = 16;
-      advancedTexture.addControl(label);
-      label.linkWithMesh(labelPos);
-    });
-  }
-  // if (showStarFace)
-  {
-    const triangles = triangulate(star.map(v => v.pos));
-    const mesh = new B.Mesh("triangles", scene);
-    const vertexData = Object.assign(new B.VertexData(), {
-      positions: triangles.flatMap(triangle => triangle.flatMap(v => [v.x, v.y, 0])),
-      indices: Array.from({length: 3*triangles.length}, (_, i) => i),
-    });
-    vertexData.applyToMesh(mesh);
-    mesh.material = faceMaterial;
-    mesh.parent = root;
-  }
-  {
-    for (let i = 0; i < star.length; i += 2) {
+    primaryVertices.forEach(({pos2D, name}, i) => {
+      if (i % 2 !== 0) return;
+      // if (showVertexNames)
+      {
+        const labelPos = new B.TransformNode("labelPos" + i, scene);
+        labelPos.parent = root;
+        labelPos.position = v3(0, .2, 0).addInPlace(v2ToV3(pos2D));
+        const label = new G.TextBlock("label" + i, name);
+        label.color = "#fff";
+        label.fontSize = 16;
+        advancedTexture.addControl(label);
+        label.linkWithMesh(labelPos);
+      }
+      // if (showFlower)
       Object.assign(
         B.CreateGreasedLine(`flower${i}`, {
           points: arcPath(
-            star[i].pos,
-            star.at(i-1).pos,
-            star[i+1].pos,
+            pos2D,
+            primaryVertices.at(i-1).pos2D,
+            primaryVertices[i+1].pos2D,
             20,
           ).map(v2ToV3),
         }, {
           width: .01,
-          color: B.Color3.Red(),
+          color: colors.flower,
         }, scene), {
           parent: root,
         }
       );
+    });
+  }
+  // if (showCuts)
+  if (false) {
+    for (const cut of cuts) {
+      Object.assign(B.CreateGreasedLine("cut", {
+        points: [cut.twin.to.pos2D, cut.to.pos2D].map(v2ToV3),
+      }, {
+        width: .01,
+        color: colors.cut,
+      }, scene), {
+        parent: root,
+      });
     }
   }
-  // if (showStarEdges)
+  // if (showEdges)
   {
     for (const {segments} of edges) {
-      for (const {from, to} of segments) {
+      for (const {twin: {to: from}, to} of segments) {
         Object.assign(
           B.MeshBuilder.CreateTube("seg", {
-            path: [v2ToV3(from.pos), v2ToV3(to.pos)],
+            path: [v2ToV3(from.pos2D), v2ToV3(to.pos2D)],
             radius: .01,
           }, scene), {
             material: edgeMaterial,
@@ -266,41 +421,55 @@ export default function renderToCanvas(
       if (!e.through) return;
       const edge = edges[i];
       e.through.forEach((name, j) => {
-        const from = edge.segments[j].to.pos;
-        const to = edge.segments[j+1].from.pos;
+        const from = edge.segments[j].to.pos2D;
+        const to = edge.segments[j+1].twin.to.pos2D;
         const index = gapIndex.get(name);
-        const center = star[2*index].pos;
+        const center = primaryVertices[2*index].pos2D;
         Object.assign(
           B.CreateGreasedLine(`arc${i}_${j}`, {
             points: arcPath(center, from, to, 10).map(v2ToV3),
           }, {
             width: .01,
-            color: B.Color3.Green(),
+            color: colors.edge,
           }, scene), {
             parent: root,
           }
         );
       });
     });
-
-    if (false) for (let i = -12; i < 4; i++) {
-      for (const [skewDown, skewUp] of [[0,0], [0.5, 0.5], [-5,+5], [+5,-5]]) {
-        const line = B.MeshBuilder.CreateTube("grid", {
-          path: [
-            v3((i+skewDown)*r3, -5, 0),
-            v3((i+skewUp  )*r3, +5, 0),
-          ],
-          radius: 0.005,
-        });
-        line.material = gridMaterial;
-        line.parent = root;
+  }
+  // if (showFaces)
+  {
+    const positions = new Array<[number, number, number]>();
+    for (const face of subfaces) {
+      if (face === boundary) continue;
+      const [first, second, ...rest] = loopHalfEdges(face);
+      const pivot = first.to;
+      assert (second.twin.to === pivot);
+      for (const current of rest) {
+        positions.push(
+          v2ToV3(pivot.pos2D).asArray(),
+          v2ToV3(current.twin.to.pos2D).asArray(),
+          v2ToV3(current.to.pos2D).asArray(),
+        )
       }
     }
+    const mesh = Object.assign(new B.Mesh("faces", scene, root), {
+      material: faceMaterial,
+    });
+    const vertexData = Object.assign(new B.VertexData(), {
+      positions: positions.flat(),
+      indices: positions.map((_, i) => i),
+    });
+    vertexData.applyToMesh(mesh);
   }
 
-  const camera = new B.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2, 10, v3(0, 0, 0), scene);
-  camera.lowerRadiusLimit = 3;
-  camera.upperRadiusLimit = 30;
+  const camera = Object.assign(
+    new B.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2, 10, v3(0, 0, 0), scene), {
+      lowerRadiusLimit: 3,
+      upperRadiusLimit: 30,
+    }
+  );
   camera.attachControl(canvas, true);
 
   [
