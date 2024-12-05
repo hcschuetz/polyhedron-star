@@ -67,14 +67,6 @@ function* vertexHalfEdges(v: Vertex): Generator<HalfEdge, void, void> {
   } while (he !== v.firstHalfEdgeOut);
 }
 
-function propagateShortestPath(face: Loop, nSteps: number) {
-  if (nSteps >= face.minStepsToTip) return;
-  face.minStepsToTip = nSteps;
-  for (const he of loopHalfEdges(face)) {
-    propagateShortestPath(he.twin.loop, nSteps + 1);
-  }
-}
-
 /**
  * An edge where the polyhedron is bent.
  * It may be subdivided into multiple segments in the star.
@@ -264,17 +256,16 @@ export default function renderToCanvas(
 
   const boundary = cuts[0].twin.loop;
 
-  primaryVertices.forEach((v, i) => {
-    if (i % 2 === 0) return;
-    const loop = vertexHalfEdges(v).map(he => he.loop).find(loop => loop !== boundary);
-    propagateShortestPath(loop, 0);
-  });
-  boundary.minStepsToTip = -1; // only needed for some edge cases
-
-  subfaces.forEach((f, i) =>
-    console.log(`${i}: [${f === boundary ? "boundary" : f.minStepsToTip}] (${
-      loopHalfEdges(f).toArray().length}) ${f.name}`)
-  );
+  // A heuristic approach to identify some "central" face:
+  propagateShortestPath(boundary, 0);
+  function propagateShortestPath(face: Loop, lengthToFace: number) {
+    if (lengthToFace >= face.minStepsToTip) return;
+    face.minStepsToTip = lengthToFace;
+    for (const he of loopHalfEdges(face)) {
+      const stepLength = he.to.pos2D.subtract(he.twin.to.pos2D).length();
+      propagateShortestPath(he.twin.loop, lengthToFace + stepLength);
+    }
+  }
 
   let centerFace: Loop = undefined;
   for (const loop of subfaces) {
@@ -283,7 +274,12 @@ export default function renderToCanvas(
     }
   }
 
-  console.log("centerFace:", centerFace.name);
+  subfaces.forEach((f, i) => {
+    console.log(`${
+      f === boundary ? "boundary:\n" : f === centerFace ? "center face:\n" : ""
+    }${i}: [${f.minStepsToTip.toFixed(3)}] (${
+      loopHalfEdges(f).toArray().length}) ${f.name}`)
+  });
 
   // ---------------------------------------------------------------------------
 
