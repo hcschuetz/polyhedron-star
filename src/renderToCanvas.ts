@@ -36,17 +36,15 @@ type HalfEdge = {
   next?: HalfEdge;
   // prev: HalfEdge;
 
-  length: number;
   /** Angle from positive x axis to this half edge, in radians */
   direction: number;
 };
 
 function makeSegment(v0: Vertex, v1: Vertex): HalfEdge {
   const diff = v1.pos2D.subtract(v0.pos2D);
-  const length = diff.length();
   const direction = Math.atan2(diff.y, diff.x);
-  const he0: HalfEdge = {to: v1, length, direction};
-  const he1: HalfEdge = {to: v0, length, direction: (direction + TAU/2) % TAU};
+  const he0: HalfEdge = {to: v1, direction};
+  const he1: HalfEdge = {to: v0, direction: (direction + TAU/2) % TAU};
   he0.twin = he1; he1.twin = he0;
   return he0;
 }
@@ -143,7 +141,7 @@ export default function renderToCanvas(
         from: inner,
         to: outer,
         alongCut: true,
-        length: seg.length,
+        length: outer.pos2D.subtract(inner.pos2D).length(),
         segments: [seg]});
     } else {
       const {from, to, through = []} = e;
