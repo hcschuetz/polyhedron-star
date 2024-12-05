@@ -81,8 +81,10 @@
     // two or more segments, each crossing a spike of the star.
     // On the folded polyhedron the segments of an edge align to a straight
     // edge.  Edges of this type must walk around the star in the "positive"
-    // direction. (See above.)
+    // direction. (See above.) So you must write
     {angle: {num: 30, unit: "deg"}, from: "b", to: "e", through: ["c", "d"]},
+    // because this is not supported:
+    // {angle: {num: 30, unit: "deg"}, from: "e", to: "b", through: ["d", "c"]}.
     {angle: {num: 30, unit: "deg"}, from: "c", to: "e", through: ["d"]},
     {angle: {num: 30, unit: "deg"}, from: "h", to: "j", through: ["i"]},
     {angle: {num: 30, unit: "deg"}, from: "i", to: "a", through: ["k"]},
