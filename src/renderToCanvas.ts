@@ -77,11 +77,18 @@ function propagateShortestPath(face: Loop, nSteps: number) {
   }
 }
 
-type EdgeKind = "inStar" | "acrossGaps" | "alongGap";
+/**
+ * An edge where the polyhedron is bent.
+ * It may be subdivided into multiple segments in the star.
+ */
 type Edge = {
   from: Vertex,
   to: Vertex,
-  kind: EdgeKind,
+  /**
+   * Is this edge along a cut in the polyhedron,
+   * that is, along the star boundary?
+   */
+  alongCut: boolean,
   length: number,
   segments: HalfEdge[],
 };
@@ -135,7 +142,7 @@ export default function renderToCanvas(
       edges.push({
         from: inner,
         to: outer,
-        kind: "alongGap",
+        alongCut: true,
         length: seg.length,
         segments: [seg]});
     } else {
@@ -200,7 +207,7 @@ export default function renderToCanvas(
       edges.push({
         from: fromVertex,
         to: toVertex,
-        kind: segments.length === 0 ? "inStar" : "acrossGaps",
+        alongCut: false,
         length,
         segments,
       });
@@ -214,8 +221,7 @@ export default function renderToCanvas(
   const segmentIndex = Map.groupBy<Vertex, HalfEdge>(
     [
       ...edges.flatMap(edge =>
-        edge.kind === "alongGap" ? [] :
-        edge.segments.flatMap(he0 => [he0, he0.twin])
+        edge.alongCut ? [] : edge.segments.flatMap(he0 => [he0, he0.twin])
       ),
       ...cuts.flatMap(cut => [cut, cut.twin]),
     ],
