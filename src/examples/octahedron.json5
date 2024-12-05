@@ -19,14 +19,4 @@
     {angle: {num: 30, unit: "deg"}, from: "d", to: "e"},
     {angle: {num: 30, unit: "deg"}, from: "e", to: "b", through: ["a"]},
   ],
-  triangles: [
-    ["a", "b", "c"],
-    ["a", "c", "d"],
-    ["a", "d", "e"],
-    ["a", "e", "b"],
-    ["b", "^", "c"],
-    ["c", "^", "d"],
-    ["d", "^", "e"],
-    ["e", "^", "b"],
-  ],
 }

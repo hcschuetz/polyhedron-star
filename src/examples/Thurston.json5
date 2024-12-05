@@ -30,8 +30,7 @@
       //
       // This example walks around the polygon in counter-clockwise direction.
       // You can also walk around in clockwise direction.  The direction used
-      // here will be called the "positive" direction.  Certain later parts of
-      // the specification will require to use this positive direction.
+      // here will be called the "positive" direction.
       {name: "a", angleDeficit: {num: 60, unit: "deg"}, steps: ["12h", "10h"]},
       {name: "b", angleDeficit: {num: 60, unit: "deg"}, steps: ["10h"]},
       {name: "c", angleDeficit: {num: 60, unit: "deg"}, steps: ["10h", "10h", "8h"]},
@@ -89,27 +88,5 @@
     {angle: {num: 30, unit: "deg"}, from: "h", to: "j", through: ["i"]},
     {angle: {num: 30, unit: "deg"}, from: "i", to: "a", through: ["k"]},
     {angle: {num: 30, unit: "deg"}, from: "j", to: "a", through: ["k"]},
-  ],
-  triangles: [
-    ["d", "h", "k"],
-    ["a", "^", "b"],
-    ["a", "b", "c"],
-    ["a", "c", "k"],
-    ["a", "k", "i"],
-    ["a", "i", "j"],
-    ["a", "j", "^"],
-    ["b", "^", "e"],
-    ["b", "e", "c"],
-    ["c", "e", "d"],
-    ["c", "d", "k"],
-    ["d", "e", "f"],
-    ["d", "f", "h"],
-    ["e", "^", "f"],
-    ["f", "^", "g"],
-    ["f", "g", "h"],
-    ["g", "^", "h"],
-    ["h", "^", "j"],
-    ["h", "j", "i"],
-    ["h", "i", "k"],
   ],
 }

@@ -9,8 +9,4 @@
     "a", "b",
     {angle: {num: 30, unit: "deg"}, from: "a", to: "b"},
   ],
-  triangles: [
-    ["a", "b", "^"],
-    ["a", "^", "b"],
-  ],
 }
