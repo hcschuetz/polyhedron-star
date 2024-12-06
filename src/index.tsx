@@ -9,6 +9,7 @@ import renderToCanvas from './renderToCanvas';
 export function App() {
   const [exampleIdx, setExampleIdx] = useState(0);
   const [count, setCount] = useState(0); // just to trigger canvas updates
+  const [bendFraction, setBendFraction] = useState(0);
   const textarea = useRef<HTMLTextAreaElement>();
   const canvas = useRef<HTMLCanvasElement>();
 
@@ -17,7 +18,7 @@ export function App() {
     [exampleIdx]
   );
   useEffect(
-    () => renderToCanvas(canvas.current, textarea.current.value),
+    () => renderToCanvas(canvas.current, textarea.current.value, bendFraction),
     [count],
   );
 
@@ -37,9 +38,15 @@ export function App() {
         </select>
       <br />
       <textarea ref={textarea} cols={100} rows={20} />
-      <br />
-      <button onClick={() => setCount(c => c+1)}>run</button>
-      <br />
+      <div>
+        <button onClick={() => setCount(c => c+1)}>run</button>
+        Bending: none
+        <input type="range" class="with-margin" style="display: inline-block; vertical-align: middle;"
+          min="0" max="1" step=".01" value={bendFraction.toFixed(2)}
+          onChange={e => setBendFraction(Number.parseFloat(e.currentTarget.value))}
+        />
+        full
+      </div>
       <canvas ref={canvas}/>
     </div>
   );

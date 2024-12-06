@@ -96,6 +96,7 @@ type Edge = {
 export default function renderToCanvas(
   canvas: HTMLCanvasElement,
   taskString: string,
+  bendFraction: number,
 ) {
   const task: Task = JSON5.parse(taskString);
 
@@ -304,12 +305,13 @@ export default function renderToCanvas(
   );
 
   function bendEdges(depth: number, he: HalfEdge, frame: UVFrame) {
-    const {twin, to} = he, from = twin.to;
-    to  .pos3D = frame.injectPoint(to  .pos2D);
-    from.pos3D = frame.injectPoint(from.pos2D);
+    const {twin, to} = he;
+    const from3D = frame.injectPoint(twin.to.pos2D);
+    const to3D   = frame.injectPoint(to.pos2D);
+    to.pos3D = to3D;
     if (twin.loop === boundary) return;
-    console.log("  ".repeat(depth) + "entering: " + twin.loop.name  );
-    const newFrame = frame.rotateAroundLine(from.pos3D, to.pos3D, he.bend);
+    console.log("  ".repeat(depth) + "entering: " + twin.loop.name);
+    const newFrame = frame.rotateAroundLine(from3D, to3D, he.bend * bendFraction);
     for (let heTmp = twin.next; heTmp !== twin; heTmp = heTmp.next) {
       bendEdges(depth + 1, heTmp, newFrame);
     }
