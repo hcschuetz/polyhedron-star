@@ -8,7 +8,7 @@ import renderToCanvas from './renderToCanvas';
 
 export function App() {
   const [exampleIdx, setExampleIdx] = useState(0);
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(0); // just to trigger canvas updates
   const textarea = useRef<HTMLTextAreaElement>();
   const canvas = useRef<HTMLCanvasElement>();
 
