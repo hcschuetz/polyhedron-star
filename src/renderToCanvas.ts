@@ -221,7 +221,7 @@ export default function renderToCanvas(
   const allSegments = segmentIndex.values().flatMap(hes => hes).toArray();
 
   const subfaces = new Array<Loop>();
-  foo: for (const he of allSegments) {
+  for (const he of allSegments) {
     if (he.loop) continue;
     let loopName = "loop#" + subfaces.length + ": " + he.twin.to.name;
     const loop: Loop = {
@@ -231,7 +231,7 @@ export default function renderToCanvas(
     subfaces.push(loop);
 
     let heTmp = he, count = 0;
-    do {
+    loopSetupLoop: do {
       loopName += " -- " + heTmp.to.name;
       let nextAngle = Number.POSITIVE_INFINITY;
       let nextHE: HalfEdge;
@@ -245,7 +245,7 @@ export default function renderToCanvas(
       heTmp.next = nextHE;
       nextHE.loop = loop;
       heTmp = nextHE;
-      if (++count > 50) {console.error("runaway iteration"); break foo;}
+      if (++count > 50) {console.error("runaway iteration"); break loopSetupLoop;}
     } while (heTmp !== he);
     loop.name = loopName;
   }
