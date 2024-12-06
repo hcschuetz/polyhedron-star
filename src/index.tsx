@@ -23,7 +23,7 @@ export function App() {
 
   return (
     <div>
-      <select value={exampleIdx} onChange={e => {
+      <select class="with-margin" value={exampleIdx} onChange={e => {
         setExampleIdx(+e.target["value"]);
         // Trigger a renderToCanvas.  (We call it indirectly so that
         // useEffect's cleanup calls take place.)
