@@ -90,8 +90,17 @@ type Edge = {
    * The bend angle may be negative to indicate bending in the other direction.
    */
   bendAngle: number,
+
+  // There should be one more segment than breaks.
+  breaks: EdgeBreak[],
   segments: HalfEdge[],
 };
+
+type EdgeBreak = {
+  from: Vertex,
+  to: Vertex,
+  pivot: Vertex,
+}
 
 export default function renderToCanvas(
   canvas: HTMLCanvasElement,
@@ -146,6 +155,7 @@ export default function renderToCanvas(
         length: outer.pos2D.subtract(inner.pos2D).length(),
         bendAngle: 0, // We do not explicitly bend an edge along a cut.
         segments: [makeSegment(inner, outer)],
+        breaks: [],
       });
     } else {
       const {from, to, through = [], angle} = e;
@@ -175,7 +185,8 @@ export default function renderToCanvas(
       const length = toPosRotated.subtract(fromPos).length();
 
       let prevVertex = fromVertex;
-      const segments = rotations.map(({index, inner, outer}) => {
+      const segments = new Array<HalfEdge>();
+      const breaks: EdgeBreak[] = rotations.map(({index, inner, outer}) => {
         const [np,, d] = intersectLineSegments(inner, outer, fromPos, toPosRotated);
         const lambda = np / d;
         if (lambda < 1e-8 || lambda > 1 - 1e-8) console.error(
@@ -201,10 +212,10 @@ export default function renderToCanvas(
           ),
         };
         vertices.push(v0, v1);
-        const seg = makeSegment(prevVertex, v0);
+        segments.push(makeSegment(prevVertex, v0));
 
         prevVertex = v1;
-        return seg;
+        return {from: v0, to: v1, pivot};
       });
       segments.push(makeSegment(prevVertex, toVertex));
       edges.push({
@@ -214,6 +225,7 @@ export default function renderToCanvas(
         length,
         bendAngle,
         segments,
+        breaks,
       });
     }
   }
@@ -440,23 +452,16 @@ export default function renderToCanvas(
         );
       }
     }
-    task.edges.forEach((e, i) => {
-      if (typeof e === "string") return;
-      if (!e.through) return;
-      const edge = edges[i];
-      e.through.forEach((name, j) => {
-        const from = edge.segments[j].to.pos3D;
-        const to = edge.segments[j+1].twin.to.pos3D;
-        const index = gapIndex.get(name);
-        const center = primaryVertices[2*index].pos3D;
-        B.CreateGreasedLine(`arc${i}_${j}`, {
-          points: arcPath(center, from, to, 10),
+    for (const {breaks} of edges) {
+      for (const {from, to, pivot} of breaks) {
+        B.CreateGreasedLine("arc", {
+          points: arcPath(pivot.pos3D, from.pos3D, to.pos3D, 10),
         }, {
           width: .01,
           color: colors.edge,
         }, scene);
-      });
-    });
+      }
+    }
   }
   // if (showFaces)
   {
