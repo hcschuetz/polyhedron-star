@@ -1,10 +1,8 @@
-import { Vector2 as V2, Vector3 as V3 } from '@babylonjs/core';
+import { Quaternion, Vector2 as V2, Vector3 as V3 } from '@babylonjs/core';
 import { assert } from './utils';
 
 export const v2 = (x?: number , y?: number) => new V2(x, y);
 export const v3 = (x?: number, y?: number, z?: number) => new V3(x, y, z);
-
-export const v2ToV3 = ({x, y}: V2) => v3(x,y);
 
 
 const aux0 = v2();
@@ -52,7 +50,7 @@ function test_intersectLineSegments() {
 // test_intersectLineSegments();
 
 
-export function arcPath(center: V2, from: V2, to: V2, nSteps: number) {
+export function arcPath(center: V3, from: V3, to: V3, nSteps: number) {
   const vecFrom = from.subtract(center);
   const vecTo = to.subtract(center);
   // assert(Math.abs(vecTo.length() - vecFrom.length()) < 1e-8);
@@ -65,4 +63,63 @@ export function arcPath(center: V2, from: V2, to: V2, nSteps: number) {
       vecTo  .scale(Math.sin(   lambda  * omega) * oneBySinOmega))
     );
   });
+}
+
+/** Embedding a plane with (orthonormal) 2D coordinates in 3D */
+export class UVFrame {
+  constructor(
+    readonly origin: V3,
+    readonly eu: V3,
+    readonly ev: V3,
+  ) {
+    // Apparently we cannot use the usual limit of 1e-8 here:
+    assert(Math.abs(eu.lengthSquared() - 1) < 1e-5);
+    assert(Math.abs(ev.lengthSquared() - 1) < 1e-5);
+    assert(Math.abs(eu.dot(ev)) < 1e-5);
+
+    // // Normalize to reduce error propagation:
+    // eu.normalize();
+    // ev.normalize();
+  }
+
+  toString() { return `UVFrame(${this.origin}, ${this.eu}, ${this.ev})`; }
+
+  // TODO rename this to "injectOffsetAndAddToRef" and make it public?
+  #inject(uv: V2, ref: V3): V3 {
+    this.eu.scaleAndAddToRef(uv.x, ref);
+    this.ev.scaleAndAddToRef(uv.y, ref);
+    return ref;
+  }
+
+  injectOffset(uv: V2): V3 { return this.#inject(uv, v3()); }
+  injectPoint(uv: V2): V3 { return this.#inject(uv, this.origin.clone()); }
+
+  projectOffset(xyz: V3): V2 {
+    return v2(xyz.dot(this.eu), xyz.dot(this.ev));
+  }
+
+  projectPoint(xyz: V3): V2 {
+    return this.projectOffset(xyz.subtract(this.origin));
+  }
+
+  /**
+   * Create a rotated `UVFrame`.
+   *
+   * Given two points `p` and `q` (in 3D coordinates),
+   * construct a new `UVFrame` by rotating this frame around the line
+   * through `p` and `q` by the given angle.
+   *
+   * If p and q are actually on the UV plane, then they (and all other points
+   * on the line through p and q) have the same coordinates in this frame and
+   * the new frame.
+   */
+  rotateAroundLine(p: V3, q: V3, angle: number): UVFrame {
+    const quaternion = Quaternion.RotationAxis(q.subtract(p).normalize(), angle);
+    return new UVFrame(
+      this.origin.rotateByQuaternionAroundPointToRef(quaternion, p, v3()),
+      // .normalize() to avoid error accumulation:
+      this.eu.rotateByQuaternionToRef(quaternion, v3()).normalize(),
+      this.ev.rotateByQuaternionToRef(quaternion, v3()).normalize(),
+    );
+  }
 }

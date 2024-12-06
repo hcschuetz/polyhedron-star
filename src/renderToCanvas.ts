@@ -5,7 +5,7 @@ import JSON5 from 'json5';
 
 import { assert, fail } from './utils';
 import { angleToRad, Task, stepToV2 } from './taskspec';
-import { arcPath, interpolateV2, intersectLineSegments, rotateAroundInPlace, v2, v2ToV3, v3 } from './geom-utils';
+import { arcPath, interpolateV2, intersectLineSegments, rotateAroundInPlace, UVFrame, v2, v3 } from './geom-utils';
 
 const TAU = 2 * Math.PI;
 
@@ -18,7 +18,7 @@ type Vertex = {
    */
   pos1D: number;
   pos2D: V2;
-  // pos3D: V3;
+  pos3D?: V3;
   firstHalfEdgeOut?: HalfEdge;
 };
 
@@ -38,6 +38,9 @@ type HalfEdge = {
 
   /** Angle from positive x axis to this half edge, in radians */
   direction: number;
+
+  /** Bending angle along this edge */
+  bend?: number;
 };
 
 function makeSegment(v0: Vertex, v1: Vertex): HalfEdge {
@@ -80,6 +83,13 @@ type Edge = {
    */
   alongCut: boolean,
   length: number,
+  /**
+   * The "bend angle" is `TAU/2 - dihedral angle`.  So a value of 0 means
+   * that there is actually no bend.
+   *
+   * The bend angle may be negative to indicate bending in the other direction.
+   */
+  bendAngle: number,
   segments: HalfEdge[],
 };
 
@@ -128,20 +138,21 @@ export default function renderToCanvas(
       const index = gapIndex.get(e);
       const inner = primaryVertices[2*index];
       const outer = primaryVertices[2*index+1];
-      const seg = makeSegment(inner, outer);
       edges.push({
         from: inner,
         to: outer,
         alongCut: true,
         length: outer.pos2D.subtract(inner.pos2D).length(),
-        segments: [seg],
+        bendAngle: 0, // We do not explicitly bend an edge along a cut.
+        segments: [makeSegment(inner, outer)],
       });
     } else {
-      const {from, to, through = []} = e;
+      const {from, to, through = [], angle} = e;
       const fromIndex = gapIndex.get(from);
       const fromVertex = primaryVertices[2*fromIndex];
       const fromPos = fromVertex.pos2D;
       const toVertex = primaryVertices[2*gapIndex.get(to)];
+      const bendAngle = angleToRad(angle);
 
       let toPosRotated = toVertex.pos2D.clone();
       const rotations: {index: number, inner: V2, outer: V2}[] = [];
@@ -200,6 +211,7 @@ export default function renderToCanvas(
         to: toVertex,
         alongCut: false,
         length,
+        bendAngle,
         segments,
       });
     }
@@ -274,12 +286,37 @@ export default function renderToCanvas(
     }
   }
 
-  subfaces.forEach((f, i) => {
-    console.log(`${
-      f === boundary ? "boundary:\n" : f === centerFace ? "center face:\n" : ""
-    }${i}: [${f.minStepsToTip.toFixed(3)}] (${
-      loopHalfEdges(f).toArray().length}) ${f.name}`)
-  });
+  for (const {bendAngle, segments} of edges) {
+    for (const he of segments) {
+      he.bend = bendAngle;
+      he.twin.bend = bendAngle;
+    }
+  }
+
+  const starCenter = primaryVertices
+    .reduce((acc, vtx) => acc.addInPlace(vtx.pos2D), V2.Zero())
+    .scaleInPlace(1 / primaryVertices.length);
+
+  const starFrame = new UVFrame(
+    v3(-starCenter.x, -starCenter.y, 0),
+    v3(1, 0, 0),
+    v3(0, 1, 0),
+  );
+
+  function bendEdges(depth: number, he: HalfEdge, frame: UVFrame) {
+    const {twin, to} = he, from = twin.to;
+    to  .pos3D = frame.injectPoint(to  .pos2D);
+    from.pos3D = frame.injectPoint(from.pos2D);
+    if (twin.loop === boundary) return;
+    console.log("  ".repeat(depth) + "entering: " + twin.loop.name  );
+    const newFrame = frame.rotateAroundLine(from.pos3D, to.pos3D, he.bend);
+    for (let heTmp = twin.next; heTmp !== twin; heTmp = heTmp.next) {
+      bendEdges(depth + 1, heTmp, newFrame);
+    }
+    console.log("  ".repeat(depth) + "leaving :", twin.loop.name);
+  }
+  console.log("center face:", centerFace.name);
+  loopHalfEdges(centerFace).forEach(he => bendEdges(1, he, starFrame));
 
   // ---------------------------------------------------------------------------
 
@@ -329,13 +366,6 @@ export default function renderToCanvas(
     diffuseColor: colors.grid,
   }, scene);
 
-  const starCenter = primaryVertices
-    .reduce((acc, vtx) => acc.addInPlace(vtx.pos2D), V2.Zero())
-    .scaleInPlace(1 / primaryVertices.length);
-
-  const root = new B.TransformNode("root", scene);
-  root.position = v2ToV3(starCenter.negate());
-
   // if (showVertices)
   {
     const vertexPatterns = [innerMaterial, tipMaterial].map(mat =>
@@ -345,26 +375,24 @@ export default function renderToCanvas(
           subdivisions: 3,
           flat: false,
         }, scene), {
-          parent: root,
           material: mat,
           isVisible: false,
         }
       )
     );
-    primaryVertices.forEach(({name, pos2D}, i) => Object.assign(
+    primaryVertices.forEach(({name, pos3D}, i) => Object.assign(
       vertexPatterns[i % 2].createInstance(name), {
-        position: v2ToV3(pos2D),
+        position: pos3D,
       }
     ));
   }
   {
-    primaryVertices.forEach(({pos2D, name}, i) => {
+    primaryVertices.forEach(({pos3D, name}, i) => {
       if (i % 2 !== 0) return;
       // if (showVertexNames)
       {
         const labelPos = new B.TransformNode("labelPos" + i, scene);
-        labelPos.parent = root;
-        labelPos.position = v3(0, .2, 0).addInPlace(v2ToV3(pos2D));
+        labelPos.position = v3(0, .2, 0).addInPlace(pos3D);
         const label = new G.TextBlock("label" + i, name);
         label.color = "#fff";
         label.fontSize = 16;
@@ -372,34 +400,28 @@ export default function renderToCanvas(
         label.linkWithMesh(labelPos);
       }
       // if (showFlower)
-      Object.assign(
-        B.CreateGreasedLine(`flower${i}`, {
-          points: arcPath(
-            pos2D,
-            primaryVertices.at(i-1).pos2D,
-            primaryVertices[i+1].pos2D,
-            20,
-          ).map(v2ToV3),
-        }, {
-          width: .01,
-          color: colors.flower,
-        }, scene), {
-          parent: root,
-        }
-      );
+      B.CreateGreasedLine(`flower${i}`, {
+        points: arcPath(
+          pos3D,
+          primaryVertices.at(i-1).pos3D,
+          primaryVertices[i+1].pos3D,
+          20,
+        ),
+      }, {
+        width: .01,
+        color: colors.flower,
+      }, scene);
     });
   }
   // if (showCuts)
   if (false) {
     for (const cut of cuts) {
-      Object.assign(B.CreateGreasedLine("cut", {
-        points: [cut.twin.to.pos2D, cut.to.pos2D].map(v2ToV3),
+      B.CreateGreasedLine("cut", {
+        points: [cut.twin.to.pos3D, cut.to.pos3D],
       }, {
         width: .01,
         color: colors.cut,
-      }, scene), {
-        parent: root,
-      });
+      }, scene);
     }
   }
   // if (showEdges)
@@ -408,11 +430,10 @@ export default function renderToCanvas(
       for (const {twin: {to: from}, to} of segments) {
         Object.assign(
           B.MeshBuilder.CreateTube("seg", {
-            path: [v2ToV3(from.pos2D), v2ToV3(to.pos2D)],
+            path: [from.pos3D, to.pos3D],
             radius: .01,
           }, scene), {
             material: edgeMaterial,
-            parent: root,
           }
         );
       }
@@ -422,20 +443,16 @@ export default function renderToCanvas(
       if (!e.through) return;
       const edge = edges[i];
       e.through.forEach((name, j) => {
-        const from = edge.segments[j].to.pos2D;
-        const to = edge.segments[j+1].twin.to.pos2D;
+        const from = edge.segments[j].to.pos3D;
+        const to = edge.segments[j+1].twin.to.pos3D;
         const index = gapIndex.get(name);
-        const center = primaryVertices[2*index].pos2D;
-        Object.assign(
-          B.CreateGreasedLine(`arc${i}_${j}`, {
-            points: arcPath(center, from, to, 10).map(v2ToV3),
-          }, {
-            width: .01,
-            color: colors.edge,
-          }, scene), {
-            parent: root,
-          }
-        );
+        const center = primaryVertices[2*index].pos3D;
+        B.CreateGreasedLine(`arc${i}_${j}`, {
+          points: arcPath(center, from, to, 10),
+        }, {
+          width: .01,
+          color: colors.edge,
+        }, scene);
       });
     });
   }
@@ -449,13 +466,13 @@ export default function renderToCanvas(
       assert (second.twin.to === pivot);
       for (const current of rest) {
         positions.push(
-          v2ToV3(pivot.pos2D).asArray(),
-          v2ToV3(current.twin.to.pos2D).asArray(),
-          v2ToV3(current.to.pos2D).asArray(),
+          pivot.pos3D.asArray(),
+          current.twin.to.pos3D.asArray(),
+          current.to.pos3D.asArray(),
         )
       }
     }
-    const mesh = Object.assign(new B.Mesh("faces", scene, root), {
+    const mesh = Object.assign(new B.Mesh("faces", scene), {
       material: faceMaterial,
     });
     const vertexData = Object.assign(new B.VertexData(), {
