@@ -8,8 +8,8 @@
   },
   edges: [
     "a", "b", "c",
-    {angle: {num: 30, unit: "deg"}, from: "a", to: "b"},
-    {angle: {num: 30, unit: "deg"}, from: "a", to: "c"},
-    {angle: {num: 30, unit: "deg"}, from: "b", to: "c"},
+    {angle: {num: 109.471, unit: "deg"}, from: "a", to: "b"},
+    {angle: {num: 109.471, unit: "deg"}, from: "a", to: "c"},
+    {angle: {num: 109.471, unit: "deg"}, from: "b", to: "c"},
   ],
 }

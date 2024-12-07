@@ -7,6 +7,6 @@
   },
   edges: [
     "a", "b",
-    {angle: {num: 30, unit: "deg"}, from: "a", to: "b"},
+    {angle: {num: 180, unit: "deg"}, from: "a", to: "b"},
   ],
 }
