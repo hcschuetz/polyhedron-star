@@ -4,11 +4,26 @@
 
 body {
 	margin: 0;
-	padding: 0;
+	padding: 8px;
 }
 
-.with-margin, textarea, button, canvas {
-	margin: 8px;
+.rows {
+	max-width: 800px;
+	display: flex;
+	flex-flow: column wrap;
+	align-items: stretch;
+	gap: 8px;
+}
+
+.flex-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 1em;
+}
+
+label {
+	display: inline-block;
 }
 
 summary {

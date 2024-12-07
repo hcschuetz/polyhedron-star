@@ -10,7 +10,16 @@ import renderToCanvas from './renderToCanvas';
 export function App() {
   const [exampleIdx, setExampleIdx] = useState(0);
   const [count, setCount] = useState(0); // just to trigger canvas updates
-  const bendFraction = useSignal(0);
+  const signals = {
+    bending: useSignal(0),
+    vertices: useSignal(true),
+    labels: useSignal(true),
+    edges: useSignal(true),
+    cuts: useSignal(true),
+    faces: useSignal(true),
+    breaks: useSignal(true),
+    flower: useSignal(true),
+  };
   const textarea = useRef<HTMLTextAreaElement>();
   const canvas = useRef<HTMLCanvasElement>();
 
@@ -19,34 +28,45 @@ export function App() {
     [exampleIdx]
   );
   useEffect(
-    () => renderToCanvas(canvas.current, textarea.current.value, bendFraction),
+    () => renderToCanvas(canvas.current, textarea.current.value, signals),
     [count],
   );
 
   return (
-    <div>
-      <select class="with-margin" value={exampleIdx} onChange={e => {
-        setExampleIdx(+e.target["value"]);
-        // Trigger a renderToCanvas.  (We call it indirectly so that
-        // useEffect's cleanup calls take place.)
-        setCount(c => c+1);
-      }}>
-        {examples.map((ex, i) => (
-          <option value={i}>
-            {ex.name}
-          </option>
-        ))}
-        </select>
-      <br />
-      <textarea ref={textarea} cols={100} rows={20} />
-      <div>
-        <button onClick={() => setCount(c => c+1)}>run</button>
-        Bending: none
-        <input type="range" class="with-margin" style="display: inline-block; vertical-align: middle;"
-          min="0" max="1" step=".01" value={bendFraction.value.toFixed(2)}
-          onInput={e => bendFraction.value = Number.parseFloat(e.currentTarget.value)}
-        />
-        full
+    <div class="rows">
+      <div class="flex-row">
+        <label>
+          Edit the task below or select an example: {}
+          <select value={exampleIdx} onChange={e => {
+            setExampleIdx(+e.target["value"]);
+            // Trigger a renderToCanvas.  (We call it indirectly so that
+            // useEffect's cleanup calls take place.)
+            setCount(c => c+1);
+          }}>
+          {examples.map((ex, i) => (
+            <option value={i}>
+              {ex.name}
+            </option>
+          ))}
+          </select>
+        </label>
+      </div>
+      <textarea ref={textarea} rows={20} />
+      <div class="flex-row">
+        <button onClick={() => setCount(c => c+1)}>run task</button>
+        {Object.entries(signals).map(([key, signal]) => <label>
+          {key}
+          {key === "bending"
+          ? <input type="range" style="display: inline-block; vertical-align: middle;"
+              min="0" max="1" step=".01" value={signals.bending.value.toFixed(2)}
+              onInput={e => signals.bending.value = Number.parseFloat(e.currentTarget.value)}
+            />
+          : <input type="checkbox"
+              checked={signals[key].value}
+              onChange={() => { signals[key].value = !signals[key].value; }}
+            />
+          }
+        </label>)}
       </div>
       <canvas ref={canvas}/>
     </div>

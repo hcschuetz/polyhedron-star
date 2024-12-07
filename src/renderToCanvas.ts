@@ -102,10 +102,21 @@ type EdgeBreak = {
   pivot: Vertex,
 }
 
+type Signals = {
+  bending: Signal<number>,
+  vertices: Signal<boolean>,
+  labels: Signal<boolean>,
+  edges: Signal<boolean>,
+  cuts: Signal<boolean>,
+  faces: Signal<boolean>,
+  breaks: Signal<boolean>,
+  flower: Signal<boolean>,
+}
+
 export default function renderToCanvas(
   canvas: HTMLCanvasElement,
   taskString: string,
-  bendFraction: Signal<number>,
+  signals: Signals,
 ) {
   const task: Task = JSON5.parse(taskString);
 
@@ -328,7 +339,7 @@ export default function renderToCanvas(
       theMap.set(to, to3D);
 
       if (twin.loop === boundary) return;
-      const newFrame = frame.rotateAroundLine(from3D, to3D, he.bend * bendFraction.value);
+      const newFrame = frame.rotateAroundLine(from3D, to3D, he.bend * signals.bending.value);
       for (let heTmp = twin.next; heTmp !== twin; heTmp = heTmp.next) {
         bendEdges(heTmp, newFrame);
       }
@@ -383,7 +394,6 @@ export default function renderToCanvas(
     diffuseColor: colors.grid,
   }, scene);
 
-  // if (showVertices)
   {
     const vertexPatterns = [innerMaterial, tipMaterial].map(mat =>
       Object.assign(
@@ -399,25 +409,29 @@ export default function renderToCanvas(
     );
     primaryVertices.forEach((v, i) => {
       const instance = vertexPatterns[i % 2].createInstance(v.name);
-      effect(() => { instance.position = pos3DMap.value.get(v); });
+      effect(() => {
+        instance.position = pos3DMap.value.get(v);
+        instance.setEnabled(signals.vertices.value);
+        // Or use this:?
+        // instance.isVisible = signals.vertices.value;
+      });
     });
   }
   {
     primaryVertices.forEach((v, i) => {
       if (i % 2 !== 0) return;
-      // if (showVertexNames)
       {
         const labelPos = new B.TransformNode("labelPos" + i, scene);
         effect(() => {
           labelPos.position = v3(0, .2, 0).addInPlace(pos3DMap.value.get(v));
         });
         const label = new G.TextBlock("label" + i, v.name);
+        effect(() => { label.isVisible = signals.labels.value; });
         label.color = "#fff";
         label.fontSize = 16;
         advancedTexture.addControl(label);
         label.linkWithMesh(labelPos);
       }
-      // if (showFlower)
       {
         dynamicGreasedLine(`flower${i}`, {
           width: .01,
@@ -427,10 +441,12 @@ export default function renderToCanvas(
           pos3DMap.value.get(primaryVertices.at(i-1)),
           pos3DMap.value.get(primaryVertices[i+1]),
           20,
-        ));      }
+        ),
+        signals.flower,
+      );
+      }
     });
   }
-  // if (showCuts)
   if (!false) {
     for (const cut of cuts) {
       dynamicGreasedLine("cut", {
@@ -439,10 +455,9 @@ export default function renderToCanvas(
       }, scene, () => [
         pos3DMap.value.get(cut.twin.to),
         pos3DMap.value.get(cut.to)
-      ]);
+      ], signals.cuts);
     }
   }
-  // if (showEdges)
   {
     for (const {segments} of edges) {
       for (const {twin: {to: from}, to} of segments) {
@@ -453,6 +468,7 @@ export default function renderToCanvas(
           },
           scene,
           () => [pos3DMap.value.get(from), pos3DMap.value.get(to)],
+          signals.edges
         );
       }
     }
@@ -466,7 +482,7 @@ export default function renderToCanvas(
           pos3DMap.value.get(from),
           pos3DMap.value.get(to),
           10
-        ));
+        ), signals.breaks);
       }
     }
   }
@@ -475,6 +491,7 @@ export default function renderToCanvas(
     const mesh = Object.assign(new B.Mesh("faces", scene), {
       material: faceMaterial,
     });
+    effect(() => { mesh.setEnabled(signals.faces.value);  });
     effect(() => {
       const positions = new Array<number>();
       const indices = new Array<number>();
@@ -543,6 +560,7 @@ function dynamicGreasedLine(
   mbo: B.GreasedLineMaterialBuilderOptions,
   scene: B.Scene,
   dataFn: () => V3[],
+  show: Signal<boolean>,
 ) {
   let line = B.CreateGreasedLine(
     name, {updatable: true, points: dataFn()}, mbo, scene,
@@ -563,6 +581,7 @@ function dynamicGreasedLine(
       positions[j++] = x; positions[j++] = y; positions[j++] = z;
       positions[j++] = x; positions[j++] = y; positions[j++] = z;
     }
+    line.setEnabled(show.value);
     line.updateVerticesData(B.VertexBuffer.PositionKind, positions);
   });
 
