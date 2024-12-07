@@ -6,6 +6,7 @@ import JSON5 from 'json5';
 import { assert, fail } from './utils';
 import { angleToRad, Task, stepToV2 } from './taskspec';
 import { arcPath, interpolateV2, intersectLineSegments, rotateAroundInPlace, UVFrame, v2, v3 } from './geom-utils';
+import { computed, effect, Signal } from '@preact/signals';
 
 const TAU = 2 * Math.PI;
 
@@ -18,7 +19,6 @@ type Vertex = {
    */
   pos1D: number;
   pos2D: V2;
-  pos3D?: V3;
   firstHalfEdgeOut?: HalfEdge;
 };
 
@@ -105,7 +105,7 @@ type EdgeBreak = {
 export default function renderToCanvas(
   canvas: HTMLCanvasElement,
   taskString: string,
-  bendFraction: number,
+  bendFraction: Signal<number>,
 ) {
   const task: Task = JSON5.parse(taskString);
 
@@ -316,21 +316,28 @@ export default function renderToCanvas(
     v3(0, 1, 0),
   );
 
-  function bendEdges(depth: number, he: HalfEdge, frame: UVFrame) {
-    const {twin, to} = he;
-    const from3D = frame.injectPoint(twin.to.pos2D);
-    const to3D   = frame.injectPoint(to.pos2D);
-    to.pos3D = to3D;
-    if (twin.loop === boundary) return;
-    console.log("  ".repeat(depth) + "entering: " + twin.loop.name);
-    const newFrame = frame.rotateAroundLine(from3D, to3D, he.bend * bendFraction);
-    for (let heTmp = twin.next; heTmp !== twin; heTmp = heTmp.next) {
-      bendEdges(depth + 1, heTmp, newFrame);
+  // 3D positions are not stored in the vertices but in a separate map.
+  // This map is replaced whenever bendFraction.value changes.
+  const pos3DMap = computed(() => {
+    const theMap = new Map<Vertex, V3>();
+
+    function bendEdges(he: HalfEdge, frame: UVFrame) {
+      const {twin, to} = he;
+      const from3D = frame.injectPoint(twin.to.pos2D);
+      const to3D   = frame.injectPoint(to.pos2D);
+      theMap.set(to, to3D);
+
+      if (twin.loop === boundary) return;
+      const newFrame = frame.rotateAroundLine(from3D, to3D, he.bend * bendFraction.value);
+      for (let heTmp = twin.next; heTmp !== twin; heTmp = heTmp.next) {
+        bendEdges(heTmp, newFrame);
+      }
     }
-    console.log("  ".repeat(depth) + "leaving :", twin.loop.name);
-  }
-  console.log("center face:", centerFace.name);
-  loopHalfEdges(centerFace).forEach(he => bendEdges(1, he, starFrame));
+
+    loopHalfEdges(centerFace).forEach(he => bendEdges(he, starFrame));
+
+    return theMap;
+  })
 
   // ---------------------------------------------------------------------------
 
@@ -353,10 +360,6 @@ export default function renderToCanvas(
   const advancedTexture = G.AdvancedDynamicTexture.CreateFullscreenUI("myUI", true, scene);
   advancedTexture.rootContainer.scaleX = window.devicePixelRatio;
   advancedTexture.rootContainer.scaleY = window.devicePixelRatio;
-
-  const edgeMaterial = standardMaterial("edgeMaterial", {
-    diffuseColor: colors.edge,
-  }, scene);
 
   const tipMaterial = standardMaterial("tipMaterial", {
     diffuseColor: colors.tip,
@@ -394,99 +397,106 @@ export default function renderToCanvas(
         }
       )
     );
-    primaryVertices.forEach(({name, pos3D}, i) => Object.assign(
-      vertexPatterns[i % 2].createInstance(name), {
-        position: pos3D,
-      }
-    ));
+    primaryVertices.forEach((v, i) => {
+      const instance = vertexPatterns[i % 2].createInstance(v.name);
+      effect(() => { instance.position = pos3DMap.value.get(v); });
+    });
   }
   {
-    primaryVertices.forEach(({pos3D, name}, i) => {
+    primaryVertices.forEach((v, i) => {
       if (i % 2 !== 0) return;
       // if (showVertexNames)
       {
         const labelPos = new B.TransformNode("labelPos" + i, scene);
-        labelPos.position = v3(0, .2, 0).addInPlace(pos3D);
-        const label = new G.TextBlock("label" + i, name);
+        effect(() => {
+          labelPos.position = v3(0, .2, 0).addInPlace(pos3DMap.value.get(v));
+        });
+        const label = new G.TextBlock("label" + i, v.name);
         label.color = "#fff";
         label.fontSize = 16;
         advancedTexture.addControl(label);
         label.linkWithMesh(labelPos);
       }
       // if (showFlower)
-      B.CreateGreasedLine(`flower${i}`, {
-        points: arcPath(
-          pos3D,
-          primaryVertices.at(i-1).pos3D,
-          primaryVertices[i+1].pos3D,
+      {
+        dynamicGreasedLine(`flower${i}`, {
+          width: .01,
+          color: colors.flower,
+        }, scene, () => arcPath(
+          pos3DMap.value.get(v),
+          pos3DMap.value.get(primaryVertices.at(i-1)),
+          pos3DMap.value.get(primaryVertices[i+1]),
           20,
-        ),
-      }, {
-        width: .01,
-        color: colors.flower,
-      }, scene);
+        ));      }
     });
   }
   // if (showCuts)
-  if (false) {
+  if (!false) {
     for (const cut of cuts) {
-      B.CreateGreasedLine("cut", {
-        points: [cut.twin.to.pos3D, cut.to.pos3D],
-      }, {
+      dynamicGreasedLine("cut", {
         width: .01,
         color: colors.cut,
-      }, scene);
+      }, scene, () => [
+        pos3DMap.value.get(cut.twin.to),
+        pos3DMap.value.get(cut.to)
+      ]);
     }
   }
   // if (showEdges)
   {
     for (const {segments} of edges) {
       for (const {twin: {to: from}, to} of segments) {
-        Object.assign(
-          B.MeshBuilder.CreateTube("seg", {
-            path: [from.pos3D, to.pos3D],
-            radius: .01,
-          }, scene), {
-            material: edgeMaterial,
-          }
+        dynamicGreasedLine(
+          "seg", {
+            width: .03,
+            color: colors.edge,
+          },
+          scene,
+          () => [pos3DMap.value.get(from), pos3DMap.value.get(to)],
         );
       }
     }
     for (const {breaks} of edges) {
       for (const {from, to, pivot} of breaks) {
-        B.CreateGreasedLine("arc", {
-          points: arcPath(pivot.pos3D, from.pos3D, to.pos3D, 10),
-        }, {
+        dynamicGreasedLine("arc", {
           width: .01,
           color: colors.edge,
-        }, scene);
+        }, scene, () => arcPath(
+          pos3DMap.value.get(pivot),
+          pos3DMap.value.get(from),
+          pos3DMap.value.get(to),
+          10
+        ));
       }
     }
   }
   // if (showFaces)
   {
-    const positions = new Array<[number, number, number]>();
-    for (const face of subfaces) {
-      if (face === boundary) continue;
-      const [first, second, ...rest] = loopHalfEdges(face);
-      const pivot = first.to;
-      assert (second.twin.to === pivot);
-      for (const current of rest) {
-        positions.push(
-          pivot.pos3D.asArray(),
-          current.twin.to.pos3D.asArray(),
-          current.to.pos3D.asArray(),
-        )
-      }
-    }
     const mesh = Object.assign(new B.Mesh("faces", scene), {
       material: faceMaterial,
     });
-    const vertexData = Object.assign(new B.VertexData(), {
-      positions: positions.flat(),
-      indices: positions.map((_, i) => i),
+    effect(() => {
+      const positions = new Array<number>();
+      const indices = new Array<number>();
+      let i = 0;
+      for (const face of subfaces) {
+        if (face === boundary) continue;
+        const [first, second, ...rest] = loopHalfEdges(face);
+        const pivot = first.to;
+        assert (second.twin.to === pivot);
+        for (const current of rest) {
+          positions.push(
+            ...pos3DMap.value.get(pivot).asArray(),
+            ...pos3DMap.value.get(current.twin.to).asArray(),
+            ...pos3DMap.value.get(current.to).asArray(),
+          );
+          indices.push(i++, i++, i++);
+        }
+      }
+
+      const vertexData = Object.assign(new B.VertexData(), {positions, indices});
+      vertexData.applyToMesh(mesh);
     });
-    vertexData.applyToMesh(mesh);
   }
 
   const camera = Object.assign(
@@ -527,3 +537,34 @@ const standardMaterial = (
   name: string, props: Partial<B.StandardMaterial>, scene: B.Scene,
 ) =>
   Object.assign(new B.StandardMaterial(name, scene), props);
+
+function dynamicGreasedLine(
+  name: string,
+  mbo: B.GreasedLineMaterialBuilderOptions,
+  scene: B.Scene,
+  dataFn: () => V3[],
+) {
+  let line = B.CreateGreasedLine(
+    name, {updatable: true, points: dataFn()}, mbo, scene,
+  );
+
+  effect(() => {
+    // This approach for updating a greased line is not documented in
+    // https://doc.babylonjs.com/features/featuresDeepDive/mesh/creation/param/greased_line/
+    // as it is not specific to greased lines but (in principle) applicable
+    // to any mesh.
+    // But there is a link to a playground example, which I'm following:
+    // https://playground.babylonjs.com/#ZRZIIZ#98
+    const positions = line.getVerticesData(B.VertexBuffer.PositionKind);
+    if (!positions) return;
+    let j = 0;
+    for (const {x,y,z} of dataFn()) {
+      // The points are duplicated (and of course flattened) into positions:
+      positions[j++] = x; positions[j++] = y; positions[j++] = z;
+      positions[j++] = x; positions[j++] = y; positions[j++] = z;
+    }
+    line.updateVerticesData(B.VertexBuffer.PositionKind, positions);
+  });
+
+  return line;
+}
