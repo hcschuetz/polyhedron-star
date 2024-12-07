@@ -327,19 +327,20 @@ export default function renderToCanvas(
     v3(0, 1, 0),
   );
 
-  // 3D positions are not stored in the vertices but in a separate map.
-  // This map is replaced whenever bendFraction.value changes.
-  const pos3DMap = computed(() => {
-    const theMap = new Map<Vertex, V3>();
+  // 3D positions are not stored in the vertices but in a computed map signal
+  // dependent on the bending signal.
+  const pos3DMapSignal = computed(() => {
+    const pos3DMap = new Map<Vertex, V3>();
 
     function bendEdges(he: HalfEdge, frame: UVFrame) {
       const {twin, to} = he;
       const from3D = frame.injectPoint(twin.to.pos2D);
       const to3D   = frame.injectPoint(to.pos2D);
-      theMap.set(to, to3D);
+      pos3DMap.set(to, to3D);
 
       if (twin.loop === boundary) return;
-      const newFrame = frame.rotateAroundLine(from3D, to3D, he.bend * signals.bending.value);
+      const newFrame =
+        frame.rotateAroundLine(from3D, to3D, he.bend * signals.bending.value);
       for (let heTmp = twin.next; heTmp !== twin; heTmp = heTmp.next) {
         bendEdges(heTmp, newFrame);
       }
@@ -347,7 +348,7 @@ export default function renderToCanvas(
 
     loopHalfEdges(centerFace).forEach(he => bendEdges(he, starFrame));
 
-    return theMap;
+    return pos3DMap;
   })
 
   // ---------------------------------------------------------------------------
@@ -410,7 +411,7 @@ export default function renderToCanvas(
     primaryVertices.forEach((v, i) => {
       const instance = vertexPatterns[i % 2].createInstance(v.name);
       effect(() => {
-        instance.position = pos3DMap.value.get(v);
+        instance.position = pos3DMapSignal.value.get(v);
         instance.setEnabled(signals.vertices.value);
         // Or use this:?
         // instance.isVisible = signals.vertices.value;
@@ -423,7 +424,7 @@ export default function renderToCanvas(
       {
         const labelPos = new B.TransformNode("labelPos" + i, scene);
         effect(() => {
-          labelPos.position = v3(0, .2, 0).addInPlace(pos3DMap.value.get(v));
+          labelPos.position = v3(0, .2, 0).addInPlace(pos3DMapSignal.value.get(v));
         });
         const label = new G.TextBlock("label" + i, v.name);
         effect(() => { label.isVisible = signals.labels.value; });
@@ -437,9 +438,9 @@ export default function renderToCanvas(
           width: .01,
           color: colors.flower,
         }, scene, () => arcPath(
-          pos3DMap.value.get(v),
-          pos3DMap.value.get(primaryVertices.at(i-1)),
-          pos3DMap.value.get(primaryVertices[i+1]),
+          pos3DMapSignal.value.get(v),
+          pos3DMapSignal.value.get(primaryVertices.at(i-1)),
+          pos3DMapSignal.value.get(primaryVertices[i+1]),
           20,
         ),
         signals.flower,
@@ -453,8 +454,8 @@ export default function renderToCanvas(
         width: .01,
         color: colors.cut,
       }, scene, () => [
-        pos3DMap.value.get(cut.twin.to),
-        pos3DMap.value.get(cut.to)
+        pos3DMapSignal.value.get(cut.twin.to),
+        pos3DMapSignal.value.get(cut.to)
       ], signals.cuts);
     }
   }
@@ -467,7 +468,7 @@ export default function renderToCanvas(
             color: colors.edge,
           },
           scene,
-          () => [pos3DMap.value.get(from), pos3DMap.value.get(to)],
+          () => [pos3DMapSignal.value.get(from), pos3DMapSignal.value.get(to)],
           signals.edges
         );
       }
@@ -478,9 +479,9 @@ export default function renderToCanvas(
           width: .01,
           color: colors.edge,
         }, scene, () => arcPath(
-          pos3DMap.value.get(pivot),
-          pos3DMap.value.get(from),
-          pos3DMap.value.get(to),
+          pos3DMapSignal.value.get(pivot),
+          pos3DMapSignal.value.get(from),
+          pos3DMapSignal.value.get(to),
           10
         ), signals.breaks);
       }
@@ -503,9 +504,9 @@ export default function renderToCanvas(
         assert (second.twin.to === pivot);
         for (const current of rest) {
           positions.push(
-            ...pos3DMap.value.get(pivot).asArray(),
-            ...pos3DMap.value.get(current.twin.to).asArray(),
-            ...pos3DMap.value.get(current.to).asArray(),
+            ...pos3DMapSignal.value.get(pivot).asArray(),
+            ...pos3DMapSignal.value.get(current.twin.to).asArray(),
+            ...pos3DMapSignal.value.get(current.to).asArray(),
           );
           indices.push(i++, i++, i++);
         }
