@@ -1,6 +1,8 @@
 import { Quaternion, Vector2 as V2, Vector3 as V3 } from '@babylonjs/core';
 import { assert } from './utils';
 
+export const TAU = 2 * Math.PI;
+
 export const v2 = (x?: number , y?: number) => new V2(x, y);
 export const v3 = (x?: number, y?: number, z?: number) => new V3(x, y, z);
 
