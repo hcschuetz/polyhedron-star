@@ -33,8 +33,10 @@ export type HalfEdge = {
   /** Angle from positive x axis to this half edge, in radians */
   direction: number;
 
-  /** Bending angle along this edge */
-  bend?: number;
+  /** Task-provided bending angle along this edge */
+  userBend?: number;
+  /** Automatically approximated bending angle */
+  computedBend?: number;
 };
 
 export function makeSegment(v0: Vertex, v1: Vertex): HalfEdge {
@@ -53,6 +55,15 @@ export function* loopHalfEdges(loop: Loop): Generator<HalfEdge, void, void> {
     if (count++ > 50) fail(`run-away iteration around loop`);
     he = he.next;
   } while (he !== loop.firstHalfEdge);
+}
+
+export function* vertexHalfEdgesOut(v: Vertex): Generator<HalfEdge, void, void> {
+  let he = v.firstHalfEdgeOut, count: 0;
+  do {
+    yield he;
+    if (count++ > 50) fail(`run-away iteration around vertex`);
+    he = he.twin.next;
+  } while (he !== v.firstHalfEdgeOut);
 }
 
 /**
@@ -85,4 +96,6 @@ export type EdgeBreak = {
   from: Vertex,
   to: Vertex,
   pivot: Vertex,
+  /** interpolation parameter between `from` (0) and `to` (1) */
+  lambda: number,
 }

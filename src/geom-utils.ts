@@ -7,15 +7,15 @@ export const v2 = (x?: number , y?: number) => new V2(x, y);
 export const v3 = (x?: number, y?: number, z?: number) => new V3(x, y, z);
 
 
-const aux0 = v2();
-const aux1 = v2();
-const aux2 = v2();
+const aux2_0 = v2();
+const aux2_1 = v2();
+const aux2_2 = v2();
 
 export const rotateAroundInPlace = (v: V2, pivot: V2, angle: number) =>
-  v.subtractToRef(pivot, aux0).rotateToRef(angle, aux1).addToRef(pivot, v);
+  v.subtractToRef(pivot, aux2_0).rotateToRef(angle, aux2_1).addToRef(pivot, v);
 
 export const interpolateV2 = (p: V2, q: V2, lambda: number) =>
-  p.add(q.subtractToRef(p, aux0).scaleInPlace(lambda));
+  p.add(q.subtractToRef(p, aux2_0).scaleInPlace(lambda));
 
 /**
  * Find the intersection between lines `p0 p1` and `q0 q1`.
@@ -31,9 +31,9 @@ export const interpolateV2 = (p: V2, q: V2, lambda: number) =>
  * and react appropriately to the special cases.
  */
 export function intersectLineSegments(p0: V2, p1: V2, q0: V2, q1: V2) {
-  const dp = p1.subtractToRef(p0, aux0);
-  const dq = q1.subtractToRef(q0, aux1);
-  const d0 = q0.subtractToRef(p0, aux2);
+  const dp = p1.subtractToRef(p0, aux2_0);
+  const dq = q1.subtractToRef(q0, aux2_1);
+  const d0 = q0.subtractToRef(p0, aux2_2);
   const np = d0.x * dq.y - dq.x * d0.y;
   const nq = d0.x * dp.y - dp.x * d0.y;
   const d  = dp.x * dq.y - dq.x * dp.y;
@@ -51,6 +51,18 @@ function test_intersectLineSegments() {
 
 // test_intersectLineSegments();
 
+export const v3Sum = (ps: V3[]): V3 =>
+  ps.reduce((acc, p) => acc.addInPlace(p), v3());
+
+export const v3Average = (ps: V3[]): V3 =>
+  v3Sum(ps).scaleInPlace(1 / ps.length);
+
+export const tripleProduct = (a: V3, b: V3, c: V3) => a.dot(b.cross(c));
+
+export const aux3_0 = v3();
+
+export const interpolateV3 = (p: V3, q: V3, lambda: number) =>
+  p.add(q.subtractToRef(p, aux3_0).scaleInPlace(lambda));
 
 export function arcPath(center: V3, from: V3, to: V3, nSteps: number) {
   const vecFrom = from.subtract(center);

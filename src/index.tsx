@@ -4,21 +4,22 @@ import { useSignal } from '@preact/signals';
 
 import './style.css';
 import { examples } from './examples';
-import renderToCanvas from './renderToCanvas';
+import renderToCanvas, { Signals } from './renderToCanvas';
 
 
 export function App() {
   const [exampleIdx, setExampleIdx] = useState(0);
   const [count, setCount] = useState(0); // just to trigger canvas updates
-  const signals = {
-    bending: useSignal(0),
-    vertices: useSignal(true),
+  const signals: Signals = {
+    vertices: useSignal(false),
     labels: useSignal(true),
     edges: useSignal(true),
     cuts: useSignal(true),
     faces: useSignal(true),
     breaks: useSignal(true),
-    flower: useSignal(true),
+    flower: useSignal(false),
+    bending: useSignal(0),
+    autobend: useSignal(false),
   };
   const textarea = useRef<HTMLTextAreaElement>();
   const canvas = useRef<HTMLCanvasElement>();

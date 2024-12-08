@@ -8,10 +8,12 @@ import { angleToRad, Task, stepToV2 } from './taskspec';
 import { arcPath, interpolateV2, intersectLineSegments, rotateAroundInPlace, TAU, UVFrame, v2, v3 } from './geom-utils';
 import { computed, effect, Signal } from '@preact/signals';
 import { Edge, EdgeBreak, HalfEdge, Loop, loopHalfEdges, makeSegment, Vertex } from './Shape';
+import computeBends from './computeBends';
 
 
-type Signals = {
+export type Signals = {
   bending: Signal<number>,
+  autobend: Signal<boolean>,
   vertices: Signal<boolean>,
   labels: Signal<boolean>,
   edges: Signal<boolean>,
@@ -105,36 +107,40 @@ export default function renderToCanvas(
 
       let prevVertex = fromVertex;
       const segments = new Array<HalfEdge>();
-      const breaks: EdgeBreak[] = rotations.map(({index, inner, outer}) => {
-        const [np,, d] = intersectLineSegments(inner, outer, fromPos, toPosRotated);
-        const lambda = np / d;
-        if (lambda < 1e-8 || lambda > 1 - 1e-8) console.error(
-          `edge ${from}-${to} does not pass through gap ${name}`
+      const breaks: EdgeBreak[] = rotations.map(({index, inner, outer}, i) => {
+        const [np, nq, d] = intersectLineSegments(inner, outer, fromPos, toPosRotated);
+        const lambda_p = np / d;
+        const lambda_q = nq / d;
+        if (lambda_p < 1e-8 || lambda_p > 1 - 1e-8) console.error(
+          `edge ${from}-${to} does not pass through gap ${through[i]}`
+        );
+        if (lambda_q < 1e-8 || lambda_q > 1 - 1e-8) console.error(
+          `edge ${from}-${to} does not reach gap ${through[i]}`
         );
         const pivot = primaryVertices[2*index];
         const v0: Vertex = {
           name: `${pivot.name}#${fromVertex.name}<${toVertex.name}`,
-          pos1D: 2*index - lambda,
+          pos1D: 2*index - lambda_p,
           pos2D: interpolateV2(
             pivot.pos2D,
             primaryVertices.at(2*index-1).pos2D,
-            lambda,
+            lambda_p,
           ),
         };
         const v1: Vertex = {
           name: `${pivot.name}#${fromVertex.name}>${toVertex.name}`,
-          pos1D: 2*index + lambda,
+          pos1D: 2*index + lambda_p,
           pos2D: interpolateV2(
             pivot.pos2D,
             primaryVertices[(2*index+1) % primaryVertices.length].pos2D,
-            lambda
+            lambda_p
           ),
         };
         vertices.push(v0, v1);
         segments.push(makeSegment(prevVertex, v0));
 
         prevVertex = v1;
-        return {from: v0, to: v1, pivot};
+        return {from: v0, to: v1, pivot, lambda: lambda_q};
       });
       segments.push(makeSegment(prevVertex, toVertex));
       edges.push({
@@ -220,8 +226,8 @@ export default function renderToCanvas(
 
   for (const {bendAngle, segments} of edges) {
     for (const he of segments) {
-      he.bend = bendAngle;
-      he.twin.bend = bendAngle;
+      he.userBend = bendAngle;
+      he.twin.userBend = bendAngle;
     }
   }
 
@@ -235,20 +241,19 @@ export default function renderToCanvas(
     v3(0, 1, 0),
   );
 
-  // 3D positions are not stored in the vertices but in a computed map signal
-  // dependent on the bending signal.
-  const pos3DMapSignal = computed(() => {
-    const pos3DMap = new Map<Vertex, V3>();
+  function makePos3DMap(bending: number, useAutoBend: boolean) {
+    const result = new Map<Vertex, V3>();
 
     function bendEdges(he: HalfEdge, frame: UVFrame) {
       const {twin, to} = he;
       const from3D = frame.injectPoint(twin.to.pos2D);
       const to3D   = frame.injectPoint(to.pos2D);
-      pos3DMap.set(to, to3D);
+      result.set(to, to3D);
 
       if (twin.loop === boundary) return;
+      const bend = useAutoBend ? he.computedBend : he.userBend;
       const newFrame =
-        frame.rotateAroundLine(from3D, to3D, he.bend * signals.bending.value);
+        frame.rotateAroundLine(from3D, to3D, bend * bending);
       for (let heTmp = twin.next; heTmp !== twin; heTmp = heTmp.next) {
         bendEdges(heTmp, newFrame);
       }
@@ -256,8 +261,24 @@ export default function renderToCanvas(
 
     loopHalfEdges(centerFace).forEach(he => bendEdges(he, starFrame));
 
-    return pos3DMap;
-  })
+    return result;
+  }
+
+  computeBends(
+    primaryVertices,
+    makePos3DMap(1, false),
+    edges,
+    centerFace,
+    boundary,
+    1000,
+    1e-16,
+  );
+
+  // 3D positions are not stored in the vertices but in a computed map signal
+  // dependent on the bending signal.
+  const pos3DMapSignal = computed(() =>
+    makePos3DMap(signals.bending.value, signals.autobend.value)
+  );
 
   // ---------------------------------------------------------------------------
 
