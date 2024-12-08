@@ -1,22 +1,8 @@
 import { Vector3 as V3 } from "@babylonjs/core";
 import { Edge, HalfEdge, Loop, loopHalfEdges, Vertex } from "./Shape";
-import { interpolateV3, tripleProduct, v3, v3Average } from "./geom-utils";
+import { interpolateV3, tripleProduct, v3 } from "./geom-utils";
+import { assert } from "./utils";
 
-
-/**
- * One direction of a distance constraint.
- * 
- * We want to fulfill the constraint that the distance between `from` and `to`
- * has the given value.
- * An `Impact` represents one direction of this constraint, namely that
- * `from` "pushes" or "pulls" `to` so that it is `distance` away.
- * (There may be another `Impact` for the opposite direction.)
- */
-type Impact = {
-  from: Vertex,
-  to: Vertex,
-  distance: number,
-}
 
 /**
  * Compute bend angles for the edge segments for proper folding of the
@@ -37,52 +23,75 @@ export default function computeBends(
   // caller:
   const vertexPositions = new Map(vertexPositionsIn);
 
-  // A few utility functions using the vertex positions:
+  // Utility functions using the vertex positions:
 
   const pos = (v: Vertex) => vertexPositions.get(v);
 
-  const vec = (from: Vertex, to: Vertex) => pos(to).subtract(pos(from));
-
-  const actualLength = (impact: Impact) => vec(impact.to, impact.from).length();
+  const vec = (he: HalfEdge) => pos(he.to).subtract(pos(he.twin.to));
 
   const faceNormal = (face: Loop) => loopHalfEdges(face).reduce(
     (acc, he) => acc.addInPlace(pos(he.twin.to).cross(pos(he.to))),
     v3(),
   ).normalize();
 
-  /** Where the `from` vertex "wants" to have the `to` vertex */
-  const targetPosition = ({from, to, distance}: Impact) =>
-    distance === 0 ? pos(from) :
-    pos(from).add(vec(from, to).normalize().scale(distance));
-
   // Collect constraints:
 
-  let impacts = new Array<Impact>();
+  /**
+   * `targets.get(to)` including `{from, distance, target}` means that
+   * `from` would like to place `to` in position `target`.
+   */
+  const forces =
+    new Map<Vertex, {from: Vertex, distance: number, target: V3}[]>(
+      primaryVertices.map(v => [v, []])
+    );
   // Tip vertices want their neighboring tip vertices at distance 0:
   for (let i = 1; i < primaryVertices.length; i += 2) {
-    const v0 = primaryVertices[i];
-    const v1 = primaryVertices.at(i-2);
-    impacts.push({from: v0, to: v1, distance: 0}, {from: v1, to: v0, distance: 0})
+    const v0 = primaryVertices.at(i-2);
+    const v1 = primaryVertices[i];
+    forces.get(v1).push({from: v0, distance: 0, target: v3()});
+    forces.get(v0).push({from: v1, distance: 0, target: v3()});
   }
   // The two ends of an edge want to have the edge length as their distance:
   for (const {from, to, length} of edges) {
-    impacts.push({from, to, distance: length}, {from: to, to: from, distance: length});
+    forces.get(to).push({from: from, distance: length, target: v3()});
+    forces.get(from).push({from: to, distance: length, target: v3()});
   }
+  forces.values().forEach(impacts => assert(impacts.length > 0));
+
 
   // (Try to) solve the constraints iteratively by placing the primary vertices:
+  const tmp = v3();
   let cost: number, i: number;
   for (i = 0; i < maxIterations; i++) {
-    cost = impacts
-      .map(impact => Math.pow(actualLength(impact) - impact.distance, 2))
-      .reduce((acc, impactCost) => acc + impactCost, 0);
+    cost = 0;
+    for (const [to, toTargets] of forces) {
+      const toPos = pos(to);
+      for (const {from, distance, target} of toTargets) {
+        const fromPos = pos(from);
+        if (distance === 0) {
+          target.copyFrom(fromPos);
+        } else {
+          // target = from + distance * normalize(to - from),
+          // but written in a style avoiding memory allocations
+          // in the inner loop where we are:
+          fromPos.addToRef(
+            toPos.subtractToRef(fromPos, tmp)
+              .normalize().scaleInPlace(distance),
+            target
+          )
+        }
+        cost += target.subtractToRef(toPos, tmp).lengthSquared();
+      }
+    }
     if (cost < costLimit) break;
 
-    const targetPositions = new Map(primaryVertices.map(v => [v, [] as V3[]]));
-    for (const impact of impacts) {
-      targetPositions.get(impact.to).push(targetPosition(impact));
-    }
-    for (const [v, targets] of targetPositions) {
-      vertexPositions.set(v, v3Average(targets));
+    for (const [to, toForces] of forces) {
+      const toPos = pos(to);
+      toPos.setAll(0);
+      for (const {target} of toForces) {
+        toPos.addInPlace(target);
+      }
+      toPos.scaleInPlace(1 / toForces.length);
     }
   }
   console.log(`after ${i} steps: cost = ${cost}`);
@@ -108,8 +117,8 @@ export default function computeBends(
     if (twin.loop === boundary) return;
     const twinNormal = faceNormal(twin.loop);
     he.computedBend = he.twin.computedBend = Math.atan2(
-      tripleProduct(twinNormal, normal, vec(he.to, he.twin.to).normalize()),
-      twinNormal.dot(normal),
+      tripleProduct(normal, twinNormal, vec(he).normalize()),
+      normal.dot(twinNormal),
     );
     for (let heTmp = twin.next; heTmp !== twin; heTmp = heTmp.next) {
       measureBends(heTmp, twinNormal);
