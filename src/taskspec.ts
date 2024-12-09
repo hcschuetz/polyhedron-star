@@ -6,8 +6,9 @@ const v2 = (x?: number , y?: number) => new V2(x, y);
 
 // Consistency:
 // - Gap names should be unique in a star.
-// - Angle deficits should add up to 720 degrees = 4pi
-// - The steps should return to the beginning
+// - Angle deficits should add up to a value between 360 and 720 degrees
+//   (TAU to 2*TAU).
+// - The steps should return to the beginning.
 export type StarSpec = {
   gaps: Gap[];
 };
