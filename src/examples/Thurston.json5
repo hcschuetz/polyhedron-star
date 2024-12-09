@@ -1,19 +1,18 @@
-// This star definition is based on "Shapes of polyhedra and triangulations of
-// the sphere" by William P Thurston, Figure 15 on page 540 (PDF page 30),
-// https://arxiv.org/pdf/math/9801088
-
-
 // The following specification uses JSON5 syntax, which is similar to JSON but
 // a bit more permissive.  For example:
 // - It supports comments.
 // - It allows to omit the quotes around a property key if it is an identifier.
 // - It allows trailing commas in objects and arrays.
 {
+  // This star definition is based on "Shapes of polyhedra and triangulations of
+  // the sphere" by William P Thurston, Figure 15 on page 540 (PDF page 30),
+  // https://arxiv.org/pdf/math/9801088.
+  // See also https://mathstodon.xyz/@johncarlosbaez/113369214767592820.
   starGaps: {
       // Each object in this list defines a side of the polygon around the
       // star tips and the corresponding gap between the star's jags.
       // - Each name is used for a polygon side, the corresponding gap,
-      //   and the gap's apex (that is, an inward-pointing vertex of the star).
+      //   and the gap's apex (usually an inward-pointing vertex of the star).
       // - The length and orientation of a polygon side is given as a sequence
       //   of steps.  For example, ["12h", "10h"] means "go one unit in the
       //   "12 o'clock direction" of a clock dial and then one unit in the
@@ -26,7 +25,7 @@
       //   cone.  (Suffix "deg" or "°" indicates degrees.  Otherwise numbers
       //   are interpreted as radians.)
       //
-      // The polygon should be closed
+      // The polygon should be closed.
       //
       // This example walks around the polygon in counter-clockwise direction.
       // You can also walk around in clockwise direction.  The direction used
