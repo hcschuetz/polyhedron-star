@@ -37,64 +37,68 @@ export default function computeBends(
   // Collect constraints:
 
   /**
-   * `targets.get(to)` including `{from, distance, target}` means that
-   * `from` would like to place `to` in position `target`.
+   * A member `{from, distance}` of the list `forces.get(to).sources` means
+   * that vertex `from` exerts a force on vertex `to`, trying to get it at
+   * distance `distance`.  These forces contribute to a total force exerted
+   * on vertex `to` given as `forces.get(to).totalForce`.
+   * 
+   * Each iteration step of our solver will first update `totalForce` and then
+   * use this value to update the position of `to` in `vertexPositions`.
+   * This way `pos(from)` and `pos(to)` will have new values in the next
+   * iteration step.
    */
   const forces =
-    new Map<Vertex, {from: Vertex, distance: number, target: V3}[]>(
-      primaryVertices.map(v => [v, []])
+    new Map<Vertex, {sources: {from: Vertex, distance: number}[], totalForce: V3}>(
+      primaryVertices.map(v => [v, {sources: [], totalForce: v3()}])
     );
   // Tip vertices want their neighboring tip vertices at distance 0:
   for (let i = 1; i < primaryVertices.length; i += 2) {
     const v0 = primaryVertices.at(i-2);
     const v1 = primaryVertices[i];
-    forces.get(v1).push({from: v0, distance: 0, target: v3()});
-    forces.get(v0).push({from: v1, distance: 0, target: v3()});
+    forces.get(v1).sources.push({from: v0, distance: 0});
+    forces.get(v0).sources.push({from: v1, distance: 0});
   }
   // The two ends of an edge want to have the edge length as their distance:
   for (const {from, to, length} of edges) {
-    forces.get(to).push({from: from, distance: length, target: v3()});
-    forces.get(from).push({from: to, distance: length, target: v3()});
+    forces.get(to).sources.push({from: from, distance: length});
+    forces.get(from).sources.push({from: to, distance: length});
   }
-  forces.values().forEach(impacts => assert(impacts.length > 0));
+  forces.values().forEach(impacts => assert(impacts.sources.length > 0));
 
 
   // (Try to) solve the constraints iteratively by placing the primary vertices:
+  const startTime = performance.now();
   const tmp = v3();
   let cost: number, i: number;
   for (i = 0; i < maxIterations; i++) {
     cost = 0;
-    for (const [to, toTargets] of forces) {
+    for (const [to, {sources, totalForce}] of forces) {
       const toPos = pos(to);
-      for (const {from, distance, target} of toTargets) {
+      totalForce.setAll(0);
+      for (const {from, distance} of sources) {
         const fromPos = pos(from);
         if (distance === 0) {
-          target.copyFrom(fromPos);
+          // totalForce += from - to
+          totalForce.addInPlace(fromPos).subtractInPlace(toPos);
         } else {
-          // target = from + distance * normalize(to - from),
+          // totalForce += (distance - |to - from|) * normalize(to - from),
           // but written in a style avoiding memory allocations
           // in the inner loop where we are:
-          fromPos.addToRef(
-            toPos.subtractToRef(fromPos, tmp)
-              .normalize().scaleInPlace(distance),
-            target
-          )
+          toPos.subtractToRef(fromPos, tmp);
+          const currentLength = tmp.length();
+          tmp.normalize().scaleAndAddToRef(distance - currentLength, totalForce);
         }
-        cost += target.subtractToRef(toPos, tmp).lengthSquared();
+        cost += totalForce.lengthSquared();
       }
     }
     if (cost < costLimit) break;
 
-    for (const [to, toForces] of forces) {
-      const toPos = pos(to);
-      toPos.setAll(0);
-      for (const {target} of toForces) {
-        toPos.addInPlace(target);
-      }
-      toPos.scaleInPlace(1 / toForces.length);
+    for (const [to, {sources, totalForce}] of forces) {
+      totalForce.scaleAndAddToRef(1 / sources.length, pos(to));
     }
   }
-  console.log(`after ${i} steps: cost = ${cost}`);
+  const endTime = performance.now();
+  console.log(`after ${i} steps (${endTime - startTime}ms): cost = ${cost}`);
 
   // Get the positions of secondary vertices (edge-breaks) by interpolating
   // along the edges.  (Edges should be straight and the two ends of a break
