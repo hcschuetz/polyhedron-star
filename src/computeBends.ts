@@ -1,7 +1,6 @@
 import { Vector3 as V3 } from "@babylonjs/core";
 import { Edge, HalfEdge, Loop, loopHalfEdges, Vertex } from "./Shape";
 import { interpolateV3, tripleProduct, v3 } from "./geom-utils";
-import { assert } from "./utils";
 
 
 /**
@@ -63,8 +62,6 @@ export default function computeBends(
     forces.get(to).sources.push({from: from, distance: length});
     forces.get(from).sources.push({from: to, distance: length});
   }
-  forces.values().forEach(impacts => assert(impacts.sources.length > 0));
-
 
   // (Try to) solve the constraints iteratively by placing the primary vertices:
   const startTime = performance.now();
@@ -94,6 +91,10 @@ export default function computeBends(
     if (cost < costLimit) break;
 
     for (const [to, {sources, totalForce}] of forces) {
+      if (sources.length === 0) {
+        console.warn(`no forces exerted on vertex "${to.name}"`);
+        continue;
+      }
       totalForce.scaleAndAddToRef(1 / sources.length, pos(to));
     }
   }
