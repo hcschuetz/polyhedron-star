@@ -302,13 +302,18 @@ export default function renderToCanvas(
   advancedTexture.rootContainer.scaleX = window.devicePixelRatio;
   advancedTexture.rootContainer.scaleY = window.devicePixelRatio;
 
-  const tipMaterial = standardMaterial("tipMaterial", {
-    diffuseColor: colors.tip,
-  }, scene);
-
-  const innerMaterial = standardMaterial("innerMaterial", {
-    diffuseColor: colors.inner,
-  }, scene);
+  const vertexPatterns = [colors.inner, colors.tip].map((diffuseColor, i) =>
+    Object.assign(
+      B.MeshBuilder.CreateIcoSphere("vertex" + i, {
+        radius: .03,
+        subdivisions: 3,
+        flat: false,
+      }, scene), {
+        material: standardMaterial("vertexMaterial" + i, {diffuseColor}, scene),
+        isVisible: false,
+      }
+    )
+  );
 
   const faceMaterial = standardMaterial("faceMaterial", {
     diffuseColor: colors.face,
@@ -324,99 +329,79 @@ export default function renderToCanvas(
     diffuseColor: colors.grid,
   }, scene);
 
-  {
-    const vertexPatterns = [innerMaterial, tipMaterial].map(mat =>
-      Object.assign(
-        B.MeshBuilder.CreateIcoSphere("tip", {
-          radius: .03,
-          subdivisions: 3,
-          flat: false,
-        }, scene), {
-          material: mat,
-          isVisible: false,
-        }
-      )
-    );
-    primaryVertices.forEach((v, i) => {
-      const instance = vertexPatterns[i % 2].createInstance(v.name);
+  primaryVertices.forEach((v, i) => {
+    const instance = vertexPatterns[i % 2].createInstance(v.name);
+    effect(() => {
+      instance.position = pos3DMapSignal.value.get(v);
+      instance.setEnabled(signals.vertices.value);
+      // Or use this:?
+      // instance.isVisible = signals.vertices.value;
+    });
+  });
+  primaryVertices.forEach((v, i) => {
+    if (i % 2 !== 0) return;
+    {
+      const labelPos = new B.TransformNode("labelPos" + i, scene);
       effect(() => {
-        instance.position = pos3DMapSignal.value.get(v);
-        instance.setEnabled(signals.vertices.value);
-        // Or use this:?
-        // instance.isVisible = signals.vertices.value;
+        labelPos.position = v3(0, .2, 0).addInPlace(pos3DMapSignal.value.get(v));
       });
-    });
-  }
-  {
-    primaryVertices.forEach((v, i) => {
-      if (i % 2 !== 0) return;
-      {
-        const labelPos = new B.TransformNode("labelPos" + i, scene);
-        effect(() => {
-          labelPos.position = v3(0, .2, 0).addInPlace(pos3DMapSignal.value.get(v));
-        });
-        const label = new G.TextBlock("label" + i, v.name);
-        effect(() => { label.isVisible = signals.labels.value; });
-        label.color = "#fff";
-        label.fontSize = 16;
-        advancedTexture.addControl(label);
-        label.linkWithMesh(labelPos);
-      }
-      {
-        dynamicGreasedLine(`flower${i}`, {
-          width: .01,
-          color: colors.flower,
-        }, scene, () => arcPath(
-          pos3DMapSignal.value.get(v),
-          pos3DMapSignal.value.get(primaryVertices.at(i-1)),
-          pos3DMapSignal.value.get(primaryVertices[i+1]),
-          20,
-        ),
-        signals.flower,
-      );
-      }
-    });
-  }
-  if (!false) {
-    for (const cut of cuts) {
-      dynamicGreasedLine("cut", {
-        width: .02,
-        color: colors.cut,
-      }, scene, () => [
-        pos3DMapSignal.value.get(cut.twin.to),
-        pos3DMapSignal.value.get(cut.to)
-      ], signals.cuts);
+      const label = new G.TextBlock("label" + i, v.name);
+      effect(() => { label.isVisible = signals.labels.value; });
+      label.color = "#fff";
+      label.fontSize = 16;
+      advancedTexture.addControl(label);
+      label.linkWithMesh(labelPos);
     }
+    dynamicGreasedLine(`flower${i}`,
+      {
+        width: .01,
+        color: colors.flower,
+      },
+      scene,
+      () => arcPath(
+        pos3DMapSignal.value.get(v),
+        pos3DMapSignal.value.get(primaryVertices.at(i-1)),
+        pos3DMapSignal.value.get(primaryVertices[i+1]),
+        20,
+      ),
+      signals.flower,
+    );
+  });
+  for (const cut of cuts) {
+    dynamicGreasedLine("cut", {
+      width: .02,
+      color: colors.cut,
+    }, scene, () => [
+      pos3DMapSignal.value.get(cut.twin.to),
+      pos3DMapSignal.value.get(cut.to)
+    ], signals.cuts);
   }
-  {
-    for (const {segments} of edges) {
-      for (const {twin: {to: from}, to} of segments) {
-        dynamicGreasedLine(
-          "seg", {
-            width: .03,
-            color: colors.edge,
-          },
-          scene,
-          () => [pos3DMapSignal.value.get(from), pos3DMapSignal.value.get(to)],
-          signals.edges
-        );
-      }
-    }
-    for (const {breaks} of edges) {
-      for (const {from, to, pivot} of breaks) {
-        dynamicGreasedLine("arc", {
-          width: .01,
+  for (const {segments} of edges) {
+    for (const {twin: {to: from}, to} of segments) {
+      dynamicGreasedLine(
+        "seg", {
+          width: .03,
           color: colors.edge,
-        }, scene, () => arcPath(
-          pos3DMapSignal.value.get(pivot),
-          pos3DMapSignal.value.get(from),
-          pos3DMapSignal.value.get(to),
-          10
-        ), signals.breaks);
-      }
+        },
+        scene,
+        () => [pos3DMapSignal.value.get(from), pos3DMapSignal.value.get(to)],
+        signals.edges
+      );
     }
   }
-  // if (showFaces)
+  for (const {breaks} of edges) {
+    for (const {from, to, pivot} of breaks) {
+      dynamicGreasedLine("arc", {
+        width: .01,
+        color: colors.edge,
+      }, scene, () => arcPath(
+        pos3DMapSignal.value.get(pivot),
+        pos3DMapSignal.value.get(from),
+        pos3DMapSignal.value.get(to),
+        10
+      ), signals.breaks);
+    }
+  }
   {
     const mesh = Object.assign(new B.Mesh("faces", scene), {
       material: faceMaterial,
