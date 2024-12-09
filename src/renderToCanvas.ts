@@ -287,205 +287,222 @@ export default function renderToCanvas(
   canvas.addEventListener("wheel", noBubble);
 
   const colors = {
-    edge: B.Color3.Green(),
-    cut: B.Color3.Red(),
-    tip: B.Color3.Red(),
     inner: B.Color3.Blue(),
-    face: B.Color3.Yellow(),
-    grid: B.Color3.Black(),
-    flower: B.Color3.Red(),
+    outer: B.Color3.Red(),
+    secondary: B.Color3.Green(),
+
+    cut: B.Color3.Red(),
+    edge: B.Color3.Green(),
     break: B.Color3.Green(),
+    flower: B.Color3.Red(),
+
+    face: B.Color3.Yellow(),
+
+    grid: B.Color3.Black(),
   };
 
   const engine = new B.Engine(canvas, true);
   const scene = new B.Scene(engine);
-
-  const advancedTexture = G.AdvancedDynamicTexture.CreateFullscreenUI("myUI", true, scene);
-  advancedTexture.rootContainer.scaleX = window.devicePixelRatio;
-  advancedTexture.rootContainer.scaleY = window.devicePixelRatio;
-
-  const vertexPatterns = [colors.inner, colors.tip].map((diffuseColor, i) =>
-    Object.assign(
-      B.MeshBuilder.CreateIcoSphere("vertex" + i, {
-        radius: .03,
-        subdivisions: 3,
-        flat: false,
-      }, scene), {
-        material: standardMaterial("vertexMaterial" + i, {diffuseColor}, scene),
-        isVisible: false,
-      }
-    )
-  );
-
-  const faceMaterial = standardMaterial("faceMaterial", {
-    diffuseColor: colors.face,
-    roughness: 100,
-    transparencyMode: B.Material.MATERIAL_ALPHABLEND,
-    alpha: 0.6,
-    // wireframe: true,
-    sideOrientation: B.VertexData.DOUBLESIDE,
-    backFaceCulling: false,
-  }, scene);
-
-  const flowerMaterial = standardMaterial("flowerMaterial", {
-    diffuseColor: colors.flower,
-  }, scene);
-
-  const cutMaterial = standardMaterial("cutMaterial", {
-    diffuseColor: colors.cut,
-  }, scene);
-
-  const edgeMaterial = standardMaterial("edgeMaterial", {
-    diffuseColor: colors.edge,
-  }, scene);
-
-  const breakMaterial = standardMaterial("breakMaterial", {
-    diffuseColor: colors.break,
-  }, scene);
-
-  const gridMaterial = standardMaterial("gridMaterial", {
-    diffuseColor: colors.grid,
-  }, scene);
-
-  primaryVertices.forEach((v, i) => {
-    const instance = vertexPatterns[i % 2].createInstance(v.name);
-    effect(() => {
-      instance.position = pos3DMapSignal.value.get(v);
-      instance.setEnabled(signals.vertices.value);
-      // Or use this:?
-      // instance.isVisible = signals.vertices.value;
-    });
-  });
-  primaryVertices.forEach((v, i) => {
-    if (i % 2 !== 0) return;
-    {
-      const labelPos = new B.TransformNode("labelPos" + i, scene);
-      effect(() => {
-        labelPos.position = v3(0, .2, 0).addInPlace(pos3DMapSignal.value.get(v));
-      });
-      const label = new G.TextBlock("label" + i, v.name);
-      effect(() => { label.isVisible = signals.labels.value; });
-      label.color = "#fff";
-      label.fontSize = 16;
-      advancedTexture.addControl(label);
-      label.linkWithMesh(labelPos);
-    }
-    dynamicTube(`flower${i}`, {
-      radius: .005,
-      pathProvider: () => arcPath(
-        pos3DMapSignal.value.get(v),
-        pos3DMapSignal.value.get(primaryVertices.at(i-1)),
-        pos3DMapSignal.value.get(primaryVertices[i+1]),
-        20,
-      ),
-      show: signals.flower,
-    }, {
-      material: flowerMaterial
-    }, scene);
-  });
-  for (const cut of cuts) {
-    dynamicTube("cut", {
-      radius: .01,
-      pathProvider: () => [
-        pos3DMapSignal.value.get(cut.twin.to),
-        pos3DMapSignal.value.get(cut.to)
-      ],
-      show: signals.cuts,
-    }, {
-      material: cutMaterial,
-    }, scene);
-  }
-  for (const {segments} of edges) {
-    for (const {twin: {to: from}, to} of segments) {
-      dynamicTube("seg", {
-        radius: .015,
-        pathProvider: () => [
-          pos3DMapSignal.value.get(from),
-          pos3DMapSignal.value.get(to),
-        ],
-        show: signals.edges
-      }, {
-        material: edgeMaterial,
-      }, scene);
-    }
-  }
-  for (const {breaks} of edges) {
-    for (const {from, to, pivot} of breaks) {
-      dynamicTube("arc", {
-        radius: .005,
-        pathProvider: () => arcPath(
-          pos3DMapSignal.value.get(pivot),
-          pos3DMapSignal.value.get(from),
-          pos3DMapSignal.value.get(to),
-          10
-        ),
-        show: signals.breaks,
-      }, {
-        material: breakMaterial,
-      }, scene);
-    }
-  }
-  {
-    const mesh = Object.assign(new B.Mesh("faces", scene), {
-      material: faceMaterial,
-    });
-    effect(() => { mesh.setEnabled(signals.faces.value);  });
-    effect(() => {
-      const positions = new Array<number>();
-      const indices = new Array<number>();
-      let i = 0;
-      for (const face of subfaces) {
-        if (face === boundary) continue;
-        const [first, second, ...rest] = loopHalfEdges(face);
-        const pivot = first.to;
-        assert (second.twin.to === pivot);
-        for (const current of rest) {
-          positions.push(
-            ...pos3DMapSignal.value.get(pivot).asArray(),
-            ...pos3DMapSignal.value.get(current.twin.to).asArray(),
-            ...pos3DMapSignal.value.get(current.to).asArray(),
-          );
-          indices.push(i++, i++, i++);
-        }
-      }
-
-      const vertexData = Object.assign(new B.VertexData(), {positions, indices});
-      vertexData.applyToMesh(mesh);
-    });
-  }
-
-  const camera = Object.assign(
-    new B.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2, 10, v3(0, 0, 0), scene), {
-      lowerRadiusLimit: 3,
-      upperRadiusLimit: 30,
-    }
-  );
-  camera.attachControl(canvas, true);
-
-  [
-    [v3( 10,  10,   0)],
-    [v3(-10, -10,  10)],
-    [v3(-10,   0, -10)],
-    [v3(  0, -10, -10)],
-    [v3( 10,   0,  10)],
-    [v3( 10,   0,   0)],
-  ].forEach(([pos], i) => {
-    const l = new B.PointLight("light" + i, pos, scene);
-    l.radius = 5;
-  });
-
   const renderScene = () => scene.render()
-  engine.runRenderLoop(renderScene);
-
   const resizeEngine = () => engine.resize();
-  window.addEventListener("resize", resizeEngine);
-
-  return () => {
+  const cleanup = () => {
     window.removeEventListener("resize", resizeEngine);
     engine.stopRenderLoop(renderScene);
     engine.dispose();
     canvas.removeEventListener("wheel", noBubble);  
-  };
+  }
+
+  try {
+    const advancedTexture = G.AdvancedDynamicTexture.CreateFullscreenUI("myUI", true, scene);
+    advancedTexture.rootContainer.scaleX = window.devicePixelRatio;
+    advancedTexture.rootContainer.scaleY = window.devicePixelRatio;
+
+    const makeVertex = (colorName) =>
+      Object.assign(
+        B.MeshBuilder.CreateIcoSphere("vertex_" + colorName, {
+          radius: .03,
+          subdivisions: 3,
+          flat: false,
+        }, scene), {
+          material: standardMaterial("vertexMaterial_" + colorName, {
+            diffuseColor: colors[colorName],
+          }, scene),
+          isVisible: false,
+        }
+      );
+    const vertexPatterns = {
+      inner: makeVertex("inner"),
+      outer: makeVertex("outer"),
+      secondary: makeVertex("secondary"),
+    }
+
+    const faceMaterial = standardMaterial("faceMaterial", {
+      diffuseColor: colors.face,
+      roughness: 100,
+      transparencyMode: B.Material.MATERIAL_ALPHABLEND,
+      alpha: 0.6,
+      // wireframe: true,
+      sideOrientation: B.VertexData.DOUBLESIDE,
+      backFaceCulling: false,
+    }, scene);
+
+    const flowerMaterial = standardMaterial("flowerMaterial", {
+      diffuseColor: colors.flower,
+    }, scene);
+
+    const cutMaterial = standardMaterial("cutMaterial", {
+      diffuseColor: colors.cut,
+    }, scene);
+
+    const edgeMaterial = standardMaterial("edgeMaterial", {
+      diffuseColor: colors.edge,
+    }, scene);
+
+    const breakMaterial = standardMaterial("breakMaterial", {
+      diffuseColor: colors.break,
+    }, scene);
+
+    const gridMaterial = standardMaterial("gridMaterial", {
+      diffuseColor: colors.grid,
+    }, scene);
+
+    vertices.values().forEach(v => {
+      const pos1DMod2 = v.pos1D % 2;
+      const patternName =
+        pos1DMod2 === 0 ? "inner" :
+        pos1DMod2 === 1 ? "outer" :
+        "secondary";
+      const instance = vertexPatterns[patternName].createInstance(v.name);
+      effect(() => {
+        instance.position = pos3DMapSignal.value.get(v);
+        instance.setEnabled(signals.vertices.value);
+        // Or use this:?
+        // instance.isVisible = signals.vertices.value;
+      });
+    });
+    primaryVertices.forEach((v, i) => {
+      if (i % 2 !== 0) return;
+      {
+        const labelPos = new B.TransformNode("labelPos" + i, scene);
+        effect(() => {
+          labelPos.position = v3(0, .2, 0).addInPlace(pos3DMapSignal.value.get(v));
+        });
+        const label = new G.TextBlock("label" + i, v.name);
+        effect(() => { label.isVisible = signals.labels.value; });
+        label.color = "#fff";
+        label.fontSize = 16;
+        advancedTexture.addControl(label);
+        label.linkWithMesh(labelPos);
+      }
+      dynamicTube(`flower${i}`, {
+        radius: .005,
+        pathProvider: () => arcPath(
+          pos3DMapSignal.value.get(v),
+          pos3DMapSignal.value.get(primaryVertices.at(i-1)),
+          pos3DMapSignal.value.get(primaryVertices[i+1]),
+          20,
+        ),
+        show: signals.flower,
+      }, {
+        material: flowerMaterial
+      }, scene);
+    });
+    for (const cut of cuts) {
+      dynamicTube("cut", {
+        radius: .01,
+        pathProvider: () => [
+          pos3DMapSignal.value.get(cut.twin.to),
+          pos3DMapSignal.value.get(cut.to)
+        ],
+        show: signals.cuts,
+      }, {
+        material: cutMaterial,
+      }, scene);
+    }
+    for (const {segments} of edges) {
+      for (const {twin: {to: from}, to} of segments) {
+        dynamicTube("seg", {
+          radius: .015,
+          pathProvider: () => [
+            pos3DMapSignal.value.get(from),
+            pos3DMapSignal.value.get(to),
+          ],
+          show: signals.edges
+        }, {
+          material: edgeMaterial,
+        }, scene);
+      }
+    }
+    for (const {breaks} of edges) {
+      for (const {from, to, pivot} of breaks) {
+        dynamicTube("arc", {
+          radius: .005,
+          pathProvider: () => arcPath(
+            pos3DMapSignal.value.get(pivot),
+            pos3DMapSignal.value.get(from),
+            pos3DMapSignal.value.get(to),
+            10
+          ),
+          show: signals.breaks,
+        }, {
+          material: breakMaterial,
+        }, scene);
+      }
+    }
+    {
+      const mesh = Object.assign(new B.Mesh("faces", scene), {
+        material: faceMaterial,
+      });
+      effect(() => { mesh.setEnabled(signals.faces.value);  });
+      effect(() => {
+        const positions = new Array<number>();
+        const indices = new Array<number>();
+        let i = 0;
+        for (const face of subfaces) {
+          if (face === boundary) continue;
+          const [first, second, ...rest] = loopHalfEdges(face);
+          const pivot = first.to;
+          assert (second.twin.to === pivot);
+          for (const current of rest) {
+            positions.push(
+              ...pos3DMapSignal.value.get(pivot).asArray(),
+              ...pos3DMapSignal.value.get(current.twin.to).asArray(),
+              ...pos3DMapSignal.value.get(current.to).asArray(),
+            );
+            indices.push(i++, i++, i++);
+          }
+        }
+
+        const vertexData = Object.assign(new B.VertexData(), {positions, indices});
+        vertexData.applyToMesh(mesh);
+      });
+    }
+
+    const camera = Object.assign(
+      new B.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2, 10, v3(0, 0, 0), scene), {
+        lowerRadiusLimit: 3,
+        upperRadiusLimit: 30,
+      }
+    );
+    camera.attachControl(canvas, true);
+
+    [
+      [v3( 10,  10,   0)],
+      [v3(-10, -10,  10)],
+      [v3(-10,   0, -10)],
+      [v3(  0, -10, -10)],
+      [v3( 10,   0,  10)],
+      [v3( 10,   0,   0)],
+    ].forEach(([pos], i) => {
+      const l = new B.PointLight("light" + i, pos, scene);
+      l.radius = 5;
+    });
+
+    engine.runRenderLoop(renderScene);
+    window.addEventListener("resize", resizeEngine);
+  } finally {
+    return cleanup;
+  }
 }
 
 const standardMaterial = (
@@ -507,14 +524,26 @@ function dynamicTube(
   let instance: B.Mesh;
 
   effect(() => {
-    instance = B.MeshBuilder.CreateTube(name, {
-      updatable: true,
-      instance,
-      path: pathProvider(),
-      radius,
-    }, scene);
-    Object.assign(instance, props);
-    instance.setEnabled(show.value);
+    try {
+      instance = B.MeshBuilder.CreateTube(name, {
+        updatable: true,
+        instance,
+        path: pathProvider(),
+        radius,
+      }, scene);
+      Object.assign(instance, props);
+      instance.setEnabled(show.value);
+    } catch (e) {
+      if (e instanceof TypeError && e.message === "positions2 is null") {
+        // This error is occasionally thrown from CreateTube.
+        // (Is this a bug in BabylonJS or am I doing something wrong?)
+        // Looks like we can simply ignore it.
+        return;
+      }
+      // Otherwise rethrow the unknown error (but Preact's signal handling
+      // probably also ignores it).
+      throw e;
+    }
   });
 
   return instance;
