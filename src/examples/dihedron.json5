@@ -1,10 +1,10 @@
 {
   starGaps: {
-    a: {angleDeficit: {num: 240, unit: "deg"}, steps: ["s", "s"]},
-    b: {angleDeficit: {num: 240, unit: "deg"}, steps: ["n", "n"]},
+    a: {angleDeficit: "240deg", steps: ["s", "s"]},
+    b: {angleDeficit: "240deg", steps: ["n", "n"]},
   },
   edges: [
     "a", "b",
-    {angle: {num: 180, unit: "deg"}, from: "a", to: "b"},
+    {angle: "180deg", from: "a", to: "b"},
   ],
 }

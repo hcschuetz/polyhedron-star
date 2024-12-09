@@ -23,24 +23,25 @@
       // - The angleDeficit is the apex angle of the isosceles gap triangle.
       //   It also tells how much rotation is missing to a full 360° turn
       //   when you walk around the corresponding polyhedron vertex or manifold
-      //   cone.  (Units "deg" and "rad" are supported.)
+      //   cone.  (Suffix "deg" or "°" indicates degrees.  Otherwise numbers
+      //   are interpreted as radians.)
       //
       // The polygon should be closed
       //
       // This example walks around the polygon in counter-clockwise direction.
       // You can also walk around in clockwise direction.  The direction used
       // here will be called the "positive" direction.
-    a: {angleDeficit: {num: 60, unit: "deg"}, steps: ["12h", "10h"]},
-    b: {angleDeficit: {num: 60, unit: "deg"}, steps: ["10h"]},
-    c: {angleDeficit: {num: 60, unit: "deg"}, steps: ["10h", "10h", "8h"]},
-    d: {angleDeficit: {num: 60, unit: "deg"}, steps: ["10h", "8h", "8h"]},
-    e: {angleDeficit: {num: 60, unit: "deg"}, steps: ["8h", "6h"]},
-    f: {angleDeficit: {num: 60, unit: "deg"}, steps: ["6h", "6h"]},
-    g: {angleDeficit: {num: 60, unit: "deg"}, steps: ["6h", "4h"]},
-    h: {angleDeficit: {num: 60, unit: "deg"}, steps: ["4h", "4h"]},
-    i: {angleDeficit: {num: 60, unit: "deg"}, steps: ["4h", "4h", "2h"]},
-    j: {angleDeficit: {num: 60, unit: "deg"}, steps: ["2h", "2h"]},
-    k: {angleDeficit: {num: 60, unit: "deg"}, steps: ["2h", "12h", "12h", "12h"]},
+    a: {angleDeficit: "60deg", steps: ["12h", "10h"]},
+    b: {angleDeficit: "60deg", steps: ["10h"]},
+    c: {angleDeficit: "60deg", steps: ["10h", "10h", "8h"]},
+    d: {angleDeficit: "60deg", steps: ["10h", "8h", "8h"]},
+    e: {angleDeficit: "60deg", steps: ["8h", "6h"]},
+    f: {angleDeficit: "60deg", steps: ["6h", "6h"]},
+    g: {angleDeficit: "60deg", steps: ["6h", "4h"]},
+    h: {angleDeficit: "60deg", steps: ["4h", "4h"]},
+    i: {angleDeficit: "60deg", steps: ["4h", "4h", "2h"]},
+    j: {angleDeficit: "60deg", steps: ["2h", "2h"]},
+    k: {angleDeficit: "60deg", steps: ["2h", "12h", "12h", "12h"]},
   },
   // Actually only the star above is from the Thurston paper.
   // The 30 edges below are one possible set of bendable edges.
@@ -55,36 +56,36 @@
     // The following edges are completely inside the star (except that their
     // end points are of course on the star boundary.)
     // The given angles are used as a starting point for an approximation 
-    {angle: {num: 30, unit: "deg"}, from: "a", to: "b"},
-    {angle: {num: 30, unit: "deg"}, from: "a", to: "c"},
-    {angle: {num: 30, unit: "deg"}, from: "a", to: "k"},
-    {angle: {num: 30, unit: "deg"}, from: "b", to: "c"},
-    {angle: {num: 30, unit: "deg"}, from: "c", to: "d"},
-    {angle: {num: 30, unit: "deg"}, from: "c", to: "k"},
-    {angle: {num: 30, unit: "deg"}, from: "d", to: "e"},
-    {angle: {num: 30, unit: "deg"}, from: "d", to: "f"},
-    {angle: {num: 30, unit: "deg"}, from: "d", to: "h"},
-    {angle: {num: 30, unit: "deg"}, from: "d", to: "k"},
-    {angle: {num: 30, unit: "deg"}, from: "e", to: "f"},
-    {angle: {num: 30, unit: "deg"}, from: "f", to: "g"},
-    {angle: {num: 30, unit: "deg"}, from: "f", to: "h"},
-    {angle: {num: 30, unit: "deg"}, from: "g", to: "h"},
-    {angle: {num: 30, unit: "deg"}, from: "h", to: "i"},
-    {angle: {num: 30, unit: "deg"}, from: "h", to: "k"},
-    {angle: {num: 30, unit: "deg"}, from: "i", to: "j"},
-    {angle: {num: 30, unit: "deg"}, from: "i", to: "k"},
+    {angle: "30deg", from: "a", to: "b"},
+    {angle: "30deg", from: "a", to: "c"},
+    {angle: "30deg", from: "a", to: "k"},
+    {angle: "30deg", from: "b", to: "c"},
+    {angle: "30deg", from: "c", to: "d"},
+    {angle: "30deg", from: "c", to: "k"},
+    {angle: "30deg", from: "d", to: "e"},
+    {angle: "30deg", from: "d", to: "f"},
+    {angle: "30deg", from: "d", to: "h"},
+    {angle: "30deg", from: "d", to: "k"},
+    {angle: "30deg", from: "e", to: "f"},
+    {angle: "30deg", from: "f", to: "g"},
+    {angle: "30deg", from: "f", to: "h"},
+    {angle: "30deg", from: "g", to: "h"},
+    {angle: "30deg", from: "h", to: "i"},
+    {angle: "30deg", from: "h", to: "k"},
+    {angle: "30deg", from: "i", to: "j"},
+    {angle: "30deg", from: "i", to: "k"},
 
     // The remaining edges cross one or more gaps.  Each of them is divided into
     // two or more segments, each crossing a spike of the star.
     // On the folded polyhedron the segments of an edge align to a straight
     // edge.  Edges of this type must walk around the star in the "positive"
     // direction. (See above.) So you must write
-    {angle: {num: 30, unit: "deg"}, from: "b", to: "e", through: ["c", "d"]},
+    {angle: "30deg", from: "b", to: "e", through: ["c", "d"]},
     // because this is not supported:
-    // {angle: {num: 30, unit: "deg"}, from: "e", to: "b", through: ["d", "c"]}.
-    {angle: {num: 30, unit: "deg"}, from: "c", to: "e", through: ["d"]},
-    {angle: {num: 30, unit: "deg"}, from: "h", to: "j", through: ["i"]},
-    {angle: {num: 30, unit: "deg"}, from: "i", to: "a", through: ["k"]},
-    {angle: {num: 30, unit: "deg"}, from: "j", to: "a", through: ["k"]},
+    // {angle: "30deg", from: "e", to: "b", through: ["d", "c"]}.
+    {angle: "30deg", from: "c", to: "e", through: ["d"]},
+    {angle: "30deg", from: "h", to: "j", through: ["i"]},
+    {angle: "30deg", from: "i", to: "a", through: ["k"]},
+    {angle: "30deg", from: "j", to: "a", through: ["k"]},
   ],
 }

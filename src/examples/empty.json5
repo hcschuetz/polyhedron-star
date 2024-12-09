@@ -1,6 +1,6 @@
 {
   starGaps: {
-    a: {angleDeficit: {num: 360, unit: "deg"}, steps: []},
+    a: {angleDeficit: "360deg", steps: []},
   },
   edges: [
     "a",

@@ -8,18 +8,16 @@ export type Gap = {
   steps: Step[],
   angleDeficit: Angle,
 };
-export type Angle = {
-  num: number,
-  unit: "deg" | "rad",
-};
+/** `.5`, `".5"` (in radians), `"60deg", `"60°"` (in degrees) */
+export type Angle = string | number;
 export type Step =
 | {
   amount: number,
-  direction: ShortDirection | Angle,
+  direction: Angle,
 }
-| ShortDirection;
+| ShortStep;
 
-export type ShortDirection =
+export type ShortStep =
 | "e" | "n" | "w" | "s"
 | "3h" | "2h" | "1h" | "12h" | "11h" | "10h" | "9h" | "8h" | "7h" | "6h" | "5h" | "4h"
 ;
@@ -63,8 +61,8 @@ const angleUnits = {
   rad: 1,
 }
 
-function directionToV2(dir: ShortDirection): V2 {
-  switch (dir) {
+function shortStepToV2(s: ShortStep): V2 {
+  switch (s) {
     case "e"  :
     case "3h" : return v2( 1     ,  0     );
     case "2h" : return v2( r3Half,  0.5   );
@@ -81,12 +79,23 @@ function directionToV2(dir: ShortDirection): V2 {
     case "6h" : return v2( 0     , -1     );
     case "5h" : return v2( 0.5   , -r3Half);
     case "4h" : return v2( r3Half, -0.5   );
-    default: fail(`unexpected direction: "${dir}"`);
+    default: fail(`unexpected step: "${s}"`);
   }
 }
 
-export const angleToRad = ({num, unit}: Angle): number =>
-  num * (angleUnits[unit] ?? fail(`unexpected angle unit "${unit}"`));
+export function angleToRad(angle: Angle): number {
+  switch (typeof angle) {
+    case "number": return angle;
+    case "string": {
+      const match = /(deg|°)$/.exec(angle);
+      if (match) {
+        return Number.parseFloat(angle.slice(0, match.index)) * (TAU/360);
+      }
+      return Number.parseFloat(angle);
+    }
+    default: fail(`unexpected type for angle: ${typeof angle}`);
+  }
+}
 
 export function angleToV2(angleObj: Angle): V2 {
   const angle = angleToRad(angleObj);
@@ -95,13 +104,10 @@ export function angleToV2(angleObj: Angle): V2 {
 
 export function stepToV2(step: Step): V2 {
   if (typeof step === "string") {
-    return directionToV2(step);
+    return shortStepToV2(step);
   } else {
     const {amount, direction} = step;
-    const v =
-      typeof direction === "string"
-      ? directionToV2(direction)
-      : angleToV2(direction);
+    const v = angleToV2(direction);
     return v.scaleInPlace(amount);
   }
 }
