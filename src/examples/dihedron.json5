@@ -5,6 +5,6 @@
   },
   edges: [
     "a", "b",
-    {angle: "180deg", from: "a", to: "b"},
+    {bend: "180deg", from: "a", to: "b"},
   ],
 }

@@ -6,8 +6,8 @@
   },
   edges: [
     "a", "b", "c",
-    {angle: "109.471deg", from: "a", to: "b"},
-    {angle: "109.471deg", from: "a", to: "c"},
-    {angle: "109.471deg", from: "b", to: "c"},
+    {bend: "109.471deg", from: "a", to: "b"},
+    {bend: "109.471deg", from: "a", to: "c"},
+    {bend: "109.471deg", from: "b", to: "c"},
   ],
 }

@@ -32,7 +32,7 @@ export type EdgeSpec =
     // Bending angle, that is, 180 deg - dihedral angle;
     // can be negative to indicate bending to the other side;
     // (just a provisional value)
-    angle: Angle,
+    bend: Angle,
   }
 ;
 

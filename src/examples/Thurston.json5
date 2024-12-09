@@ -54,37 +54,38 @@
 
     // The following edges are completely inside the star (except that their
     // end points are of course on the star boundary.)
-    // The given angles are used as a starting point for an approximation 
-    {angle: "30deg", from: "a", to: "b"},
-    {angle: "30deg", from: "a", to: "c"},
-    {angle: "30deg", from: "a", to: "k"},
-    {angle: "30deg", from: "b", to: "c"},
-    {angle: "30deg", from: "c", to: "d"},
-    {angle: "30deg", from: "c", to: "k"},
-    {angle: "30deg", from: "d", to: "e"},
-    {angle: "30deg", from: "d", to: "f"},
-    {angle: "30deg", from: "d", to: "h"},
-    {angle: "30deg", from: "d", to: "k"},
-    {angle: "30deg", from: "e", to: "f"},
-    {angle: "30deg", from: "f", to: "g"},
-    {angle: "30deg", from: "f", to: "h"},
-    {angle: "30deg", from: "g", to: "h"},
-    {angle: "30deg", from: "h", to: "i"},
-    {angle: "30deg", from: "h", to: "k"},
-    {angle: "30deg", from: "i", to: "j"},
-    {angle: "30deg", from: "i", to: "k"},
+    // The bend angles are used as a starting point for an approximation
+    // algorithm.
+    {bend: "30deg", from: "a", to: "b"},
+    {bend: "30deg", from: "a", to: "c"},
+    {bend: "30deg", from: "a", to: "k"},
+    {bend: "30deg", from: "b", to: "c"},
+    {bend: "30deg", from: "c", to: "d"},
+    {bend: "30deg", from: "c", to: "k"},
+    {bend: "30deg", from: "d", to: "e"},
+    {bend: "30deg", from: "d", to: "f"},
+    {bend: "30deg", from: "d", to: "h"},
+    {bend: "30deg", from: "d", to: "k"},
+    {bend: "30deg", from: "e", to: "f"},
+    {bend: "30deg", from: "f", to: "g"},
+    {bend: "30deg", from: "f", to: "h"},
+    {bend: "30deg", from: "g", to: "h"},
+    {bend: "30deg", from: "h", to: "i"},
+    {bend: "30deg", from: "h", to: "k"},
+    {bend: "30deg", from: "i", to: "j"},
+    {bend: "30deg", from: "i", to: "k"},
 
     // The remaining edges cross one or more gaps.  Each of them is divided into
     // two or more segments, each crossing a spike of the star.
     // On the folded polyhedron the segments of an edge align to a straight
     // edge.  Edges of this type must walk around the star in the "positive"
     // direction. (See above.) So you must write
-    {angle: "30deg", from: "b", to: "e", through: ["c", "d"]},
+    {bend: "30deg", from: "b", to: "e", through: ["c", "d"]},
     // because this is not supported:
-    // {angle: "30deg", from: "e", to: "b", through: ["d", "c"]}.
-    {angle: "30deg", from: "c", to: "e", through: ["d"]},
-    {angle: "30deg", from: "h", to: "j", through: ["i"]},
-    {angle: "30deg", from: "i", to: "a", through: ["k"]},
-    {angle: "30deg", from: "j", to: "a", through: ["k"]},
+    // {bend: "30deg", from: "e", to: "b", through: ["d", "c"]}.
+    {bend: "30deg", from: "c", to: "e", through: ["d"]},
+    {bend: "30deg", from: "h", to: "j", through: ["i"]},
+    {bend: "30deg", from: "i", to: "a", through: ["k"]},
+    {bend: "30deg", from: "j", to: "a", through: ["k"]},
   ],
 }

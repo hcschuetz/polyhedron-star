@@ -80,12 +80,12 @@ export default function renderToCanvas(
         breaks: [],
       });
     } else {
-      const {from, to, through = [], angle} = e;
+      const {from, to, through = [], bend} = e;
       const fromIndex = gapIndex.get(from);
       const fromVertex = primaryVertices[2*fromIndex];
       const fromPos = fromVertex.pos2D;
       const toVertex = primaryVertices[2*gapIndex.get(to)];
-      const bendAngle = angleToRad(angle);
+      const bendAngle = angleToRad(bend);
 
       let toPosRotated = toVertex.pos2D.clone();
       const rotations: {index: number, inner: V2, outer: V2}[] = [];
