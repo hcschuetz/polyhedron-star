@@ -328,7 +328,7 @@ export default function renderToCanvas(
     const vertexPatterns = [innerMaterial, tipMaterial].map(mat =>
       Object.assign(
         B.MeshBuilder.CreateIcoSphere("tip", {
-          radius: .05,
+          radius: .03,
           subdivisions: 3,
           flat: false,
         }, scene), {
@@ -380,7 +380,7 @@ export default function renderToCanvas(
   if (!false) {
     for (const cut of cuts) {
       dynamicGreasedLine("cut", {
-        width: .01,
+        width: .02,
         color: colors.cut,
       }, scene, () => [
         pos3DMapSignal.value.get(cut.twin.to),
