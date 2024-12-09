@@ -10,13 +10,10 @@ export type Gap = {
 };
 /** `.5`, `".5"` (in radians), `"60deg", `"60°"` (in degrees) */
 export type Angle = string | number;
-export type Step =
-| {
-  amount: number,
-  direction: Angle,
-}
-| ShortStep;
 
+export type Step =
+| {x: number, y: number}
+| ShortStep;
 export type ShortStep =
 | "e" | "n" | "w" | "s"
 | "3h" | "2h" | "1h" | "12h" | "11h" | "10h" | "9h" | "8h" | "7h" | "6h" | "5h" | "4h"
@@ -97,17 +94,11 @@ export function angleToRad(angle: Angle): number {
   }
 }
 
-export function angleToV2(angleObj: Angle): V2 {
-  const angle = angleToRad(angleObj);
-  return v2(Math.cos(angle), Math.sin(angle));
-}
-
 export function stepToV2(step: Step): V2 {
   if (typeof step === "string") {
     return shortStepToV2(step);
   } else {
-    const {amount, direction} = step;
-    const v = angleToV2(direction);
-    return v.scaleInPlace(amount);
+    const {x, y} = step;
+    return v2(x, y);
   }
 }
