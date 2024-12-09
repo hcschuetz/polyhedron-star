@@ -1,6 +1,6 @@
 import { Vector3 as V3 } from "@babylonjs/core";
 import { Edge, HalfEdge, Loop, loopHalfEdges, Vertex } from "./Shape";
-import { interpolateV3, tripleProduct, v3 } from "./geom-utils";
+import { interpolateV3, TAU, tripleProduct, v3 } from "./geom-utils";
 
 
 /**
@@ -121,10 +121,16 @@ export default function computeBends(
     const {twin} = he;
     if (twin.loop === boundary) return;
     const twinNormal = faceNormal(twin.loop);
-    he.computedBend = he.twin.computedBend = Math.atan2(
+    const measured = Math.atan2(
       tripleProduct(normal, twinNormal, vec(he).normalize()),
       normal.dot(twinNormal),
     );
+    console.log(`${he.twin.to.name.padEnd(5)} -- ${he.to.name.padEnd(5)}: ${
+      (he.userBend * (360/TAU)).toFixed(3).padStart(7)
+    }° => ${(
+      measured * (360/TAU)).toFixed(3).padStart(7)
+    }°`);
+    he.computedBend = he.twin.computedBend = measured;
     for (let heTmp = twin.next; heTmp !== twin; heTmp = heTmp.next) {
       measureBends(heTmp, twinNormal);
     }
@@ -134,7 +140,7 @@ export default function computeBends(
   loopHalfEdges(centerFace).forEach(he => measureBends(he, centerNormal));
 
   // For edges with multiple segments, check if they got (approximately) the
-  // same autoBend.
+  // same computed bend.
   for (const {segments} of edges) {
     for (let i = 0; i < segments.length; i++) {
       const seg_i = segments[i];
