@@ -487,14 +487,15 @@ export default function renderToCanvas(
     camera.attachControl(canvas, true);
 
     [
-      [v3( 10,  10,   0)],
-      [v3(-10, -10,  10)],
-      [v3(-10,   0, -10)],
-      [v3(  0, -10, -10)],
-      [v3( 10,   0,  10)],
-      [v3( 10,   0,   0)],
-    ].forEach(([pos], i) => {
-      const l = new B.PointLight("light" + i, pos, scene);
+      [-10,  10, -10],
+      [ 10,  10,   0],
+      [-10, -10,  10],
+      [-10,   0, -10],
+      [  0, -10, -10],
+      [ 10,   0,  10],
+      [ 10,   0,   0],
+    ].forEach((pos, i) => {
+      const l = new B.PointLight("light" + i, v3(...pos), scene);
       l.radius = 5;
     });
 
