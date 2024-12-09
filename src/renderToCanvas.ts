@@ -294,6 +294,7 @@ export default function renderToCanvas(
     face: B.Color3.Yellow(),
     grid: B.Color3.Black(),
     flower: B.Color3.Red(),
+    break: B.Color3.Green(),
   };
 
   const engine = new B.Engine(canvas, true);
@@ -326,6 +327,22 @@ export default function renderToCanvas(
     backFaceCulling: false,
   }, scene);
 
+  const flowerMaterial = standardMaterial("flowerMaterial", {
+    diffuseColor: colors.flower,
+  }, scene);
+
+  const cutMaterial = standardMaterial("cutMaterial", {
+    diffuseColor: colors.cut,
+  }, scene);
+
+  const edgeMaterial = standardMaterial("edgeMaterial", {
+    diffuseColor: colors.edge,
+  }, scene);
+
+  const breakMaterial = standardMaterial("breakMaterial", {
+    diffuseColor: colors.break,
+  }, scene);
+
   const gridMaterial = standardMaterial("gridMaterial", {
     diffuseColor: colors.grid,
   }, scene);
@@ -353,54 +370,59 @@ export default function renderToCanvas(
       advancedTexture.addControl(label);
       label.linkWithMesh(labelPos);
     }
-    dynamicGreasedLine(`flower${i}`,
-      {
-        width: .01,
-        color: colors.flower,
-      },
-      scene,
-      () => arcPath(
+    dynamicTube(`flower${i}`, {
+      radius: .005,
+      pathProvider: () => arcPath(
         pos3DMapSignal.value.get(v),
         pos3DMapSignal.value.get(primaryVertices.at(i-1)),
         pos3DMapSignal.value.get(primaryVertices[i+1]),
         20,
       ),
-      signals.flower,
-    );
+      show: signals.flower,
+    }, {
+      material: flowerMaterial
+    }, scene);
   });
   for (const cut of cuts) {
-    dynamicGreasedLine("cut", {
-      width: .02,
-      color: colors.cut,
-    }, scene, () => [
-      pos3DMapSignal.value.get(cut.twin.to),
-      pos3DMapSignal.value.get(cut.to)
-    ], signals.cuts);
+    dynamicTube("cut", {
+      radius: .01,
+      pathProvider: () => [
+        pos3DMapSignal.value.get(cut.twin.to),
+        pos3DMapSignal.value.get(cut.to)
+      ],
+      show: signals.cuts,
+    }, {
+      material: cutMaterial,
+    }, scene);
   }
   for (const {segments} of edges) {
     for (const {twin: {to: from}, to} of segments) {
-      dynamicGreasedLine(
-        "seg", {
-          width: .03,
-          color: colors.edge,
-        },
-        scene,
-        () => [pos3DMapSignal.value.get(from), pos3DMapSignal.value.get(to)],
-        signals.edges
-      );
+      dynamicTube("seg", {
+        radius: .015,
+        pathProvider: () => [
+          pos3DMapSignal.value.get(from),
+          pos3DMapSignal.value.get(to),
+        ],
+        show: signals.edges
+      }, {
+        material: edgeMaterial,
+      }, scene);
     }
   }
   for (const {breaks} of edges) {
     for (const {from, to, pivot} of breaks) {
-      dynamicGreasedLine("arc", {
-        width: .01,
-        color: colors.edge,
-      }, scene, () => arcPath(
-        pos3DMapSignal.value.get(pivot),
-        pos3DMapSignal.value.get(from),
-        pos3DMapSignal.value.get(to),
-        10
-      ), signals.breaks);
+      dynamicTube("arc", {
+        radius: .005,
+        pathProvider: () => arcPath(
+          pos3DMapSignal.value.get(pivot),
+          pos3DMapSignal.value.get(from),
+          pos3DMapSignal.value.get(to),
+          10
+        ),
+        show: signals.breaks,
+      }, {
+        material: breakMaterial,
+      }, scene);
     }
   }
   {
@@ -471,35 +493,29 @@ const standardMaterial = (
 ) =>
   Object.assign(new B.StandardMaterial(name, scene), props);
 
-function dynamicGreasedLine(
+function dynamicTube(
   name: string,
-  mbo: B.GreasedLineMaterialBuilderOptions,
+  options: {
+    pathProvider: () => V3[],
+    radius?: number,
+    show: Signal<boolean>,
+  },
+  props: Partial<B.Mesh>,
   scene: B.Scene,
-  dataFn: () => V3[],
-  show: Signal<boolean>,
 ) {
-  let line = B.CreateGreasedLine(
-    name, {updatable: true, points: dataFn()}, mbo, scene,
-  );
+  const {radius, pathProvider, show} = options;
+  let instance: B.Mesh;
 
   effect(() => {
-    // This approach for updating a greased line is not documented in
-    // https://doc.babylonjs.com/features/featuresDeepDive/mesh/creation/param/greased_line/
-    // as it is not specific to greased lines but (in principle) applicable
-    // to any mesh.
-    // But there is a link to a playground example, which I'm following:
-    // https://playground.babylonjs.com/#ZRZIIZ#98
-    const positions = line.getVerticesData(B.VertexBuffer.PositionKind);
-    if (!positions) return;
-    let j = 0;
-    for (const {x,y,z} of dataFn()) {
-      // The points are duplicated (and of course flattened) into positions:
-      positions[j++] = x; positions[j++] = y; positions[j++] = z;
-      positions[j++] = x; positions[j++] = y; positions[j++] = z;
-    }
-    line.setEnabled(show.value);
-    line.updateVerticesData(B.VertexBuffer.PositionKind, positions);
+    instance = B.MeshBuilder.CreateTube(name, {
+      updatable: true,
+      instance,
+      path: pathProvider(),
+      radius,
+    }, scene);
+    Object.assign(instance, props);
+    instance.setEnabled(show.value);
   });
 
-  return line;
+  return instance;
 }
