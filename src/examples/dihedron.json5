@@ -1,9 +1,7 @@
 {
-  star: {
-    gaps: [
-      {name: "a", angleDeficit: {num: 240, unit: "deg"}, steps: ["s", "s"]},
-      {name: "b", angleDeficit: {num: 240, unit: "deg"}, steps: ["n", "n"]},
-    ],
+  starGaps: {
+    a: {angleDeficit: {num: 240, unit: "deg"}, steps: ["s", "s"]},
+    b: {angleDeficit: {num: 240, unit: "deg"}, steps: ["n", "n"]},
   },
   edges: [
     "a", "b",

@@ -1,14 +1,12 @@
 {
-  star: {
-    gaps: [
-      {name: "a", angleDeficit: {num: 90, unit: "deg"}, steps: ["w", "w"]},
-      {name: "b", angleDeficit: {num: 90, unit: "deg"}, steps: ["w", "s"]},
-      {name: "c", angleDeficit: {num: 90, unit: "deg"}, steps: ["s", "s"]},
-      {name: "d", angleDeficit: {num: 90, unit: "deg"}, steps: ["s", "e"]},
-      {name: "e", angleDeficit: {num: 90, unit: "deg"}, steps: ["e", "e"]},
-      {name: "f", angleDeficit: {num: 90, unit: "deg"}, steps: ["e", "n"]},
-      {name: "g", angleDeficit: {num: 90, unit: "deg"}, steps: ["w", "n", "n", "n"]},
-    ],
+  starGaps: {
+    a: {angleDeficit: {num: 90, unit: "deg"}, steps: ["w", "w"]},
+    b: {angleDeficit: {num: 90, unit: "deg"}, steps: ["w", "s"]},
+    c: {angleDeficit: {num: 90, unit: "deg"}, steps: ["s", "s"]},
+    d: {angleDeficit: {num: 90, unit: "deg"}, steps: ["s", "e"]},
+    e: {angleDeficit: {num: 90, unit: "deg"}, steps: ["e", "e"]},
+    f: {angleDeficit: {num: 90, unit: "deg"}, steps: ["e", "n"]},
+    g: {angleDeficit: {num: 90, unit: "deg"}, steps: ["w", "n", "n", "n"]},
   },
   edges: [
     "b", "d", "f",

@@ -1,18 +1,17 @@
+// Based on https://mathstodon.xyz/@GerardWestendorp/113374197385229562
 {
-  star: {
-    gaps: [
-      {name: "a", angleDeficit: {num: 60, unit: "deg"}, steps: ["10h", "8h", "8h"]},
-      {name: "b", angleDeficit: {num: 60, unit: "deg"}, steps: ["8h", "6h"]},
-      {name: "c", angleDeficit: {num: 60, unit: "deg"}, steps: ["6h"]},
-      {name: "d", angleDeficit: {num: 60, unit: "deg"}, steps: ["6h", "4h"]},
-      {name: "e", angleDeficit: {num: 60, unit: "deg"}, steps: ["4h"]},
-      {name: "f", angleDeficit: {num: 60, unit: "deg"}, steps: ["4h", "2h"]},
-      {name: "g", angleDeficit: {num: 60, unit: "deg"}, steps: ["2h"]},
-      {name: "h", angleDeficit: {num: 60, unit: "deg"}, steps: ["2h", "12h"]},
-      {name: "i", angleDeficit: {num: 60, unit: "deg"}, steps: ["12h"]},
-      {name: "j", angleDeficit: {num: 60, unit: "deg"}, steps: ["12h", "10h"]},
-      {name: "k", angleDeficit: {num: 60, unit: "deg"}, steps: ["10h"]},
-    ],
+  starGaps: {
+    a: {angleDeficit: {num: 60, unit: "deg"}, steps: ["10h", "8h", "8h"]},
+    b: {angleDeficit: {num: 60, unit: "deg"}, steps: ["8h", "6h"]},
+    c: {angleDeficit: {num: 60, unit: "deg"}, steps: ["6h"]},
+    d: {angleDeficit: {num: 60, unit: "deg"}, steps: ["6h", "4h"]},
+    e: {angleDeficit: {num: 60, unit: "deg"}, steps: ["4h"]},
+    f: {angleDeficit: {num: 60, unit: "deg"}, steps: ["4h", "2h"]},
+    g: {angleDeficit: {num: 60, unit: "deg"}, steps: ["2h"]},
+    h: {angleDeficit: {num: 60, unit: "deg"}, steps: ["2h", "12h"]},
+    i: {angleDeficit: {num: 60, unit: "deg"}, steps: ["12h"]},
+    j: {angleDeficit: {num: 60, unit: "deg"}, steps: ["12h", "10h"]},
+    k: {angleDeficit: {num: 60, unit: "deg"}, steps: ["10h"]},
   },
   edges: [
     "c", "e", "g", "i", "k",

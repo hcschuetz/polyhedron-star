@@ -9,8 +9,7 @@
 // - It allows to omit the quotes around a property key if it is an identifier.
 // - It allows trailing commas in objects and arrays.
 {
-  star: {
-    gaps: [
+  starGaps: {
       // Each object in this list defines a side of the polygon around the
       // star tips and the corresponding gap between the star's jags.
       // - Each name is used for a polygon side, the corresponding gap,
@@ -31,18 +30,17 @@
       // This example walks around the polygon in counter-clockwise direction.
       // You can also walk around in clockwise direction.  The direction used
       // here will be called the "positive" direction.
-      {name: "a", angleDeficit: {num: 60, unit: "deg"}, steps: ["12h", "10h"]},
-      {name: "b", angleDeficit: {num: 60, unit: "deg"}, steps: ["10h"]},
-      {name: "c", angleDeficit: {num: 60, unit: "deg"}, steps: ["10h", "10h", "8h"]},
-      {name: "d", angleDeficit: {num: 60, unit: "deg"}, steps: ["10h", "8h", "8h"]},
-      {name: "e", angleDeficit: {num: 60, unit: "deg"}, steps: ["8h", "6h"]},
-      {name: "f", angleDeficit: {num: 60, unit: "deg"}, steps: ["6h", "6h"]},
-      {name: "g", angleDeficit: {num: 60, unit: "deg"}, steps: ["6h", "4h"]},
-      {name: "h", angleDeficit: {num: 60, unit: "deg"}, steps: ["4h", "4h"]},
-      {name: "i", angleDeficit: {num: 60, unit: "deg"}, steps: ["4h", "4h", "2h"]},
-      {name: "j", angleDeficit: {num: 60, unit: "deg"}, steps: ["2h", "2h"]},
-      {name: "k", angleDeficit: {num: 60, unit: "deg"}, steps: ["2h", "12h", "12h", "12h"]},
-    ],
+    a: {angleDeficit: {num: 60, unit: "deg"}, steps: ["12h", "10h"]},
+    b: {angleDeficit: {num: 60, unit: "deg"}, steps: ["10h"]},
+    c: {angleDeficit: {num: 60, unit: "deg"}, steps: ["10h", "10h", "8h"]},
+    d: {angleDeficit: {num: 60, unit: "deg"}, steps: ["10h", "8h", "8h"]},
+    e: {angleDeficit: {num: 60, unit: "deg"}, steps: ["8h", "6h"]},
+    f: {angleDeficit: {num: 60, unit: "deg"}, steps: ["6h", "6h"]},
+    g: {angleDeficit: {num: 60, unit: "deg"}, steps: ["6h", "4h"]},
+    h: {angleDeficit: {num: 60, unit: "deg"}, steps: ["4h", "4h"]},
+    i: {angleDeficit: {num: 60, unit: "deg"}, steps: ["4h", "4h", "2h"]},
+    j: {angleDeficit: {num: 60, unit: "deg"}, steps: ["2h", "2h"]},
+    k: {angleDeficit: {num: 60, unit: "deg"}, steps: ["2h", "12h", "12h", "12h"]},
   },
   // Actually only the star above is from the Thurston paper.
   // The 30 edges below are one possible set of bendable edges.

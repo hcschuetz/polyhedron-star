@@ -1,12 +1,10 @@
 {
-  star: {
-    gaps: [
-      {name: "a", angleDeficit: {num: 120, unit: "deg"}, steps: ["8h", "8h", "8h"]},
-      {name: "b", angleDeficit: {num: 120, unit: "deg"}, steps: ["6h", "4h"]},
-      {name: "c", angleDeficit: {num: 120, unit: "deg"}, steps: ["4h", "2h"]},
-      {name: "d", angleDeficit: {num: 120, unit: "deg"}, steps: ["2h", "12h"]},
-      {name: "e", angleDeficit: {num: 120, unit: "deg"}, steps: ["12h", "10h"]},
-    ],
+  starGaps: {
+    a: {angleDeficit: {num: 120, unit: "deg"}, steps: ["8h", "8h", "8h"]},
+    b: {angleDeficit: {num: 120, unit: "deg"}, steps: ["6h", "4h"]},
+    c: {angleDeficit: {num: 120, unit: "deg"}, steps: ["4h", "2h"]},
+    d: {angleDeficit: {num: 120, unit: "deg"}, steps: ["2h", "12h"]},
+    e: {angleDeficit: {num: 120, unit: "deg"}, steps: ["12h", "10h"]},
   },
   edges: [
     "b", "c", "d", "e",

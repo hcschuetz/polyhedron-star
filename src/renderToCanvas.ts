@@ -34,13 +34,14 @@ export default function renderToCanvas(
 
   // ---------------------------------------------------------------------------
 
-  const gapIndex = new Map(task.star.gaps.map((v, i) => [v.name, i]));
+  const gaps = Object.entries(task.starGaps).map(([name, gap]) => ({...gap, name}));
+  const gapIndex = new Map(gaps.map(({name}, i) => [name, i]));
 
   const primaryVertices = new Array<Vertex>();
 
   let pos = V2.Zero();
   let totalAngleDeficit = 0;
-  task.star.gaps.forEach(({name, angleDeficit, steps}, i, array) => {
+  gaps.forEach(({name, angleDeficit, steps}, i, array) => {
     const stepTotal = V2.Zero();
     for (const step of steps) {
       stepTotal.addInPlace(stepToV2(step));
@@ -91,7 +92,7 @@ export default function renderToCanvas(
       for (const thr of through.toReversed()) {
         const index = gapIndex.get(thr);
         const pivot = primaryVertices[2*index].pos2D;
-        const angleDefNeg = -angleToRad(task.star.gaps[index].angleDeficit);
+        const angleDefNeg = -angleToRad(gaps[index].angleDeficit);
         rotateAroundInPlace(toPosRotated, pivot, angleDefNeg);
         for (const {inner, outer} of rotations) {
           rotateAroundInPlace(inner, pivot, angleDefNeg);
