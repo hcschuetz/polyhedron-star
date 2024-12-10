@@ -480,7 +480,7 @@ export default function renderToCanvas(
     }
 
     const camera = Object.assign(
-      new B.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2, 10, v3(0, 0, 0), scene), {
+      new B.ArcRotateCamera("camera", -TAU/4, TAU/4, 10, v3(0, 0, 0), scene), {
         lowerRadiusLimit: 3,
         upperRadiusLimit: 30,
       }
