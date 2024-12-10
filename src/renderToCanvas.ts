@@ -275,8 +275,8 @@ export default function renderToCanvas(
     1e-16,
   );
 
-  // 3D positions are not stored in the vertices but in a computed map signal
-  // dependent on the bending signal.
+  // 3D positions are not stored in the vertices but in a computed map
+  // so that they can be changed in a single transaction.
   const pos3DMapSignal = computed(() =>
     makePos3DMap(signals.bending.value, signals.autobend.value)
   );
