@@ -317,15 +317,15 @@ export default function renderToCanvas(
     advancedTexture.rootContainer.scaleX = window.devicePixelRatio;
     advancedTexture.rootContainer.scaleY = window.devicePixelRatio;
 
-    const makeVertex = (colorName) =>
+    const makeVertex = (kind: string) =>
       Object.assign(
-        B.MeshBuilder.CreateIcoSphere("vertex_" + colorName, {
+        B.MeshBuilder.CreateIcoSphere("vertex_" + kind, {
           radius: .03,
           subdivisions: 3,
           flat: false,
         }, scene), {
-          material: standardMaterial("vertexMaterial_" + colorName, {
-            diffuseColor: colors[colorName],
+          material: standardMaterial("vertexMaterial_" + kind, {
+            diffuseColor: colors[kind],
           }, scene),
           isVisible: false,
         }
