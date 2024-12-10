@@ -339,6 +339,7 @@ export default function renderToCanvas(
     const faceMaterial = standardMaterial("faceMaterial", {
       diffuseColor: colors.face,
       roughness: 100,
+      specularColor: B.Color3.White().scale(.5),
       transparencyMode: B.Material.MATERIAL_ALPHABLEND,
       alpha: 0.6,
       // wireframe: true,
@@ -486,18 +487,19 @@ export default function renderToCanvas(
     );
     camera.attachControl(canvas, true);
 
-    [
-      [-10,  10, -10],
-      [ 10,  10,   0],
-      [-10, -10,  10],
-      [-10,   0, -10],
-      [  0, -10, -10],
-      [ 10,   0,  10],
-      [ 10,   0,   0],
-    ].forEach((pos, i) => {
-      const l = new B.PointLight("light" + i, v3(...pos), scene);
-      l.radius = 5;
-    });
+    [ // tetrahedral directions
+      [ 1,  1,  1], [ 1, -1, -1],
+      [-1,  1, -1], [-1, -1,  1],
+    ].forEach((dir, i) => {
+      const hl = new B.HemisphericLight("hemisphericLight" + i, v3(...dir), scene);
+      hl.intensity = .6;
+
+      // point lights come from the opposite directions:
+      const pl = new B.PointLight("pointLight" + i, v3(...dir).scaleInPlace(-100), scene);
+      pl.radius = 50;
+    })
+    
+    new B.HemisphericLight("hemisphLight1", v3(0,0,-100), scene);
 
     engine.runRenderLoop(renderScene);
     window.addEventListener("resize", resizeEngine);
