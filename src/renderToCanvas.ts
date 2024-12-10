@@ -503,6 +503,8 @@ export default function renderToCanvas(
 
     engine.runRenderLoop(renderScene);
     window.addEventListener("resize", resizeEngine);
+  } catch(error) {
+    console.error(`In renderToCanvas(...):`, error)
   } finally {
     return cleanup;
   }
