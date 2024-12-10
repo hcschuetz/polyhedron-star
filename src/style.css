@@ -26,6 +26,10 @@ label {
 	display: inline-block;
 }
 
+input {
+	margin: 0;
+}
+
 summary {
 	/* make it look similar to a link */
 	cursor: pointer;
