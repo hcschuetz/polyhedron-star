@@ -10,6 +10,11 @@ import { computed, effect, Signal } from '@preact/signals';
 import { Edge, EdgeBreak, HalfEdge, Loop, loopHalfEdges, makeSegment, Vertex } from './Shape';
 import computeBends from './computeBends';
 
+export type GridType =
+| "none"
+| "triangular even" | "triangular odd"
+| "quad" | "quad diagonal"
+;
 
 export type Signals = {
   bending: Signal<number>,
@@ -21,6 +26,73 @@ export type Signals = {
   faces: Signal<boolean>,
   breaks: Signal<boolean>,
   flower: Signal<boolean>,
+  grid: Signal<GridType>,
+  density: Signal<number>,
+};
+
+/**
+ * Draw an "N" shape in a rectangle.  (Actually an "И" since the 2D context uses
+ * downward y coordinates.)
+ *
+ * Mirroring this horizontally and vertically gives a triangle pattern.
+ */
+function drawN(ctx: B.ICanvasRenderingContext, width: number, height: number) {
+  ctx.beginPath();
+  ctx.moveTo(0    , 0     );
+  ctx.lineTo(0    , height);
+  ctx.lineTo(width, 0     );
+  ctx.lineTo(width, height);
+  ctx.stroke();
+}
+
+/**
+ * Draw an "L" shape in a rectangle.
+ *
+ * Mirroring this horizontally and vertically gives a quad pattern.
+ */
+function drawL(ctx: B.ICanvasRenderingContext, width: number, height: number) {
+  ctx.beginPath();
+  ctx.moveTo(0    , 0     );
+  ctx.lineTo(0    , height);
+  ctx.lineTo(width, height);
+  ctx.stroke();
+}
+
+type GridDef = {
+  tileRatio: number,
+  drawTile(ctx: B.ICanvasRenderingContext, width: number, height: number): void,
+  uvFunc(pos2D: V2): [number, number];
+};
+
+const uScaleN = 1 / Math.sqrt(3);
+
+export const grids: Record<GridType, GridDef> = {
+  "none": {
+    tileRatio: 1,
+    drawTile: () => {},
+    uvFunc: ({x, y}) => [x, y],
+  },
+  "triangular even": {
+    tileRatio: Math.sqrt(3),
+    drawTile: drawN,
+    uvFunc: ({x, y}) => [x * uScaleN, y],
+  },
+  "triangular odd": {
+    tileRatio: Math.sqrt(3),
+    drawTile: drawN,
+    // Flip x and y to use the "N" tile as a "Z" tile:
+    uvFunc: ({x, y}) => [y * uScaleN, x],
+  },
+  "quad": {
+    tileRatio: 1,
+    drawTile: drawL,
+    uvFunc: ({x, y}) => [x, y],
+  },
+  "quad diagonal": {
+    tileRatio: 1,
+    drawTile: drawL,
+    uvFunc: ({x, y}) => [x+y, x-y],
+  },
 }
 
 export default function renderToCanvas(
@@ -337,15 +409,33 @@ export default function renderToCanvas(
     }
 
     const faceMaterial = standardMaterial("faceMaterial", {
-      diffuseColor: colors.face,
       roughness: 100,
       specularColor: B.Color3.White().scale(.5),
-      transparencyMode: B.Material.MATERIAL_ALPHABLEND,
-      alpha: 0.6,
-      // wireframe: true,
       sideOrientation: B.VertexData.DOUBLESIDE,
       backFaceCulling: false,
     }, scene);
+
+    effect(() => {
+      const {tileRatio, drawTile} = grids[signals.grid.value];
+      const height = 1 << 8;
+      const width = height * tileRatio;
+      const texture = new B.DynamicTexture("grid", {width, height});
+      // Mirroring extends "N" tiles to triangles and "L" tiles to quads:
+      texture.wrapU = B.Constants.TEXTURE_MIRROR_ADDRESSMODE;
+      texture.wrapV = B.Constants.TEXTURE_MIRROR_ADDRESSMODE;
+
+      const ctx = texture.getContext();
+      ctx.fillStyle = "#dd0";
+      ctx.fillRect(0, 0, width, height);
+      ctx.lineWidth = height * signals.density.value / 40;
+      ctx.strokeStyle = "#000";
+      drawTile(ctx, width, height);
+
+      texture.update();
+
+      faceMaterial.diffuseTexture?.dispose(); // Is this needed?
+      faceMaterial.diffuseTexture = texture;
+    });
 
     const flowerMaterial = standardMaterial("flowerMaterial", {
       diffuseColor: colors.flower,
@@ -456,7 +546,10 @@ export default function renderToCanvas(
       });
       effect(() => { mesh.setEnabled(signals.faces.value);  });
       effect(() => {
+        const {uvFunc} = grids[signals.grid.value];
+
         const positions = new Array<number>();
+        const uvs1 = new Array<number>();
         const indices = new Array<number>();
         let i = 0;
         for (const face of subfaces) {
@@ -470,11 +563,24 @@ export default function renderToCanvas(
               ...pos3DMapSignal.value.get(current.twin.to).asArray(),
               ...pos3DMapSignal.value.get(current.to).asArray(),
             );
+            uvs1.push(
+              ...uvFunc(pivot.pos2D),
+              ...uvFunc(current.twin.to.pos2D),
+              ...uvFunc(current.to.pos2D),
+            )
             indices.push(i++, i++, i++);
           }
         }
+        const density = signals.density.value;
+        // The "2" here is to compensate with the mirroring:
+        const uvs = uvs1.map(val => 2 * density * val);
 
-        const vertexData = Object.assign(new B.VertexData(), {positions, indices});
+        // TODO: update positions and uvs independently
+        // (positions whenever the bending and thus the pos3DMapSignal changes;
+        // uvs whenever the grid type or density changes.)
+        const vertexData = Object.assign(new B.VertexData(), {
+          positions, uvs, indices,
+        });
         vertexData.applyToMesh(mesh);
       });
     }

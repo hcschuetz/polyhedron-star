@@ -1,10 +1,10 @@
 import { render } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { useSignal } from '@preact/signals';
+import { Signal, useSignal } from '@preact/signals';
 
 import './style.css';
 import { examples } from './examples';
-import renderToCanvas, { Signals } from './renderToCanvas';
+import renderToCanvas, { grids, GridType, Signals } from './renderToCanvas';
 
 
 export function App() {
@@ -20,6 +20,8 @@ export function App() {
     flower: useSignal(false),
     bending: useSignal(0),
     autobend: useSignal(false),
+    grid: useSignal("triangular even"),
+    density: useSignal(1),
   };
   const textarea = useRef<HTMLTextAreaElement>();
   const canvas = useRef<HTMLCanvasElement>();
@@ -33,6 +35,15 @@ export function App() {
     [count],
   );
 
+  const checkbox = (text: string, signal: Signal<boolean>) => (
+    <label>
+      {text}
+      <input type="checkbox"
+        checked={signal.value as boolean}
+        onChange={() => { signal.value = !signal.value; }}
+      />
+    </label>
+  );
   return (
     <div class="rows">
       <div class="flex-row">
@@ -54,20 +65,40 @@ export function App() {
       </div>
       <textarea ref={textarea} rows={20} />
       <div class="flex-row">
-        <button onClick={() => setCount(c => c+1)}>run task</button>
-        {Object.entries(signals).map(([key, signal]) => <label>
-          {key}
-          {key === "bending"
-          ? <input type="range" style="display: inline-block; vertical-align: middle;"
-              min="0" max="1" step=".01" value={signals.bending.value.toFixed(2)}
-              onInput={e => signals.bending.value = Number.parseFloat(e.currentTarget.value)}
-            />
-          : <input type="checkbox"
-              checked={signals[key].value}
-              onChange={() => { signals[key].value = !signals[key].value; }}
-            />
-          }
-        </label>)}
+        <button onClick={() => setCount(c => c+1)}>run</button>
+        {checkbox("vertices", signals.vertices)}
+        {checkbox("labels", signals.labels)}
+        {checkbox("edges", signals.edges)}
+        {checkbox("cuts", signals.cuts)}
+        {checkbox("faces", signals.faces)}
+        {checkbox("breaks", signals.breaks)}
+        {checkbox("flower", signals.flower)}
+        <label>
+          {"bending "}
+          <input type="range" style="display: inline-block; vertical-align: middle;"
+            min="0" max="1" step=".01"
+            value={(signals.bending.value as number).toFixed(2)}
+            onInput={e => signals.bending.value = Number.parseFloat(e.currentTarget.value)}
+          />
+        </label>
+        {checkbox("autobend", signals.autobend)}
+        <label>
+          {"grid "}
+          <select value={signals.grid.value as GridType}
+            onChange={e => signals.grid.value = e.currentTarget.value as GridType}
+          >
+            {Object.keys(grids).map(key => (
+              <option value={key}>{key}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          density [{signals.density.value}]{" "}
+          <input type="range" style="display: inline-block; vertical-align: middle;"
+            min="1" max="5" step="1" value={signals.density.value.toString()}
+            onInput={e => signals.density.value = Number.parseInt(e.currentTarget.value)}
+          />
+        </label>
       </div>
       <canvas ref={canvas}/>
     </div>
