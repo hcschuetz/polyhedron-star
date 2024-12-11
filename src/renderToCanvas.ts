@@ -617,9 +617,8 @@ export default function renderToCanvas(
     // leads to an exception due to an undefined context in the DynamicTexture.
     // Then maybe move the signals-setting up to avoid unnecessary effect
     // re-evaluation.
-    // Or treat grid type and grid density as properties of the manifold
-    // rather than the display?  So they would no more be GUI-modifiable
-    // signals.
+    // Or treat grid type and grid density as manifold properties rather than
+    // display properties?  So they would no more be (GUI-modifiable) signals.
 
     {
       function setSignal<T>(signal: Signal<T>, value: T | undefined) {
