@@ -477,12 +477,13 @@ export default function renderToCanvas(
       {
         const labelPos = new B.TransformNode("labelPos" + i, scene);
         effect(() => {
-          labelPos.position = v3(0, .2, 0).addInPlace(pos3DMapSignal.value.get(v));
+          labelPos.position = pos3DMapSignal.value.get(v);
         });
         const label = new G.TextBlock("label" + i, v.name);
         effect(() => { label.isVisible = signals.labels.value; });
         label.color = "#fff";
         label.fontSize = 16;
+        label.linkOffsetY = -10;
         advancedTexture.addControl(label);
         label.linkWithMesh(labelPos);
       }
