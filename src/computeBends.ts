@@ -1,6 +1,6 @@
 import { Vector3 as V3 } from "@babylonjs/core";
 import { Edge, HalfEdge, Loop, loopHalfEdges, Vertex } from "./Shape";
-import { interpolateV3, TAU, tripleProduct, v3 } from "./geom-utils";
+import { directedAngle, interpolateV3, TAU, v3 } from "./geom-utils";
 
 
 /**
@@ -119,18 +119,26 @@ export default function computeBends(
 
   function measureBends(he: HalfEdge, normal: V3) {
     const {twin} = he;
-    if (twin.loop === boundary) return;
+    if (twin.loop === boundary) {
+      if (he.to.pos1D % 2 === 1 && twin.to.pos1D % 2 === 0) {
+        // We do not need the bend angle across a cut along an edge,
+        // but we compute and log it for curiosity:
+        const otherNormal = faceNormal(twin.next.twin.loop);
+        const measured = directedAngle(normal, otherNormal, vec(he));
+        console.log(`${twin.to.name.padEnd(5)} -- ^    :      -     => ${(
+          measured * (360/TAU)).toFixed(5).padStart(9)
+        }°`);
+      }
+      return;
+    }
     const twinNormal = faceNormal(twin.loop);
-    const measured = Math.atan2(
-      tripleProduct(normal, twinNormal, vec(he).normalize()),
-      normal.dot(twinNormal),
-    );
-    console.log(`${he.twin.to.name.padEnd(5)} -- ${he.to.name.padEnd(5)}: ${
-      (he.userBend * (360/TAU)).toFixed(3).padStart(7)
+    const measured = directedAngle(normal, twinNormal, vec(he));
+    console.log(`${twin.to.name.padEnd(5)} -- ${he.to.name.padEnd(5)}: ${
+      (he.userBend * (360/TAU)).toFixed(5).padStart(9)
     }° => ${(
-      measured * (360/TAU)).toFixed(3).padStart(7)
+      measured * (360/TAU)).toFixed(5).padStart(9)
     }°`);
-    he.computedBend = he.twin.computedBend = measured;
+    he.computedBend = twin.computedBend = measured;
     for (let heTmp = twin.next; heTmp !== twin; heTmp = heTmp.next) {
       measureBends(heTmp, twinNormal);
     }

@@ -59,6 +59,10 @@ export const v3Average = (ps: V3[]): V3 =>
 
 export const tripleProduct = (a: V3, b: V3, c: V3) => a.dot(b.cross(c));
 
+/** Angle between a and b as seen by c, which should be orthogonal to a and b */
+export const directedAngle = (a: V3, b: V3, c: V3): number =>
+  Math.atan2(tripleProduct(a, b, c.normalizeToNew()), a.dot(b));
+
 export const aux3_0 = v3();
 
 export const interpolateV3 = (p: V3, q: V3, lambda: number) =>
