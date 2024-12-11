@@ -192,7 +192,7 @@ export default function renderToCanvas(
         );
         const pivot = primaryVertices[2*index];
         const v0: Vertex = {
-          name: `${pivot.name}#${fromVertex.name}<${toVertex.name}`,
+          name: `${fromVertex.name}<${toVertex.name}#${pivot.name}`,
           pos1D: 2*index - lambda_p,
           pos2D: interpolateV2(
             pivot.pos2D,
@@ -201,7 +201,7 @@ export default function renderToCanvas(
           ),
         };
         const v1: Vertex = {
-          name: `${pivot.name}#${fromVertex.name}>${toVertex.name}`,
+          name: `${fromVertex.name}>${toVertex.name}#${pivot.name}`,
           pos1D: 2*index + lambda_p,
           pos2D: interpolateV2(
             pivot.pos2D,
