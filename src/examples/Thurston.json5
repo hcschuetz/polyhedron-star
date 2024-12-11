@@ -88,11 +88,10 @@
     {bend: "30deg", from: "i", to: "a", through: ["k"]},
     {bend: "30deg", from: "j", to: "a", through: ["k"]},
   ],
-  // Automatically set the display parameters to certain values so that you
-  // need not set them manually after each run.  You can still change the
-  // parameters in the GUI later.
-  // (Each component of the display element and also the display element as
-  // a whole is optional.)
+  // Set display parameters here so that you need not set them manually.
+  // You can still change them in the GUI later.
+  // (Omit components or the "display" element as a whole to leave settings
+  // unchanged.)
   display: {
     vertices: false,
     labels: true,
