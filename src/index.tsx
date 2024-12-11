@@ -37,7 +37,7 @@ export function App() {
 
   const checkbox = (text: string, signal: Signal<boolean>) => (
     <label>
-      {text}
+      {text + " "}
       <input type="checkbox"
         checked={signal.value as boolean}
         onChange={() => { signal.value = !signal.value; }}
