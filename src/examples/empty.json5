@@ -1,3 +1,4 @@
+// A 0-hedron:
 {
   starGaps: {
     a: {angleDeficit: "360deg", steps: []},
