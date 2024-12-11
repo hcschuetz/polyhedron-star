@@ -9,6 +9,7 @@ import renderToCanvas, { grids, GridType, Signals } from './renderToCanvas';
 
 export function App() {
   const [exampleIdx, setExampleIdx] = useState(0);
+  const [task, setTask] = useState(examples[exampleIdx].value.trim());
   const [count, setCount] = useState(0); // just to trigger canvas updates
   const signals: Signals = {
     vertices: useSignal(false),
@@ -23,17 +24,23 @@ export function App() {
     grid: useSignal("triangular even"),
     density: useSignal(1),
   };
-  const textarea = useRef<HTMLTextAreaElement>();
   const canvas = useRef<HTMLCanvasElement>();
 
   useEffect(
-    () => { textarea.current.value = examples[exampleIdx].value.trim(); },
-    [exampleIdx]
-  );
-  useEffect(
-    () => renderToCanvas(canvas.current, textarea.current.value, signals),
+    () => renderToCanvas(canvas.current, task, signals),
     [count],
   );
+
+  function saveAndRun(text: string) {
+    setTask(text);
+    // Trigger a renderToCanvas.  (We call it indirectly so that
+    // useEffect's cleanup calls take place.)
+    setCount(c => c+1);
+  }
+
+  async function paste() {
+    saveAndRun(await navigator.clipboard.readText());
+  }
 
   const checkbox = (text: string, signal: Signal<boolean>) => (
     <label>
@@ -46,24 +53,22 @@ export function App() {
   );
   return (
     <div class="rows">
-      <div class="flex-row">
-        <label>
-          Edit the task below or select an example: {}
-          <select value={exampleIdx} onChange={e => {
-            setExampleIdx(+e.target["value"]);
-            // Trigger a renderToCanvas.  (We call it indirectly so that
-            // useEffect's cleanup calls take place.)
-            setCount(c => c+1);
-          }}>
-          {examples.map((ex, i) => (
-            <option value={i}>
-              {ex.name}
-            </option>
-          ))}
-          </select>
-        </label>
+      <div>
+        Edit the task below, select an example {}
+        <select value={exampleIdx} onChange={e => {
+          const idx = +e.currentTarget.value;
+          setExampleIdx(idx);
+          saveAndRun(examples[idx].value.trim());
+        }}>
+        {examples.map((ex, i) => (
+          <option value={i}>
+            {ex.name}
+          </option>
+        ))}
+        </select>,
+        or <button onClick={paste}>paste</button> the clipboard content.
       </div>
-      <textarea ref={textarea} rows={20} />
+      <textarea value={task} onChange={e => setTask(e.currentTarget.value)} rows={20} />
       <div class="flex-row">
         <button onClick={() => setCount(c => c+1)}>run</button>
         {checkbox("vertices", signals.vertices)}
