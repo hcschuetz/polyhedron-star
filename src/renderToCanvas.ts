@@ -421,7 +421,7 @@ export default function renderToCanvas(
       const ctx = texture.getContext();
       ctx.fillStyle = "#dd0";
       ctx.fillRect(0, 0, width, height);
-      ctx.lineWidth = height * signals.density.value / 40;
+      ctx.lineWidth = height * signals.density.value / 20;
       ctx.strokeStyle = "#000";
       drawTile(ctx, width, height);
 
