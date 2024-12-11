@@ -41,4 +41,7 @@
     {bend: "41.810deg", from: "g", to: "i", through: ["h"]},
     {bend: "41.810deg", from: "i", to: "k", through: ["j"]},
   ],
+  display: {
+    grid: "triangular even",
+  }
 }

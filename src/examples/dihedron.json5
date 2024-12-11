@@ -7,4 +7,7 @@
     "a", "b",
     {bend: "180deg", from: "a", to: "b"},
   ],
+  display: {
+    grid: "triangular even",
+  }
 }

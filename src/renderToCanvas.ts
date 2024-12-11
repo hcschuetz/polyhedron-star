@@ -4,7 +4,7 @@ import * as G from '@babylonjs/gui';
 import JSON5 from 'json5';
 
 import { assert, fail } from './utils';
-import { angleToRad, Task, stepToV2 } from './taskspec';
+import { angleToRad, Task, stepToV2, DisplaySettings } from './taskspec';
 import { arcPath, interpolateV2, intersectLineSegments, rotateAroundInPlace, TAU, UVFrame, v2, v3 } from './geom-utils';
 import { computed, effect, Signal } from '@preact/signals';
 import { Edge, EdgeBreak, HalfEdge, Loop, loopHalfEdges, makeSegment, Vertex } from './Shape';
@@ -609,6 +609,40 @@ export default function renderToCanvas(
 
     engine.runRenderLoop(renderScene);
     window.addEventListener("resize", resizeEngine);
+
+    // -------------------------------------------------------------------------
+
+    // TODO Figure out why setting the signals (actually signal.grid) earlier
+    // leads to an exception due to an undefined context in the DynamicTexture.
+    // Then maybe move the signals-setting up to avoid unnecessary effect
+    // re-evaluation.
+    // Or treat grid type and grid density as properties of the manifold
+    // rather than the display?  So they would no more be GUI-modifiable
+    // signals.
+
+    {
+      function setSignal<T>(signal: Signal<T>, value: T | undefined) {
+        if (value !== undefined) signal.value = value;
+      }
+
+      const {
+        vertices, labels, edges, cuts, faces, breaks, flower,
+        bending, autobend, grid, density,
+      } = task.display;
+
+      setSignal(signals.vertices, vertices);
+      setSignal(signals.labels, labels);
+      setSignal(signals.edges, edges);
+      setSignal(signals.cuts, cuts);
+      setSignal(signals.faces, faces);
+      setSignal(signals.breaks, breaks);
+      setSignal(signals.flower, flower);
+      setSignal(signals.bending, bending);
+      setSignal(signals.autobend, autobend);
+      setSignal(signals.grid, grid);
+      setSignal(signals.density, density);
+    }
+
   } catch(error) {
     console.error(`In renderToCanvas(...):`, error)
   } finally {

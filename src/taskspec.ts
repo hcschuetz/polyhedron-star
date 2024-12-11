@@ -1,5 +1,6 @@
 import { Vector2 as V2 } from '@babylonjs/core';
 import { fail } from './utils';
+import { GridType } from './renderToCanvas';
 
 
 const v2 = (x?: number , y?: number) => new V2(x, y);
@@ -36,6 +37,20 @@ export type EdgeSpec =
   }
 ;
 
+export type DisplaySettings = {
+  vertices: boolean,
+  labels: boolean,
+  edges: boolean,
+  cuts: boolean,
+  faces: boolean,
+  breaks: boolean,
+  flower: boolean,
+  bending: number,
+  autobend: boolean,
+  grid: GridType,
+  density: number,
+};
+
 export type Task = {
   name: string,
   // Consistency:
@@ -45,6 +60,7 @@ export type Task = {
   // - The steps should return to the beginning.
   starGaps: Record<string, Gap>,
   edges: EdgeSpec[],
+  display?: Partial<DisplaySettings>,
 }
 
 
