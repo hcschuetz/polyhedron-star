@@ -53,8 +53,11 @@ export function App() {
   );
   return (
     <div class="rows">
+      <textarea value={task} onChange={e => setTask(e.currentTarget.value)} rows={20} />
       <div>
-        Edit the task below, select an example {}
+        Edit the spec above
+        and <button onClick={() => setCount(c => c+1)}>run</button> it,
+        select an example {}
         <select value={exampleIdx} onChange={e => {
           const idx = +e.currentTarget.value;
           setExampleIdx(idx);
@@ -66,11 +69,10 @@ export function App() {
           </option>
         ))}
         </select>,
-        or <button onClick={paste}>paste</button> the clipboard content.
+        or <button onClick={paste}>paste</button> from the clipboard.
       </div>
-      <textarea value={task} onChange={e => setTask(e.currentTarget.value)} rows={20} />
       <div class="flex-row">
-        <button onClick={() => setCount(c => c+1)}>run</button>
+        <span style={{textDecoration: "underline"}}>Display settings:</span>
         {checkbox("vertices", signals.vertices)}
         {checkbox("labels", signals.labels)}
         {checkbox("edges", signals.edges)}

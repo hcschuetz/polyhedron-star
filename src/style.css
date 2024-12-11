@@ -10,7 +10,7 @@ body {
 .rows {
 	max-width: 800px;
 	display: flex;
-	flex-flow: column wrap;
+	flex-flow: column;
 	align-items: stretch;
 	gap: 8px;
 }
@@ -19,7 +19,7 @@ body {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 1em;
+	column-gap: 1em;
 }
 
 label {
