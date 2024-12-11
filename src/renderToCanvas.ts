@@ -347,12 +347,6 @@ export default function renderToCanvas(
     1e-16,
   );
 
-  // 3D positions are not stored in the vertices but in a computed map
-  // so that they can be changed in a single transaction.
-  const pos3DMapSignal = computed(() =>
-    makePos3DMap(signals.bending.value, signals.autobend.value)
-  );
-
   // ---------------------------------------------------------------------------
 
   const noBubble = (e: Event) => e.preventDefault();
@@ -456,6 +450,13 @@ export default function renderToCanvas(
     const gridMaterial = standardMaterial("gridMaterial", {
       diffuseColor: colors.grid,
     }, scene);
+
+
+    // 3D positions are not stored in the vertices but in a computed map
+    // so that they can be changed in a single transaction.
+    const pos3DMapSignal = computed(() =>
+      makePos3DMap(signals.bending.value, signals.autobend.value)
+    );
 
     vertices.values().forEach(v => {
       const pos1DMod2 = v.pos1D % 2;
