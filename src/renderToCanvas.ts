@@ -349,9 +349,6 @@ export default function renderToCanvas(
 
   // ---------------------------------------------------------------------------
 
-  const noBubble = (e: Event) => e.preventDefault();
-  canvas.addEventListener("wheel", noBubble);
-
   const colors = {
     inner: B.Color3.Blue(),
     outer: B.Color3.Red(),
@@ -375,7 +372,6 @@ export default function renderToCanvas(
     window.removeEventListener("resize", resizeEngine);
     engine.stopRenderLoop(renderScene);
     engine.dispose();
-    canvas.removeEventListener("wheel", noBubble);  
   }
 
   try {
@@ -591,9 +587,10 @@ export default function renderToCanvas(
       new B.ArcRotateCamera("camera", -TAU/4, TAU/4, 10, v3(0, 0, 0), scene), {
         lowerRadiusLimit: 3,
         upperRadiusLimit: 30,
+        zoomToMouseLocation: true,
       }
     );
-    camera.attachControl(canvas, true);
+    camera.attachControl(canvas, false);
 
     [ // tetrahedral directions
       [ 1,  1,  1], [ 1, -1, -1],
