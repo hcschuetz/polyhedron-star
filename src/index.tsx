@@ -4,7 +4,8 @@ import { Signal, useSignal } from '@preact/signals';
 
 import './style.css';
 import { examples } from './examples';
-import renderToCanvas, { grid3Features, grids, GridType, Signals } from './renderToCanvas';
+import renderToCanvas, { Signals } from './renderToCanvas';
+import { grid3Features, grids, GridType } from './tiling';
 
 
 export function App() {
