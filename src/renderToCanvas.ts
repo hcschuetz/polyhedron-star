@@ -10,6 +10,179 @@ import { computed, effect, Signal } from '@preact/signals';
 import { Edge, EdgeBreak, HalfEdge, Loop, loopHalfEdges, makeSegment, Vertex } from './Shape';
 import computeBends from './computeBends';
 
+
+// It would be cool to have Alhambra-style tilings
+// (http://www.andalucia360travel.com/en/descubrir/tiles-of-the-alhambra/)
+// or M. C. Escher-style creatures.
+
+const r3 = Math.sqrt(3);
+
+type Grid3Feature =
+| "subTriangles"
+| "triangles"
+| "diamonds"
+| "hexagons1"
+| "hexagons2"
+| "arrows"
+| "ball"
+| "zigzag"
+;
+
+const grid3Painters: Record<Grid3Feature, (ctx: B.ICanvasRenderingContext) => void> = {
+  subTriangles(ctx) {
+    ctx.fillStyle = "#cc0";
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.lineTo(2/r3, 0);
+    ctx.lineTo(r3/2, 1/2);
+    ctx.closePath();
+    ctx.fill();
+  },
+  triangles(ctx) {
+    ctx.lineWidth = 1 / 20;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, 1);
+    ctx.stroke();
+  },
+  diamonds(ctx) {
+    ctx.lineWidth = 1 / 20;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(r3*2/3, 0);
+    ctx.stroke();
+  },
+  hexagons1(ctx) {
+    ctx.lineWidth = 1 / 20;
+    ctx.beginPath();
+    ctx.moveTo(2/r3, 0);
+    ctx.lineTo(r3/2, 1/2);
+    ctx.stroke();
+  },
+  hexagons2(ctx) {
+    ctx.lineWidth = 1 / 20;
+    ctx.beginPath();
+    ctx.moveTo(r3/3, -1/3);
+    ctx.lineTo(r3/3,  1/3);
+    ctx.lineTo(r3/2,  1/2);
+    ctx.stroke();
+  },
+  arrows(ctx) {
+    ctx.lineWidth = 1 / 40;
+    ctx.beginPath();
+    ctx.moveTo(.2 ,  .6);
+    ctx.lineTo(.2 , 1.4);
+    ctx.moveTo(.25, 1.28);
+    ctx.lineTo(.2 , 1.4);
+    ctx.lineTo(.15, 1.28);
+    ctx.stroke();  
+  },
+  ball(ctx) {
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    ctx.arc(0, 0, .2, 0, TAU, true);
+    ctx.fill();  
+  },
+  zigzag(ctx) {
+    ctx.lineWidth = 1 / 20;
+    ctx.beginPath();
+    ctx.moveTo(-.1, .45);
+    ctx.lineTo( .1, .5 );
+    ctx.lineTo(-.1, .8 );
+    ctx.lineTo( .1, .85);
+    ctx.lineTo(0, 1);
+    ctx.stroke();
+  },
+};
+
+export const grid3Features = Object.keys(grid3Painters) as Grid3Feature[];
+
+type DrawTile = (
+  ctx: B.ICanvasRenderingContext,
+  width: number,
+  height: number,
+  features?: Partial<{
+    grid3: Record<Grid3Feature, Signal<boolean>>,
+  }>,
+) => void;
+
+const drawTile3: DrawTile = (ctx, width, height, features) => {
+  ctx.beginPath();
+  ctx.save();
+  ctx.scale(height/2, height/2);
+  ctx.translate(r3, 1);
+  ctx.strokeStyle = "#000";
+
+  for (const [name, painter] of Object.entries(grid3Painters)) {
+    if (!features?.grid3?.[name].value) continue;
+    for (const [x, y] of [
+            [0,  2],
+      [-r3,  1], [ r3,  1],
+            [0,  0],
+      [-r3, -1], [ r3, -1],
+            [0, -2],
+      ]
+    ) {
+      ctx.save();
+      ctx.translate(x, y);
+      for (let i = 0; i < 6; i++) {
+        painter(ctx);
+        ctx.rotate(TAU/6);
+      }
+      ctx.restore();
+    }
+  }
+  ctx.restore();
+}
+
+function drawTile4(ctx: B.ICanvasRenderingContext, width: number, height: number) {
+  ctx.beginPath();
+  ctx.moveTo(0    , 0     );
+  ctx.lineTo(0    , height);
+  ctx.lineTo(width, height);
+  ctx.lineTo(width, 0     );
+  ctx.lineTo(0    , 0     );
+  ctx.stroke();
+}
+
+type GridDef = {
+  tileRatio: number,
+  drawTile: DrawTile,
+  uvFunc(pos2D: V2): [number, number];
+};
+
+const uScaleN = 1 / r3;
+
+export const grids: Record<GridType, GridDef> = {
+  "none": {
+    tileRatio: 1,
+    drawTile() {},
+    uvFunc: ({x, y}) => [x, y],
+  },
+  "triangular even": {
+    tileRatio: r3,
+    drawTile: drawTile3,
+    uvFunc: ({x, y}) => [x * uScaleN, y],
+  },
+  "triangular odd": {
+    tileRatio: r3,
+    drawTile: drawTile3,
+    // Flip x and y to use the "N" tile as a "Z" tile:
+    uvFunc: ({x, y}) => [y * uScaleN, x],
+  },
+  "quad": {
+    tileRatio: 1,
+    drawTile: drawTile4,
+    uvFunc: ({x, y}) => [x, y],
+  },
+  "quad diagonal": {
+    tileRatio: 1,
+    drawTile: drawTile4,
+    uvFunc: ({x, y}) => [x+y, x-y],
+  },
+}
+
+
 export type GridType =
 | "none"
 | "triangular even" | "triangular odd"
@@ -28,72 +201,9 @@ export type Signals = {
   flower: Signal<boolean>,
   grid: Signal<GridType>,
   density: Signal<number>,
+  grid3: Record<Grid3Feature, Signal<boolean>>,
 };
 
-/**
- * Draw an "N" shape in a rectangle.  (Actually an "И" since the 2D context uses
- * downward y coordinates.)
- *
- * Mirroring this horizontally and vertically gives a triangle pattern.
- */
-function drawN(ctx: B.ICanvasRenderingContext, width: number, height: number) {
-  ctx.beginPath();
-  ctx.moveTo(0    , 0     );
-  ctx.lineTo(0    , height);
-  ctx.lineTo(width, 0     );
-  ctx.lineTo(width, height);
-  ctx.stroke();
-}
-
-/**
- * Draw an "L" shape in a rectangle.
- *
- * Mirroring this horizontally and vertically gives a quad pattern.
- */
-function drawL(ctx: B.ICanvasRenderingContext, width: number, height: number) {
-  ctx.beginPath();
-  ctx.moveTo(0    , 0     );
-  ctx.lineTo(0    , height);
-  ctx.lineTo(width, height);
-  ctx.stroke();
-}
-
-type GridDef = {
-  tileRatio: number,
-  drawTile(ctx: B.ICanvasRenderingContext, width: number, height: number): void,
-  uvFunc(pos2D: V2): [number, number];
-};
-
-const uScaleN = 1 / Math.sqrt(3);
-
-export const grids: Record<GridType, GridDef> = {
-  "none": {
-    tileRatio: 1,
-    drawTile: () => {},
-    uvFunc: ({x, y}) => [x, y],
-  },
-  "triangular even": {
-    tileRatio: Math.sqrt(3),
-    drawTile: drawN,
-    uvFunc: ({x, y}) => [x * uScaleN, y],
-  },
-  "triangular odd": {
-    tileRatio: Math.sqrt(3),
-    drawTile: drawN,
-    // Flip x and y to use the "N" tile as a "Z" tile:
-    uvFunc: ({x, y}) => [y * uScaleN, x],
-  },
-  "quad": {
-    tileRatio: 1,
-    drawTile: drawL,
-    uvFunc: ({x, y}) => [x, y],
-  },
-  "quad diagonal": {
-    tileRatio: 1,
-    drawTile: drawL,
-    uvFunc: ({x, y}) => [x+y, x-y],
-  },
-}
 
 export default function renderToCanvas(
   canvas: HTMLCanvasElement,
@@ -410,16 +520,13 @@ export default function renderToCanvas(
       const height = 1 << 8;
       const width = height * tileRatio;
       const texture = new B.DynamicTexture("grid", {width, height});
-      // Mirroring extends "N" tiles to triangles and "L" tiles to quads:
-      texture.wrapU = B.Constants.TEXTURE_MIRROR_ADDRESSMODE;
-      texture.wrapV = B.Constants.TEXTURE_MIRROR_ADDRESSMODE;
+      texture.wrapU = B.Constants.TEXTURE_WRAP_ADDRESSMODE;
+      texture.wrapV = B.Constants.TEXTURE_WRAP_ADDRESSMODE;
 
       const ctx = texture.getContext();
       ctx.fillStyle = "#dd0";
       ctx.fillRect(0, 0, width, height);
-      ctx.lineWidth = height * signals.density.value / 20;
-      ctx.strokeStyle = "#000";
-      drawTile(ctx, width, height);
+      drawTile(ctx, width, height, {grid3: signals.grid3});
 
       texture.update();
 
@@ -570,8 +677,7 @@ export default function renderToCanvas(
           }
         }
         const density = signals.density.value;
-        // The "2" here is to compensate with the mirroring:
-        const uvs = uvs1.map(val => 2 * density * val);
+        const uvs = uvs1.map(val => density * val);
 
         // TODO: update positions and uvs independently
         // (positions whenever the bending and thus the pos3DMapSignal changes;

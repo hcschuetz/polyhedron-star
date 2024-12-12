@@ -4,7 +4,7 @@ import { Signal, useSignal } from '@preact/signals';
 
 import './style.css';
 import { examples } from './examples';
-import renderToCanvas, { grids, GridType, Signals } from './renderToCanvas';
+import renderToCanvas, { grid3Features, grids, GridType, Signals } from './renderToCanvas';
 
 
 export function App() {
@@ -23,6 +23,16 @@ export function App() {
     autobend: useSignal(false),
     grid: useSignal("triangular even"),
     density: useSignal(1),
+    grid3: {
+      subTriangles: useSignal(true),
+      triangles: useSignal(true),
+      diamonds: useSignal(false),
+      hexagons1: useSignal(false),
+      hexagons2: useSignal(false),
+      arrows: useSignal(false),
+      ball: useSignal(false),
+      zigzag: useSignal(false),
+    }
   };
   const canvas = useRef<HTMLCanvasElement>();
 
@@ -108,6 +118,10 @@ export function App() {
         </label>
       </div>
       <canvas ref={canvas}/>
+      <div className="flex-row">
+        <span style={{textDecoration: "underline"}}>Triangular-grid features:</span>
+        {grid3Features.map(ft => checkbox(ft, signals.grid3[ft]))}
+      </div>
     </div>
   );
 }
