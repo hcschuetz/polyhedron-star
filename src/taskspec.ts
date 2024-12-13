@@ -1,6 +1,6 @@
 import { Vector2 as V2 } from '@babylonjs/core';
 import { fail } from './utils';
-import { GridType } from './renderToCanvas';
+import { Grid3Feature, GridType } from './tiling';
 
 
 const v2 = (x?: number , y?: number) => new V2(x, y);
@@ -37,7 +37,7 @@ export type EdgeSpec =
   }
 ;
 
-export type DisplaySettings = {
+export type DisplaySettings = Partial<{
   vertices: boolean,
   labels: boolean,
   edges: boolean,
@@ -49,7 +49,8 @@ export type DisplaySettings = {
   autobend: boolean,
   grid: GridType,
   density: number,
-};
+  grid3: Partial<Record<Grid3Feature, boolean>>,
+}>;
 
 export type Task = {
   name: string,
@@ -60,7 +61,7 @@ export type Task = {
   // - The steps should return to the beginning.
   starGaps: Record<string, Gap>,
   edges: EdgeSpec[],
-  display?: Partial<DisplaySettings>,
+  display?: DisplaySettings,
 }
 
 

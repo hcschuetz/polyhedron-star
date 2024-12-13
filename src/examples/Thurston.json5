@@ -104,5 +104,15 @@
     autobend: true,
     grid: "triangular even",
     density: 1,
+    grid3: {
+      subTriangles: true,
+      triangles: true,
+      diamonds: false,
+      hexagons1: false,
+      hexagons2: false,
+      arrows: false,
+      ball: false,
+      zigzag: false,
+    }
   }
 }

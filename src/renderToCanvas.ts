@@ -533,7 +533,7 @@ export default function renderToCanvas(
 
       const {
         vertices, labels, edges, cuts, faces, breaks, flower,
-        bending, autobend, grid, density,
+        bending, autobend, grid, density, grid3,
       } = task.display;
 
       setSignal(signals.vertices, vertices);
@@ -547,6 +547,21 @@ export default function renderToCanvas(
       setSignal(signals.autobend, autobend);
       setSignal(signals.grid, grid);
       setSignal(signals.density, density);
+      if (grid3) {
+        const grid3Signals = signals.grid3;
+        const {
+          subTriangles, triangles, diamonds, hexagons1, hexagons2,
+          arrows, ball, zigzag
+        } = grid3;
+        setSignal(grid3Signals.subTriangles, subTriangles);
+        setSignal(grid3Signals.triangles, triangles);
+        setSignal(grid3Signals.diamonds, diamonds);
+        setSignal(grid3Signals.hexagons1, hexagons1);
+        setSignal(grid3Signals.hexagons2, hexagons2);
+        setSignal(grid3Signals.arrows, arrows);
+        setSignal(grid3Signals.ball, ball);
+        setSignal(grid3Signals.zigzag, zigzag);
+      }
     }
 
   } catch(error) {
