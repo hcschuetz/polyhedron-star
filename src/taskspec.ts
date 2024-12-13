@@ -59,7 +59,7 @@ export type Task = {
   // - Angle deficits should add up to a value between 360 and 720 degrees
   //   (TAU to 2*TAU).
   // - The steps should return to the beginning.
-  starGaps: Record<string, Gap>,
+  starGaps: Record<string, Gap | string>,
   edges: EdgeSpec[],
   display?: DisplaySettings,
 }
@@ -75,27 +75,28 @@ const angleUnits = {
   rad: 1,
 }
 
-function shortStepToV2(s: ShortStep): V2 {
-  switch (s) {
-    case "e"  :
-    case "3h" : return v2( 1     ,  0     );
-    case "2h" : return v2( r3Half,  0.5   );
-    case "1h" : return v2( 0.5   ,  r3Half);
-    case "n"  :
-    case "12h": return v2( 0     ,  1     );
-    case "11h": return v2(-0.5   ,  r3Half);
-    case "10h": return v2(-r3Half,  0.5   );
-    case "w"  :
-    case "9h" : return v2(-1     ,  0     );
-    case "8h" : return v2(-r3Half, -0.5   );
-    case "7h" : return v2(-0.5   , -r3Half);
-    case "s"  :
-    case "6h" : return v2( 0     , -1     );
-    case "5h" : return v2( 0.5   , -r3Half);
-    case "4h" : return v2( r3Half, -0.5   );
-    default: fail(`unexpected step: "${s}"`);
-  }
+export const stepOffsets: Record<ShortStep, V2> = {
+  "3h" : v2( 1     ,  0     ),
+  "2h" : v2( r3Half,  0.5   ),
+  "1h" : v2( 0.5   ,  r3Half),
+  "12h": v2( 0     ,  1     ),
+  "11h": v2(-0.5   ,  r3Half),
+  "10h": v2(-r3Half,  0.5   ),
+  "9h" : v2(-1     ,  0     ),
+  "8h" : v2(-r3Half, -0.5   ),
+  "7h" : v2(-0.5   , -r3Half),
+  "6h" : v2( 0     , -1     ),
+  "5h" : v2( 0.5   , -r3Half),
+  "4h" : v2( r3Half, -0.5   ),
+
+  "e"  : v2( 1     ,  0     ),
+  "n"  : v2( 0     ,  1     ),
+  "w"  : v2(-1     ,  0     ),
+  "s"  : v2( 0     , -1     ),
 }
+
+const shortStepToV2 = (s: ShortStep): V2 =>
+  stepOffsets[s] ?? fail(`unexpected step: "${s}"`);
 
 export function angleToRad(angle: Angle): number {
   switch (typeof angle) {

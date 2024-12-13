@@ -1,46 +1,44 @@
-// The following specification uses JSON5 syntax, which is similar to JSON but
-// a bit more permissive.  For example:
-// - It supports comments.
-// - It allows to omit the quotes around a property key if it is an identifier.
-// - It allows trailing commas in objects and arrays.
+// A star/polygon specification uses JSON5 syntax (a superset of JSON).
+// To reduce verbosity some short-hands are provided where a string represents
+// a complex object.
 {
   // This star definition is based on "Shapes of polyhedra and triangulations of
   // the sphere" by William P Thurston, Figure 15 on page 540 (PDF page 30),
   // https://arxiv.org/pdf/math/9801088.
   // See also https://mathstodon.xyz/@johncarlosbaez/113369214767592820.
   starGaps: {
-      // Each object in this list defines a side of the polygon around the
-      // star tips and the corresponding gap between the star's jags.
-      // - Each name is used for a polygon side, the corresponding gap,
-      //   and the gap's apex (usually an inward-pointing vertex of the star).
-      // - The length and orientation of a polygon side is given as a sequence
-      //   of steps.  For example, ["12h", "10h"] means "go one unit in the
-      //   "12 o'clock direction" of a clock dial and then one unit in the
-      //   "10 o'clock direction".
-      //   (A syntax for arbitrary step directions and lengths is also available
-      //   but not used here.)
-      // - The angleDeficit is the apex angle of the isosceles gap triangle.
-      //   It also tells how much rotation is missing to a full 360° turn
-      //   when you walk around the corresponding polyhedron vertex or manifold
-      //   cone.  (Suffix "deg" or "°" indicates degrees.  Otherwise numbers
-      //   are interpreted as radians.)
-      //
-      // The polygon should be closed.
-      //
-      // This example walks around the polygon in counter-clockwise direction.
-      // You can also walk around in clockwise direction.  The direction used
-      // here will be called the "positive" direction.
-    a: {angleDeficit: "60deg", steps: ["12h", "10h"]},
-    b: {angleDeficit: "60deg", steps: ["10h"]},
-    c: {angleDeficit: "60deg", steps: ["10h", "10h", "8h"]},
-    d: {angleDeficit: "60deg", steps: ["10h", "8h", "8h"]},
-    e: {angleDeficit: "60deg", steps: ["8h", "6h"]},
-    f: {angleDeficit: "60deg", steps: ["6h", "6h"]},
-    g: {angleDeficit: "60deg", steps: ["6h", "4h"]},
-    h: {angleDeficit: "60deg", steps: ["4h", "4h"]},
-    i: {angleDeficit: "60deg", steps: ["4h", "4h", "2h"]},
-    j: {angleDeficit: "60deg", steps: ["2h", "2h"]},
-    k: {angleDeficit: "60deg", steps: ["2h", "12h", "12h", "12h"]},
+    // Each object in this list defines a side of the polygon around the
+    // star tips and the corresponding gap between the star's jags.
+    // - Each name is used for a polygon side, the corresponding gap,
+    //   and the gap's apex (usually an inward-pointing vertex of the star).
+    // - The length and orientation of a polygon side is given as a sequence
+    //   of steps.  For example, "12h 10h" means "go one unit in the
+    //   "12 o'clock direction" of a clock dial and then one unit in the
+    //   "10 o'clock direction". (If you don't know clock dials, ask a boomer.)
+    //   A syntax for arbitrary step directions and lengths is also available
+    //   but not used here.
+    // - The angleDeficit is the apex angle of the isosceles gap triangle.
+    //   It also tells how much rotation is missing to a full 360° turn
+    //   when you walk around the corresponding polyhedron vertex or manifold
+    //   cone.  (Suffix "deg" or "°" indicates degrees.  Otherwise numbers
+    //   are interpreted as radians.)
+    //
+    // The polygon should be closed.
+    //
+    // This example walks around the polygon in counter-clockwise direction.
+    // You can also walk around in clockwise direction.  The direction used
+    // here will be called the "positive" direction.
+    a: "12h 10h         60°",
+    b: "10h             60°",
+    c: "10h 10h 8h      60°",
+    d: "10h  8h 8h      60°",
+    e: " 8h  6h         60°",
+    f: " 6h  6h         60°",
+    g: " 6h  4h         60°",
+    h: " 4h  4h         60°",
+    i: " 4h  4h 2h      60°",
+    j: " 2h  2h         60°",
+    k: " 2h 12h 12h 12h 60°",
   },
   // Actually only the star above is from the Thurston paper.
   // The 30 edges below are one possible set of bendable edges.
@@ -56,37 +54,36 @@
     // end points are of course on the star boundary.)
     // The bend angles are used as a starting point for an approximation
     // algorithm.
-    {bend: "30deg", from: "a", to: "b"},
-    {bend: "30deg", from: "a", to: "c"},
-    {bend: "30deg", from: "a", to: "k"},
-    {bend: "30deg", from: "b", to: "c"},
-    {bend: "30deg", from: "c", to: "d"},
-    {bend: "30deg", from: "c", to: "k"},
-    {bend: "30deg", from: "d", to: "e"},
-    {bend: "30deg", from: "d", to: "f"},
-    {bend: "30deg", from: "d", to: "h"},
-    {bend: "30deg", from: "d", to: "k"},
-    {bend: "30deg", from: "e", to: "f"},
-    {bend: "30deg", from: "f", to: "g"},
-    {bend: "30deg", from: "f", to: "h"},
-    {bend: "30deg", from: "g", to: "h"},
-    {bend: "30deg", from: "h", to: "i"},
-    {bend: "30deg", from: "h", to: "k"},
-    {bend: "30deg", from: "i", to: "j"},
-    {bend: "30deg", from: "i", to: "k"},
+    "a b 30°",
+    "a c 30°",
+    "a k 30°",
+    "b c 30°",
+    "c d 30°",
+    "c k 30°",
+    "d e 30°",
+    "d f 30°",
+    "d h 30°",
+    "d k 30°",
+    "e f 30°",
+    "f g 30°",
+    "f h 30°",
+    "g h 30°",
+    "h i 30°",
+    "h k 30°",
+    "i j 30°",
+    "i k 30°",
 
     // The remaining edges cross one or more gaps.  Each of them is divided into
     // two or more segments, each crossing a spike of the star.
     // On the folded polyhedron the segments of an edge align to a straight
     // edge.  Edges of this type must walk around the star in the "positive"
     // direction. (See above.) So you must write
-    {bend: "30deg", from: "b", to: "e", through: ["c", "d"]},
-    // because this is not supported:
-    // {bend: "30deg", from: "e", to: "b", through: ["d", "c"]}.
-    {bend: "30deg", from: "c", to: "e", through: ["d"]},
-    {bend: "30deg", from: "h", to: "j", through: ["i"]},
-    {bend: "30deg", from: "i", to: "a", through: ["k"]},
-    {bend: "30deg", from: "j", to: "a", through: ["k"]},
+    "b c d e 30°",
+    // because "e d c b 30°" is not supported.
+    "c d e 30°",
+    "h i j 30°",
+    "i k a 30°",
+    "j k a 30°",
   ],
   // Set display parameters here so that you need not set them manually.
   // You can still change them in the GUI later.

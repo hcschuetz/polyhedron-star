@@ -4,7 +4,7 @@ import * as G from '@babylonjs/gui';
 import JSON5 from 'json5';
 
 import { assert, fail } from './utils';
-import { angleToRad, Task, stepToV2 } from './taskspec';
+import { angleToRad, Task, stepToV2, Step } from './taskspec';
 import { arcPath, interpolateV2, intersectLineSegments, rotateAroundInPlace, TAU, UVFrame, v2, v3 } from './geom-utils';
 import { computed, effect, Signal } from '@preact/signals';
 import { Edge, EdgeBreak, HalfEdge, Loop, loopHalfEdges, makeSegment, Vertex } from './Shape';
@@ -36,7 +36,15 @@ export default function renderToCanvas(
 
   // ---------------------------------------------------------------------------
 
-  const gaps = Object.entries(task.starGaps).map(([name, gap]) => ({...gap, name}));
+  const gaps = Object.entries(task.starGaps).map(([name, gap]) => {
+    if (typeof gap === "string") {
+      // expand abbreviated notation:
+      const parts = gap.trim().split(/ +/);
+      const angleDeficit = parts.pop();
+      gap = {angleDeficit, steps: parts as Step[]};
+    }
+    return {...gap, name};
+  });
   const gapIndex = new Map(gaps.map(({name}, i) => [name, i]));
 
   const primaryVertices = new Array<Vertex>();
@@ -67,7 +75,16 @@ export default function renderToCanvas(
 
   const vertices: Vertex[] = primaryVertices.slice();
   const edges: Edge[] = [];
-  for (const e of task.edges) {
+  for (let e of task.edges) {
+    if (typeof e === "string" && e.includes(" ")) {
+      // expand abbreviated notation:
+      const parts = e.trim().split(/ +/);
+      const from = parts.shift();
+      const bend = parts.pop();
+      const to = parts.pop();
+      e = {from, to, through: parts, bend}
+      console.log(JSON5.stringify(e))
+    }
     if (typeof e === "string") {
       const index = gapIndex.get(e);
       const inner = primaryVertices[2*index];
