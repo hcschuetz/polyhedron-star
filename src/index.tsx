@@ -118,11 +118,11 @@ export function App() {
           />
         </label>
       </div>
-      <canvas ref={canvas}/>
       <div className="flex-row">
         <span style={{textDecoration: "underline"}}>Triangular-grid features:</span>
         {grid3Features.map(ft => checkbox(ft, signals.grid3[ft]))}
       </div>
+      <canvas ref={canvas}/>
     </div>
   );
 }

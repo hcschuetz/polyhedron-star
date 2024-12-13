@@ -305,6 +305,8 @@ export default function renderToCanvas(
   }
 
   try {
+    scene.clearColor = new B.Color4(0,0,0,0);
+
     const advancedTexture = G.AdvancedDynamicTexture.CreateFullscreenUI("myUI", true, scene);
     advancedTexture.rootContainer.scaleX = window.devicePixelRatio;
     advancedTexture.rootContainer.scaleY = window.devicePixelRatio;

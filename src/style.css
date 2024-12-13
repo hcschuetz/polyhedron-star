@@ -1,46 +1,72 @@
 :root {
-	font-family: 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', 'Trebuchet MS', Arial, sans-serif;
-}
+  font-family: Arial, Helvetica, sans-serif;
+  --canvas-background: #224;
+  /* A lighter version of --canvas-background to compensate that the same color
+   * appears darker on small areas (in front of white background). */
+   --accent: #336;
+  }
 
 body {
-	margin: 0;
-	padding: 8px;
+  margin: 0;
+  padding: 8px;
 }
 
 .rows {
-	max-width: 800px;
-	display: flex;
-	flex-flow: column;
-	align-items: stretch;
-	gap: 8px;
+  max-width: 800px;
+  display: flex;
+  flex-flow: column;
+  align-items: stretch;
+  gap: 8px;
 }
 
 .flex-row {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	column-gap: 1em;
-}
-
-label {
-	display: inline-block;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 1em;
 }
 
 input {
-	margin: 0;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+button, select {
+  margin: 0;
+  border: none;
+  border-radius: 3px;
+  padding: 2px 4px 3px;
+  background-color: var(--accent);
+  color: white;
+  &:hover {
+    opacity: 80%;
+  }
+  font-family: inherit;
+  font-size: 100%;
+}
+
+select {
+  padding-right: 0;
+}
+
+label {
+  display: flex;
+  gap: .25em;
+  align-items: center;
 }
 
 summary {
-	/* make it look similar to a link */
-	cursor: pointer;
-	text-decoration: underline;
+  /* make it look similar to a link */
+  cursor: pointer;
+  text-decoration: underline;
 
-	&:hover {
-		opacity: 60%;
-	}
+  &:hover {
+    opacity: 60%;
+  }
 }
 
 canvas {
-	width: 800px;
-	height: 800px;
+  width: 800px;
+  height: 800px;
+  background-color: var(--canvas-background);
 }
