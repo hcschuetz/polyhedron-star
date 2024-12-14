@@ -29,15 +29,15 @@ folding a star (with certain properties) to a polyhedron.
 ## How To Use It
 
 To get a first impression, have a look at the provided examples, which can be
-selected near the top of the page.
+selected below the text area.
 - The first example (based on the star from the Thurston paper)
   comes with explanatory comments.
-- Also various regular polyhedra are provided.
+- Also various (more or less) regular polyhedra are provided.
 
 You can edit an example and click the "run" button to see what manifold it
 generates.  (Caution: If you switch to another example, your edits will be lost.
 So it might be best to edit files in your favorite editor and to copy/paste them
-to the text area.)
+to the text area using the "paste" button.)
 
 Various inputs allow you to modify the graphic output.
 Most of them should be self-explanatory, but some notes might be helpful:
@@ -75,11 +75,13 @@ Use the
 [discussion area](https://github.com/hcschuetz/polyhedron-star/discussions)
 of this project (or even provide a pull request).
 <br>
-[TODO: Check if a discussion contribution can be written without a github account.
-Otherwise I need to find another way to receive shapes.]
+[TODO: I should check if a discussion contribution can be written without a
+Github account.  Otherwise I need to find another way to receive shapes.]
 
 
-## Edges Across Star Gaps
+## Notes On The Inner Workings Of The Demo
+
+### Edges Across Star Gaps
 
 An edge between two inner vertices of the star is a line segment
 that is "straight" according to some special metric.  That metric
@@ -88,7 +90,7 @@ says that you can jump over a gap to the corresponding point on the other side
 angle to one side of the gap has to leave it with the same angle to the
 opposite side of the gap.
 
-I do not require an edge specification to locate the intersection points
+An edge specification does not locate the intersection points
 between an edge and the gap sides.  So how do we find the intersection points?
 
 It is probably easiest to understand with an example:
@@ -117,9 +119,59 @@ The implemented algorithm essentially simulates this pencil & paper & ruler
 approach by applying rotations around the inner vertices of the crossed gaps.
 
 
-## The Constraint Solver
+### Vertices And Vertex Positions
 
-The polyhedron geometry depends on the lengths of the edges you specified.
+We have three kinds of vertices:
+- Vertices of the initial polygon.  These are also tips of the star.
+  They should coincide when the star is folded to a polygon.
+  In the demo they are painted red if you check the "vertices" checkbox.
+- Apices of the gaps.  These are the inner nodes of the star.
+  Blue in the demo.
+- Crossings between edges and the star boundary.
+  They come in pairs since an edge entering a gap will leave it
+  on the other side.
+  When folding the star, the vertices of a pair should coincide.
+  Green in the demo.
+
+For each vertex we store three kinds of positions:
+- The "2D position" tells where the vertex is in the flat star.
+- The "3D position" tells where it is in the (partially) folded polyhedron.
+- Now notice that all the vertices are placed on the star boundary.
+  So a "1D position" can locate a vertex with a single real number.
+
+The 1D positions could be distances along the boundary from some start point.
+But we actually use a different value:
+- The (blue) inner vertices have even 1D positions 0, 2, 4, ...
+- The (red) outer vertices have odd 1D positions 1, 3, 5, ...
+- The (green) crossing vertices have non-integer 1D positions
+  that are interpolated between their inner and outer neighbors.
+
+While this is not geometrically accurate, it is correct from a topological
+viewpoint.
+We use it to determine the topology of the star subdivision by the edge segments.
+In the Thurston example of the demo this helps us to figure out that
+edge `i-a` crosses gap `k` closer to the inner vertex `k` than edge `j-a` does.
+
+And a more technical note:
+While 1D and 2D positions are stored as vertex properties, 3D positions are
+stored separately.
+This allows us to deal with "hypothetical" vertex placements.
+We use this in the constraint solver (see below)
+and for positioning vertices in a partially bent manifold.
+
+
+### The Constraint Solver
+
+The 3D polyhedron geometry depends on the lengths of the edges you specified.
+It is constructed just from the edge lengths
+- between inner vertices and
+- between inner and outer vertices.
+
+The crossing vertices can be computed afterwards
+by interpolation between the neighboring inner and outer vertex,
+using the 1D positions.
+
+#### Closed-Form Solver
 
 For specific situations there are closed-form solutions.
 Consider a tetrahedron with 6 given edge lengths.  You can proceed like this.
@@ -142,9 +194,11 @@ And for a regular polyhedron you can simply look up the dihedral angle in
 Wikipedia and subtract it from 180°.
 (That's what I did for some of the examples.)
 
+#### Iterative Solver
+
 But I am not aware of a closed-form approach for the general case.
 So I implemented an approximation method for our constraint problem.
-It first tries to find a set of vertex positions such that each
+It first tries to find a set of (3D) vertex positions such that each
 given edge length fits with the distance between the positions of
 the two ends of the edge.
 Then it simply "measures" the angles trigonometrically using the `atan2` function.
