@@ -62,7 +62,12 @@ export function App() {
       />
     </label>
   );
-  return (
+  return (<>
+    <h1>Folding a Star to a Polyhedron</h1>
+    <p>
+      For a description of this demo see {}
+      <a href="https://github.com/hcschuetz/polyhedron-star">the project README</a>.
+    </p>
     <div class="rows">
       <textarea value={task} onChange={e => setTask(e.currentTarget.value)} rows={20} />
       <div>
@@ -124,7 +129,7 @@ export function App() {
       </div>
       <canvas ref={canvas}/>
     </div>
-  );
+  </>);
 }
 
 render(<App />, document.getElementById('app'));

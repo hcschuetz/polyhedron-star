@@ -1,15 +1,16 @@
 # Polyhedron Star
 
-This demo shows how polyhedra can be constructed by folding certain star-shaped
+[This demo](https://hcschuetz.github.io/polyhedron-star/dist/)
+shows how polyhedra can be constructed by folding certain star-shaped
 polygons.
-For the math background see
+(For the math background see
 [this paper](https://arxiv.org/pdf/math/9801088) by William P. Thurston
 (in particular section 7)
 and
 [these](https://johncarlosbaez.wordpress.com/2024/10/25/triangulations-of-the-sphere/)
 blog
 [posts](https://johncarlosbaez.wordpress.com/2024/10/30/triangulations-of-the-sphere-part-2/)
-by John Carlos Baez.
+by John Carlos Baez.)
 
 
 ## What It Does
