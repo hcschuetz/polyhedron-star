@@ -16,15 +16,22 @@
   },
   // But with different edges we get a different shape, resembling an origami
   // lampshade.
-  // - The constraint solver converges quite slowly.  Is the shape actually
-  //   completely determined by topology + edge lengths?  Or can we pull the
-  //   two "poles" apart resulting in a longer and slimmer shape?
-  // - The bending angles look like precise values, but actually the
-  //   constraint solver modifies them slightly.
-  // - An interesting observation: If you replace the five 120° angles to 140°,
-  //   the solver will find a solution with rotational symmetry order 4 rather
-  //   than 5.  Some edges near the pole-to-pole cut (= gap "a") get 180° bends
-  //   ensuring that the gap closes properly.
+  // - The given bending angles (120°, -60°, 108°) look like precise values,
+  //   but actually the constraint solver modifies them slightly.
+  // - The constraint solver converges relatively slowly.
+  //   I suspected that the shape might not be completely determined by
+  //   topology + edge lengths and that we could pull the two "poles" apart
+  //   resulting in a longer and slimmer shape.  But some experimentation
+  //   showed that the constraint system is actually not underconstrained.
+  //   (I added varying distance constraints between the poles
+  //   by a hack directly in the code.  This turned out to prohibit convergence
+  //   towards a solution, unless the given length was the one that the solver
+  //   already found without the extra constraint.)
+  // - An interesting observation:
+  //   If you change the five 120° angles below to 140°, the solver will find
+  //   a solution with rotational symmetry order 4 rather than 5.  Some edges
+  //   near the pole-to-pole cut (= gap "a") get 180° bends ensuring that the
+  //   gap closes properly.
   edges: [
     "c", "e", "g", "i", "k",
     "b", "d", "f", "h", "j",
