@@ -125,7 +125,9 @@ export default function computeBends(
         // but we compute and log it for curiosity:
         const otherNormal = faceNormal(twin.next.twin.loop);
         const measured = directedAngle(normal, otherNormal, vec(he));
-        console.log(`${twin.to.name.padEnd(5)} -- ^    :      -     => ${(
+        console.log(`${twin.to.name.padEnd(5)} -- ^    : ${
+          vec(he).length().toFixed(3)
+        },      -     => ${(
           measured * (360/TAU)).toFixed(5).padStart(9)
         }°`);
       }
@@ -134,6 +136,8 @@ export default function computeBends(
     const twinNormal = faceNormal(twin.loop);
     const measured = directedAngle(normal, twinNormal, vec(he));
     console.log(`${twin.to.name.padEnd(5)} -- ${he.to.name.padEnd(5)}: ${
+      vec(he).length().toFixed(3)
+    }, ${
       (he.userBend * (360/TAU)).toFixed(5).padStart(9)
     }° => ${(
       measured * (360/TAU)).toFixed(5).padStart(9)
