@@ -26,7 +26,7 @@ This application performs the inverse operation:
 folding a star (with certain properties) to a polyhedron.
 
 
-## HOWTO
+## How To Use It
 
 To get a first impression, have a look at the provided examples, which can be
 selected near the top of the page.
@@ -42,7 +42,7 @@ to the text area.)
 Various inputs allow you to modify the graphic output.
 Most of them should be self-explanatory, but some notes might be helpful:
 - Some objects can be switched on and off with checkboxes.  But "breaks"
-  and the "flower" anyway not visible when the polyhedron is fully folded.
+  and the "flower" are anyway not visible when the polyhedron is fully folded.
   They are intended for use with the flat star.
 - Instead of dihedral angles between faces I use "bending angles",
   which are easier to work with.
@@ -54,9 +54,9 @@ Most of them should be self-explanatory, but some notes might be helpful:
 
   Bending angles are signed, indicating whether the ant rotates upward or downward.
   (Notice that the sign does not depend on the direction in which the ant
-  crosses the edge.  But it does depend on the side of the polygon surface
-  on which it walks.  So we need to define one side of our star or polyhedron
-  as the "ant walking side".)
+  crosses the edge.  But it does depend on the side of the surface
+  on which it walks.  So we have to consistently treat one side of our star or
+  polyhedron as the "ant walking side".)
 
   The bending slider allows you to scale the bending angles between 0 and 100%
   to give a smooth transformation from the star to the polyhedron.
