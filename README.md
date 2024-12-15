@@ -150,7 +150,7 @@ While this is not geometrically accurate, it is correct from a topological
 viewpoint.
 We use it to determine the topology of the star subdivision by the edge segments.
 In the Thurston example of the demo this helps us to figure out that
-edge `i-a` crosses gap `k` closer to the inner vertex `k` than edge `j-a` does.
+edge `i a` crosses gap `k` closer to the inner vertex `k` than edge `j a` does.
 
 And a more technical note:
 While 1D and 2D positions are stored as vertex properties, 3D positions are
@@ -210,7 +210,7 @@ The vertex positions are defined iteratively.
 - Now each iteration step works as follows:
   - For each edge $pq$ with given length $l$ compute a "force"
 
-    $$({l-|q-p|}){q-p\over|q-p|}$$
+    $$\left({l-\left|q-p\right|}\right){q-p\over\left|q-p\right|} = \left({{l\over\left|q-p\right|}-1}\right) \left(q-p\right)$$
 
     acting on $q$
     and the opposite force on $p$.
