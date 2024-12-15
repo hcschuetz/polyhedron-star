@@ -76,8 +76,7 @@ Use the
 [discussion area](https://github.com/hcschuetz/polyhedron-star/discussions)
 of this project (or even provide a pull request).
 <br>
-[TODO: I should check if a discussion contribution can be written without a
-Github account.  Otherwise I need to find another way to receive shapes.]
+[TODO: Find a way to receive shapes from people without a Github account.]
 
 
 ## Notes On The Inner Workings Of The Demo
@@ -210,15 +209,15 @@ The vertex positions are defined iteratively.
   Their initial positions are computed based on the provided bending angles.
 - Now each iteration step works as follows:
   - For each edge $pq$ with given length $l$ compute a "force"
-    ```math
-    \left({l-|q-p|}\right){q-p\over|q-p|}
-    ```
+
+    $$({l-|q-p|}){q-p\over|q-p|}$$
+
     acting on $q$
     and the opposite force on $p$.
   - For certain pairs $(p, q)$ of outer vertices compute a force
-    ```math
-    p-q
-    ```
+
+    $$p-q$$
+
     acting on $q$ and the opposite force on $p$.
     <br>
     Notes:
@@ -243,9 +242,9 @@ More remarks:
   lengths.  Or think of a regular icosahedron with one vertex pushed inward to
   make it concave.  This is the reason why some initial edge angles are needed.
 - The position and attitude of the polyhedron in 3D space is not determined
-  by our constraints.  So the problem is underspecified.
-  But this is not a problem since we are anyway only interested
-  in the internal angles.
+  by our constraints.
+  But this is not a problem since we are only interested in the "internal"
+  geometry.
   Actually leaving the degrees of freedom for position and attitude
   unconstrained speeds up convergence.
 
