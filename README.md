@@ -177,7 +177,7 @@ For specific situations there are closed-form solutions.
 Consider a tetrahedron with 6 given edge lengths.  You can proceed like this.
 - Select one vertex $a$ and place it somewhere.
 - Select another vertex $b$ and place it somewhere on the sphere with center
-  $a$ and radius $|ab|$.  We call this $Sph(a, b)$.
+  $a$ and radius $|ab|$.  We call this sphere $Sph(a, b)$.
 - Select yet another vertex $c$ and place it somewhere on the intersection
   of the spheres $Sph(a,c)$ and $Sph(b,c)$.
 - Finally place the remaining vertex $d$ on the intersection of 
@@ -213,7 +213,7 @@ The vertex positions are defined iteratively.
       $$\left({l-\left|q-p\right|}\right){q-p\over\left|q-p\right|} = \left({{l\over\left|q-p\right|}-1}\right) \left(q-p\right)$$
 
     acting on $q$
-    and the opposite force on $p$.
+    and the opposite force acting on $p$.
   - For certain pairs $(p, q)$ of outer vertices compute a force
 
       $$p-q$$
@@ -233,7 +233,7 @@ The vertex positions are defined iteratively.
 
 The algorithm is quite ad-hoc and could be investigated theoretically.
 Or it might be replaced by something more theoretically sound.
-But it turned out to converge on my examples quite fast (< 30ms on a
+But it turned out to converge quite fast on my examples (< 30ms on a
 not-so-new and non-high-end laptop).
 
 More remarks:
