@@ -1,3 +1,4 @@
+import 'es-iterator-helpers/auto'; // shims for Safari
 import * as B from '@babylonjs/core';
 import { Vector2 as V2, Vector3 as V3 } from '@babylonjs/core';
 import * as G from '@babylonjs/gui';
