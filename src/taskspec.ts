@@ -53,9 +53,7 @@ export type DisplaySettings = Partial<{
 }>;
 
 export type Task = {
-  name: string,
   // Consistency:
-  // - Gap names should be unique in a star.
   // - Angle deficits should add up to a value between 360 and 720 degrees
   //   (TAU to 2*TAU).
   // - The steps should return to the beginning.
