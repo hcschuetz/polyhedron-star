@@ -78,7 +78,6 @@ export default function renderToCanvas(
       const bend = parts.pop();
       const to = parts.pop();
       e = {from, to, through: parts, bend}
-      console.log(JSON5.stringify(e))
     }
     if (typeof e === "string") {
       const index = gapIndex.get(e);
@@ -126,12 +125,12 @@ export default function renderToCanvas(
         const [np, nq, d] = intersectLineSegments(inner, outer, fromPos, toPosRotated);
         const lambda_p = np / d;
         const lambda_q = nq / d;
-        if (lambda_p < 1e-8 || lambda_p > 1 - 1e-8) console.error(
-          `edge ${from}-${to} does not pass through gap ${through[i]}`
-        );
-        if (lambda_q < 1e-8 || lambda_q > 1 - 1e-8) console.error(
-          `edge ${from}-${to} does not reach gap ${through[i]}`
-        );
+        if (lambda_p < 1e-8 || lambda_p > 1 - 1e-8) {
+          throw `edge ${from}-${to} does not pass through gap ${through[i]}`;
+        }
+        if (lambda_q < 1e-8 || lambda_q > 1 - 1e-8) {
+          throw `edge ${from}-${to} does not reach gap ${through[i]}`;
+        }
         const pivot = primaryVertices[2*index];
         const v0: Vertex = {
           name: `${fromVertex.name}<${toVertex.name}#${pivot.name}`,
@@ -196,7 +195,7 @@ export default function renderToCanvas(
     subfaces.push(loop);
 
     let heTmp = he, count = 0;
-    loopSetupLoop: do {
+    do {
       loopName += " -- " + heTmp.to.name;
       let nextAngle = Number.POSITIVE_INFINITY;
       let nextHE: HalfEdge;
@@ -210,7 +209,7 @@ export default function renderToCanvas(
       heTmp.next = nextHE;
       nextHE.loop = loop;
       heTmp = nextHE;
-      if (++count > 50) {console.error("runaway iteration"); break loopSetupLoop;}
+      if (++count > 50) { throw "runaway iteration"; }
     } while (heTmp !== he);
     loop.name = loopName;
   }
@@ -593,7 +592,7 @@ export default function renderToCanvas(
     }
 
   } catch(error) {
-    console.error(`In renderToCanvas(...):`, error)
+    console.error(`In renderToCanvas(...): ${error}`);
   } finally {
     return cleanup;
   }

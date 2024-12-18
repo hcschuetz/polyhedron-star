@@ -159,7 +159,7 @@ export default function computeBends(
       for (let j = i+1; j < segments.length; j++) {
         const seg_j = segments[j];
         const diff = Math.abs(seg_i.computedBend - seg_j.computedBend);
-        if (diff > 1e-8) console.error(
+        if (diff > 1e-8) console.warn(
           `computed bend angles for edge segments differ by`,
           diff.toExponential(3),
           `\n  ${seg_i.twin.to.name} - ${seg_i.to.name}: ${seg_i.computedBend}` +

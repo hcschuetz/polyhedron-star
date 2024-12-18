@@ -58,7 +58,11 @@ export function App() {
         return;
       }
       setErrors([]);
-      return renderToCanvas(canvas.current, validity.output, signals);
+      try {
+        return renderToCanvas(canvas.current, validity.output, signals);
+      } catch (e) {
+        setErrors([`Exception caught: ${e}`]);
+      }
     }, [count],
   );
 
