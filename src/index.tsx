@@ -1,17 +1,21 @@
 import { render } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { Signal, useSignal } from '@preact/signals';
+import JSON5 from 'json5';
+import * as V from 'valibot';
 
 import './style.css';
 import { examples } from './examples';
 import renderToCanvas, { Signals } from './renderToCanvas';
 import { grid3Features, grids, GridType } from './tiling';
+import { validateTask } from './validation';
 
 
 export function App() {
   const [exampleIdx, setExampleIdx] = useState(0);
   const [task, setTask] = useState(examples[exampleIdx].value.trim());
   const [count, setCount] = useState(0); // just to trigger canvas updates
+  const [errors, setErrors] = useState<string[]>([]);
   const signals: Signals = {
     vertices: useSignal(false),
     labels: useSignal(true),
@@ -38,13 +42,29 @@ export function App() {
   const canvas = useRef<HTMLCanvasElement>();
 
   useEffect(
-    () => renderToCanvas(canvas.current, task, signals),
-    [count],
+    () => {
+      let parsedTask: unknown;
+      try {
+        parsedTask = JSON5.parse(task);
+      } catch (e) {
+        setErrors(["Could not parse JSON5: " + e]);
+        return;
+      }
+      const validity = validateTask(parsedTask);
+      if (!validity.success) {
+        setErrors(validity.issues.map(issue =>
+          `${issue.message}\nPath: ${V.getDotPath(issue)}`
+        ));
+        return;
+      }
+      setErrors([]);
+      return renderToCanvas(canvas.current, validity.output, signals);
+    }, [count],
   );
 
   function saveAndRun(text: string) {
     setTask(text);
-    // Trigger a renderToCanvas.  (We call it indirectly so that
+    // Trigger a renderToCanvas.  (We do it indirectly so that
     // useEffect's cleanup calls take place.)
     setCount(c => c+1);
   }
@@ -69,7 +89,15 @@ export function App() {
       <a href="https://github.com/hcschuetz/polyhedron-star">the project README</a>.
     </p>
     <div class="rows">
-      <textarea value={task} onChange={e => setTask(e.currentTarget.value)} rows={20} />
+      <textarea
+        rows={20} spellcheck={false}
+        value={task} onChange={e => setTask(e.currentTarget.value)}
+      />
+      {errors.length > 0 && (
+      <ul class="errors">
+        {errors.map(issue => <li>{issue}</li>)}
+      </ul>
+      )}
       <div>
         Edit the spec above
         and <button onClick={() => setCount(c => c+1)}>run</button> it,

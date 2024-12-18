@@ -91,7 +91,9 @@ export const stepOffsets: Record<ShortStep, V2> = {
   "n"  : v2( 0     ,  1     ),
   "w"  : v2(-1     ,  0     ),
   "s"  : v2( 0     , -1     ),
-}
+};
+
+export const shortSteps = Object.keys(stepOffsets) as ShortStep[];
 
 const shortStepToV2 = (s: ShortStep): V2 =>
   stepOffsets[s] ?? fail(`unexpected step: "${s}"`);

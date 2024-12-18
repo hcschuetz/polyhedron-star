@@ -28,15 +28,9 @@ export type Signals = {
 
 export default function renderToCanvas(
   canvas: HTMLCanvasElement,
-  taskString: string,
+  task: Task,
   signals: Signals,
 ) {
-  const task: Task = JSON5.parse(taskString);
-
-  // TODO type-check task
-
-  // ---------------------------------------------------------------------------
-
   const gaps = Object.entries(task.starGaps).map(([name, gap]) => {
     if (typeof gap === "string") {
       // expand abbreviated notation:

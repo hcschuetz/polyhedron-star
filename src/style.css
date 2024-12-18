@@ -19,6 +19,16 @@ body {
   gap: 8px;
 }
 
+.errors {
+  margin: 0;
+  padding: 0;
+  padding-left: 1em;
+  color: #c00;
+  & > li {
+    white-space-collapse: preserve-breaks;
+  }
+}
+
 .flex-row {
   display: flex;
   flex-wrap: wrap;

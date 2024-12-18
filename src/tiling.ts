@@ -126,7 +126,7 @@ export const drawTile3: DrawTile = (ctx, width, height, features) => {
     }
   }
   ctx.restore();
-}
+};
 
 
 function drawTile4(ctx: B.ICanvasRenderingContext, width: number, height: number) {
@@ -175,8 +175,7 @@ export const grids: Record<GridType, GridDef> = {
     drawTile: drawTile4,
     uvFunc: ({x, y}) => [(x+y)/2, (x-y)/2],
   },
-}
-
+};
 
 export type GridType =
 | "none"
@@ -184,10 +183,12 @@ export type GridType =
 | "quad" | "quad diagonal"
 ;
 
+export const gridTypes = Object.keys(grids) as GridType[];
+
 export type GridSignals = {
   grid: Signal<GridType>,
   grid3: Record<Grid3Feature, Signal<boolean>>,
-}
+};
 
 export function makeTexture(signals: GridSignals): B.DynamicTexture {
   const {tileRatio, drawTile} = grids[signals.grid.value];
