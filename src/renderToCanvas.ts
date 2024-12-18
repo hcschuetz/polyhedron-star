@@ -316,7 +316,17 @@ export default function renderToCanvas(
   const scene = new B.Scene(engine);
   const renderScene = () => scene.render()
   const resizeEngine = () => engine.resize();
+
+  const effectDisposers: (() => void)[] = [];
+
+  function disposableEffect(fn: () => void): void {
+    effectDisposers.push(effect(fn));
+  }
+
   const cleanup = () => {
+    for (const dispose of effectDisposers.reverse()) {
+      dispose();
+    }
     window.removeEventListener("resize", resizeEngine);
     engine.stopRenderLoop(renderScene);
     engine.dispose();
@@ -355,7 +365,7 @@ export default function renderToCanvas(
       backFaceCulling: false,
     }, scene);
 
-    effect(() => {
+    disposableEffect(() => {
       faceMaterial.diffuseTexture?.dispose(); // Is this needed?
       faceMaterial.diffuseTexture = makeTexture(signals);
     });
@@ -390,7 +400,7 @@ export default function renderToCanvas(
         pos1DMod2 === 1 ? "outer" :
         "secondary";
       const instance = vertexPatterns[patternName].createInstance(v.name);
-      effect(() => {
+      disposableEffect(() => {
         instance.position = pos3DMapSignal.value.get(v);
         instance.setEnabled(signals.vertices.value);
         // Or use this:?
@@ -401,11 +411,11 @@ export default function renderToCanvas(
       if (i % 2 !== 0) return;
       {
         const labelPos = new B.TransformNode("labelPos" + i, scene);
-        effect(() => {
+        disposableEffect(() => {
           labelPos.position = pos3DMapSignal.value.get(v);
         });
         const label = new G.TextBlock("label" + i, v.name);
-        effect(() => { label.isVisible = signals.labels.value; });
+        disposableEffect(() => { label.isVisible = signals.labels.value; });
         label.color = "#fff";
         label.fontSize = 16;
         label.linkOffsetY = -10;
@@ -421,6 +431,7 @@ export default function renderToCanvas(
           20,
         ),
         show: signals.flower,
+        disposableEffect,
       }, {
         material: flowerMaterial
       }, scene);
@@ -433,6 +444,7 @@ export default function renderToCanvas(
           pos3DMapSignal.value.get(cut.to)
         ],
         show: signals.cuts,
+        disposableEffect,
       }, {
         material: cutMaterial,
       }, scene);
@@ -445,7 +457,8 @@ export default function renderToCanvas(
             pos3DMapSignal.value.get(from),
             pos3DMapSignal.value.get(to),
           ],
-          show: signals.edges
+          show: signals.edges,
+          disposableEffect,
         }, {
           material: edgeMaterial,
         }, scene);
@@ -462,6 +475,7 @@ export default function renderToCanvas(
             10
           ),
           show: signals.breaks,
+          disposableEffect,
         }, {
           material: breakMaterial,
         }, scene);
@@ -471,8 +485,8 @@ export default function renderToCanvas(
       const mesh = Object.assign(new B.Mesh("faces", scene), {
         material: faceMaterial,
       });
-      effect(() => { mesh.setEnabled(signals.faces.value);  });
-      effect(() => {
+      disposableEffect(() => { mesh.setEnabled(signals.faces.value);  });
+      disposableEffect(() => {
         const {uvFunc} = grids[signals.grid.value];
 
         const positions = new Array<number>();
@@ -602,14 +616,15 @@ function dynamicTube(
     pathProvider: () => V3[],
     radius?: number,
     show: Signal<boolean>,
+    disposableEffect: (fn: () => void) => void,
   },
   props: Partial<B.Mesh>,
   scene: B.Scene,
 ) {
-  const {radius, pathProvider, show} = options;
+  const {radius, pathProvider, show, disposableEffect} = options;
   let instance: B.Mesh;
 
-  effect(() => {
+  disposableEffect(() => {
     try {
       instance = B.MeshBuilder.CreateTube(name, {
         updatable: true,
