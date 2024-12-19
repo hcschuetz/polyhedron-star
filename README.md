@@ -75,7 +75,7 @@ list of examples.
 You can
 - use the [discussion area](https://github.com/hcschuetz/polyhedron-star/discussions)
   of this project (or even provide a pull request)
-- or send it to my Mastodon account @hcschuetz@mastodon.social.
+- or send it to my Mastodon account `@hcschuetz@mastodon.social`.
 
 
 ## Notes On The Inner Workings Of The Demo
