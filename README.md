@@ -72,11 +72,10 @@ Most of them should be self-explanatory, but some notes might be helpful:
 
 If you have an interesting shape, let me know so I can include it in the
 list of examples.
-Use the
-[discussion area](https://github.com/hcschuetz/polyhedron-star/discussions)
-of this project (or even provide a pull request).
-<br>
-[TODO: Find a way to receive shapes from people without a Github account.]
+You can
+- use the [discussion area](https://github.com/hcschuetz/polyhedron-star/discussions)
+  of this project (or even provide a pull request)
+- or send it to my Mastodon account @hcschuetz@mastodon.social.
 
 
 ## Notes On The Inner Workings Of The Demo
