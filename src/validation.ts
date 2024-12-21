@@ -38,14 +38,14 @@ const sDisplaySettings = V.partial(V.object({
   autobend: V.boolean(),
   grid: V.picklist(gridTypes),
   density: V.number(),
-  grid3: V.object(Object.fromEntries([
+  grid3: V.partial(V.object(Object.fromEntries([
     ...grid3Features.map(f => [f, V.boolean()]),
     ["background", V.picklist(grid3Backgrounds)],
-  ])),
-  grid4: V.object(Object.fromEntries([
+  ]))),
+  grid4: V.partial(V.object(Object.fromEntries([
     ...grid4Features.map(f => [f, V.boolean()]),
     ["background", V.picklist(grid4Backgrounds)],
-  ])),
+  ]))),
 }));
 
 const sTask = V.object({
