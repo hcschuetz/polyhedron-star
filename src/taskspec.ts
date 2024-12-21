@@ -1,6 +1,6 @@
 import { Vector2 as V2 } from '@babylonjs/core';
 import { fail } from './utils';
-import { Grid3Feature, GridType } from './tiling';
+import { Grid3Background, Grid3Feature, Grid4Background, Grid4Feature, GridType } from './tiling';
 
 
 const v2 = (x?: number , y?: number) => new V2(x, y);
@@ -49,7 +49,8 @@ export type DisplaySettings = Partial<{
   autobend: boolean,
   grid: GridType,
   density: number,
-  grid3: Partial<Record<Grid3Feature, boolean>>,
+  grid3: Partial<Record<Grid3Feature, boolean> & {background: Grid3Background}>,
+  grid4: Partial<Record<Grid4Feature, boolean> & {background: Grid4Background}>,
 }>;
 
 export type Task = {

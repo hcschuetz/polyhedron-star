@@ -1,7 +1,7 @@
 import * as V from 'valibot';
 
 import { shortSteps, Task } from './taskspec';
-import { grid3Features, gridTypes } from './tiling';
+import { grid3Backgrounds, grid3Features, grid4Backgrounds, grid4Features, gridTypes } from './tiling';
 
 
 const sStep = V.union([
@@ -38,7 +38,14 @@ const sDisplaySettings = V.partial(V.object({
   autobend: V.boolean(),
   grid: V.picklist(gridTypes),
   density: V.number(),
-  grid3: V.record(V.picklist(grid3Features), V.boolean()),
+  grid3: V.object(Object.fromEntries([
+    ...grid3Features.map(f => [f, V.boolean()]),
+    ["background", V.picklist(grid3Backgrounds)],
+  ])),
+  grid4: V.object(Object.fromEntries([
+    ...grid4Features.map(f => [f, V.boolean()]),
+    ["background", V.picklist(grid4Backgrounds)],
+  ])),
 }));
 
 const sTask = V.object({

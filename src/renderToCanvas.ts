@@ -2,7 +2,6 @@ import 'es-iterator-helpers/auto'; // shims for Safari
 import * as B from '@babylonjs/core';
 import { Vector2 as V2, Vector3 as V3 } from '@babylonjs/core';
 import * as G from '@babylonjs/gui';
-import JSON5 from 'json5';
 
 import { assert, fail } from './utils';
 import { angleToRad, Task, stepToV2, Step } from './taskspec';
@@ -577,10 +576,10 @@ export default function renderToCanvas(
       if (grid3) {
         const grid3Signals = signals.grid3;
         const {
-          subTriangles, triangles, diamonds, hexagons1, hexagons2,
+          background, triangles, diamonds, hexagons1, hexagons2,
           arrows, ball, zigzag
         } = grid3;
-        setSignal(grid3Signals.subTriangles, subTriangles);
+        setSignal(grid3Signals.background, background);
         setSignal(grid3Signals.triangles, triangles);
         setSignal(grid3Signals.diamonds, diamonds);
         setSignal(grid3Signals.hexagons1, hexagons1);

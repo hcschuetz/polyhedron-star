@@ -102,7 +102,7 @@
     grid: "triangular even",
     density: 1,
     grid3: {
-      subTriangles: true,
+      background: "subTriangles",
       triangles: true,
       diamonds: false,
       hexagons1: false,
