@@ -7,6 +7,7 @@ import tile3a from './assets/tile3a.png';
 import tile4a from './assets/tile4a.png';
 import tile4b from './assets/tile4b.png';
 import tile4c from './assets/tile4c.png';
+import tile4d from './assets/tile4d.png';
 
 
 // It would be cool to also have M. C. Escher-style creatures.
@@ -70,6 +71,7 @@ const imgTile3a = new Image(); imgTile3a.src = tile3a;
 const imgTile4a = new Image(); imgTile4a.src = tile4a;
 const imgTile4b = new Image(); imgTile4b.src = tile4b;
 const imgTile4c = new Image(); imgTile4c.src = tile4c;
+const imgTile4d = new Image(); imgTile4d.src = tile4d;
 
 const grid3Painters: Record<Grid3Feature, (ctx: B.ICanvasRenderingContext) => void> = {
   triangles(ctx) {
@@ -177,6 +179,7 @@ export type Grid4Background =
 | "tiles A"
 | "tiles B"
 | "tiles C"
+| "tiles D"
 ;
 
 function drawImage4(ctx: B.ICanvasRenderingContext, img: HTMLImageElement) {
@@ -199,6 +202,10 @@ const grid4BackgroundPainters: Record<Grid4Background, (ctx: B.ICanvasRenderingC
   "tiles A"(ctx) { drawImage4(ctx, imgTile4a); },
   "tiles B"(ctx) { drawImage4(ctx, imgTile4b); },
   "tiles C"(ctx) { drawImage4(ctx, imgTile4c); },
+  "tiles D"(ctx) {
+    const {naturalWidth: nw, naturalHeight: nh} = imgTile4d;
+    ctx.drawImage(imgTile4d, 0, 0, nw, nh, 0, 0, 1, 1);
+  },
 };
 
 export const grid4Backgrounds = Obj.keys(grid4BackgroundPainters);
