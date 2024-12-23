@@ -277,7 +277,10 @@ const uScaleN = 1 / r3;
 export const grids: Record<GridType, GridDef> = {
   "none": {
     tileRatio: 1,
-    drawTile() {},
+    drawTile(ctx, width, height, features) {
+      ctx.fillStyle = "#dd0";
+      ctx.fillRect(0, 0, width, height);
+    },
     uvFunc: ({x, y}) => [x, y],
   },
   "triangular even": {
