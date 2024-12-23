@@ -28,5 +28,9 @@
   ],
   display: {
     grid: "quad", // try also "quad diagonal"
+    grid4: {
+      background: "tiles A",
+      quads: false,
+    },
   }
 }

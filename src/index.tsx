@@ -12,6 +12,17 @@ import { validateTask } from './validation';
 import { Obj } from './utils';
 
 
+const background3Names: Partial<Record<Grid3Background, string>> = {
+  tiles: "Alhambra tiles"
+}
+
+const background4Names: Partial<Record<Grid4Background, string>> = {
+  "tiles A": "Alhambra tiles A",
+  "tiles B": "Alhambra tiles B",
+  "tiles C": "Alhambra tiles C",
+  "tiles D": "Escher-style lizards",
+}
+
 export function App() {
   const [exampleIdx, setExampleIdx] = useState(0);
   const [task, setTask] = useState(examples[exampleIdx].value.trim());
@@ -168,7 +179,7 @@ export function App() {
             onChange={e => signals.grid3.background.value = e.currentTarget.value as Grid3Background}
           >
             {grid3Backgrounds.map(background =>
-              <option value={background}>{background}</option>
+              <option value={background}>{background3Names[background] ?? background}</option>
             )}
           </select></label>
           {grid3Features.map(ft => checkbox(ft, signals.grid3[ft]))}
@@ -182,7 +193,7 @@ export function App() {
             onChange={e => signals.grid4.background.value = e.currentTarget.value as Grid4Background}
           >
             {grid4Backgrounds.map(background =>
-              <option value={background}>{background}</option>
+              <option value={background}>{background4Names[background] ?? background}</option>
             )}
           </select></label>
           {grid4Features.map(ft => checkbox(ft, signals.grid4[ft]))}
