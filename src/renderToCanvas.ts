@@ -358,8 +358,10 @@ export default function renderToCanvas(
     }, scene);
 
     disposableEffect(() => {
-      faceMaterial.diffuseTexture?.dispose(); // Is this needed?
+      const oldTexture = faceMaterial.diffuseTexture;
       faceMaterial.diffuseTexture = makeTexture(signals);
+      // Disposing *after* setting the new texture to avoid flickering:
+      oldTexture?.dispose(); // Is this actually needed?
     });
 
     const flowerMaterial = standardMaterial("flowerMaterial", {
