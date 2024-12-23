@@ -19,8 +19,13 @@ export type Grid3Background =
 ;
 
 const grid3BackgroundPainters: Record<Grid3Background, (ctx: B.ICanvasRenderingContext) => void> = {
-  plain(ctx) { /* do nothing */ },
+  plain(ctx) {
+    ctx.fillStyle = "#dd0";
+    ctx.fillRect(0, 0, r3, 1);
+  },
   subTriangles(ctx) {
+    this.plain(ctx);
+
     ctx.fillStyle = "#cc0";
     ctx.beginPath();
     ctx.moveTo(  0   , 0  );
@@ -197,7 +202,8 @@ function drawImage4(ctx: B.ICanvasRenderingContext, img: HTMLImageElement) {
 
 const grid4BackgroundPainters: Record<Grid4Background, (ctx: B.ICanvasRenderingContext) => void> = {
   plain(ctx) {
-    // do nothing; the background has been painted by makeTexture(...); move this code here?
+    ctx.fillStyle = "#dd0";
+    ctx.fillRect(0, 0, 1, 1);
   },
   "tiles A"(ctx) { drawImage4(ctx, imgTile4a); },
   "tiles B"(ctx) { drawImage4(ctx, imgTile4b); },
@@ -301,8 +307,6 @@ export function makeTexture(signals: GridSignals): B.DynamicTexture {
   texture.wrapV = B.Constants.TEXTURE_WRAP_ADDRESSMODE;
 
   const ctx = texture.getContext();
-  ctx.fillStyle = "#dd0";
-  ctx.fillRect(0, 0, width, height);
   drawTile(ctx, width, height, signals);
 
   texture.update();
