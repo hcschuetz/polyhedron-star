@@ -559,22 +559,20 @@ export default function renderToCanvas(
         if (value !== undefined) signal.value = value;
       }
 
-      const {
-        vertices, labels, edges, cuts, faces, breaks, flower,
-        bending, autobend, grid, density, grid3, grid4,
-      } = task.display;
+      const {display} = task;
+      const {grid3, grid4} = display;
 
-      setSignal(signals.vertices, vertices);
-      setSignal(signals.labels, labels);
-      setSignal(signals.edges, edges);
-      setSignal(signals.cuts, cuts);
-      setSignal(signals.faces, faces);
-      setSignal(signals.breaks, breaks);
-      setSignal(signals.flower, flower);
-      setSignal(signals.bending, bending);
-      setSignal(signals.autobend, autobend);
-      setSignal(signals.grid, grid);
-      setSignal(signals.density, density);
+      setSignal(signals.vertices, display.vertices);
+      setSignal(signals.labels, display.labels);
+      setSignal(signals.edges, display.edges);
+      setSignal(signals.cuts, display.cuts);
+      setSignal(signals.faces, display.faces);
+      setSignal(signals.breaks, display.breaks);
+      setSignal(signals.flower, display.flower);
+      setSignal(signals.bending, display.bending);
+      setSignal(signals.autobend, display.autobend);
+      setSignal(signals.grid, display.grid);
+      setSignal(signals.density, display.density);
       if (grid3) {
         const grid3Signals = signals.grid3;
         setSignal(grid3Signals.background, grid3.background);
