@@ -561,7 +561,7 @@ export default function renderToCanvas(
 
       const {
         vertices, labels, edges, cuts, faces, breaks, flower,
-        bending, autobend, grid, density, grid3,
+        bending, autobend, grid, density, grid3, grid4,
       } = task.display;
 
       setSignal(signals.vertices, vertices);
@@ -577,18 +577,19 @@ export default function renderToCanvas(
       setSignal(signals.density, density);
       if (grid3) {
         const grid3Signals = signals.grid3;
-        const {
-          background, triangles, diamonds, hexagons1, hexagons2,
-          arrows, ball, zigzag
-        } = grid3;
-        setSignal(grid3Signals.background, background);
-        setSignal(grid3Signals.triangles, triangles);
-        setSignal(grid3Signals.diamonds, diamonds);
-        setSignal(grid3Signals.hexagons1, hexagons1);
-        setSignal(grid3Signals.hexagons2, hexagons2);
-        setSignal(grid3Signals.arrows, arrows);
-        setSignal(grid3Signals.ball, ball);
-        setSignal(grid3Signals.zigzag, zigzag);
+        setSignal(grid3Signals.background, grid3.background);
+        setSignal(grid3Signals.triangles, grid3.triangles);
+        setSignal(grid3Signals.diamonds, grid3.diamonds);
+        setSignal(grid3Signals.hexagons1, grid3.hexagons1);
+        setSignal(grid3Signals.hexagons2, grid3.hexagons2);
+        setSignal(grid3Signals.arrows, grid3.arrows);
+        setSignal(grid3Signals.ball, grid3.ball);
+        setSignal(grid3Signals.zigzag, grid3.zigzag);
+      }
+      if (grid4) {
+        const grid4Signals = signals.grid4;
+        setSignal(grid4Signals.background, grid4.background);
+        setSignal(grid4Signals.quads, grid4.quads);
       }
     }
 
