@@ -86,7 +86,7 @@ export function App() {
     <label>
       {text + " "}
       <input type="checkbox"
-        checked={signal.value}
+        checked={signal}
         onChange={() => { signal.value = !signal.value; }}
       />
     </label>
@@ -137,14 +137,14 @@ export function App() {
           {"bending "}
           <input type="range" style="display: inline-block; vertical-align: middle;"
             min="0" max="1" step=".01"
-            value={(signals.bending.value).toFixed(2)}
+            value={signals.bending}
             onInput={e => signals.bending.value = Number.parseFloat(e.currentTarget.value)}
           />
         </label>
         {checkbox("autobend", signals.autobend)}
         <label>
           {"grid "}
-          <select value={signals.grid.value}
+          <select value={signals.grid}
             onChange={e => signals.grid.value = e.currentTarget.value as GridType}
           >
             {Obj.keys(grids).map(key => (
@@ -153,9 +153,9 @@ export function App() {
           </select>
         </label>
         <label>
-          density [{signals.density.value}]{" "}
+          density [{signals.density}]{" "}
           <input type="range" style="display: inline-block; vertical-align: middle;"
-            min="1" max="5" step="1" value={signals.density.value.toString()}
+            min="1" max="5" step="1" value={signals.density}
             onInput={e => signals.density.value = Number.parseInt(e.currentTarget.value)}
           />
         </label>
@@ -164,7 +164,7 @@ export function App() {
         <div className="flex-row">
           <span style={{textDecoration: "underline"}}>Triangular grid:</span>
           <label>background: <select
-            value={signals.grid3.background.value}
+            value={signals.grid3.background}
             onChange={e => signals.grid3.background.value = e.currentTarget.value as Grid3Background}
           >
             {grid3Backgrounds.map(background =>
@@ -178,7 +178,7 @@ export function App() {
         <div className="flex-row">
           <span style={{textDecoration: "underline"}}>Quad grid:</span>
           <label>background: <select
-            value={signals.grid4.background.value}
+            value={signals.grid4.background}
             onChange={e => signals.grid4.background.value = e.currentTarget.value as Grid4Background}
           >
             {grid4Backgrounds.map(background =>
