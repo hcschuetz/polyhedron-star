@@ -194,11 +194,11 @@ export type Grid4Background =
 | "tiles D"
 ;
 
-function drawImage4(ctx: B.ICanvasRenderingContext, img: HTMLImageElement) {
+// Mirroring (as opposed to rotating) hides small differences between
+// horizontal and vertical direction.
+function drawImage4mirror(ctx: B.ICanvasRenderingContext, img: HTMLImageElement) {
   const {naturalWidth: nw, naturalHeight: nh} = img;
   ctx.save();
-  // Mirroring (as opposed to rotating) hides small differences between
-  // horizontal and vertical direction:
   ctx.drawImage(img, 0, 0, nw, nh, 0, 0, 1/2, 1/2);
   ctx.translate(1, 0); ctx.scale(-1,1);
   ctx.drawImage(img, 0, 0, nw, nh, 0, 0, 1/2, 1/2);
@@ -209,42 +209,27 @@ function drawImage4(ctx: B.ICanvasRenderingContext, img: HTMLImageElement) {
   ctx.restore();
 };
 
+// Some patterns have rotational symmetry.
+function drawImage4rotate(ctx: B.ICanvasRenderingContext, img: HTMLImageElement) {
+  const {naturalWidth: nw, naturalHeight: nh} = img;
+  ctx.save();
+  for (let i = 0; i < 4; i++) {
+    ctx.drawImage(img, 0, 0, nw, nh, 0, 0, 1/2, 1/2);
+    ctx.translate(1, 0);
+    ctx.rotate(TAU/4);
+  }
+  ctx.restore();
+}
+
 const grid4BackgroundPainters: Record<Grid4Background, (ctx: B.ICanvasRenderingContext) => void> = {
   plain(ctx) {
     ctx.fillStyle = "#dd0";
     ctx.fillRect(0, 0, 1, 1);
   },
-  "tiles A"(ctx) { drawImage4(ctx, imgTile4a); },
-  "tiles B"(ctx) { drawImage4(ctx, imgTile4b); },
-  // The following two sub-tiles have been cut out differently.  So different
-  // rotation schemas are needed:
-  "tiles C"(ctx) {
-    const img = imgTile4c;
-    const {naturalWidth: nw, naturalHeight: nh} = img;
-    ctx.save();
-    // Rotating (as opposed to mirroring) keeps the cross-over/cross-under
-    // alternation.
-    for (let i = 0; i < 4; i++) {
-      ctx.drawImage(img, 0, 0, nw, nh, 0, 0, 1/2, 1/2);
-      ctx.translate(1, 0);
-      ctx.rotate(TAU/4);
-    }
-    ctx.restore();
-  
-  },
-  "tiles D"(ctx) {
-    const img = imgTile4d;
-    const {naturalWidth: nw, naturalHeight: nh} = img;
-    ctx.save();
-    // The lizards have rotational (not mirror) symmetry.
-    ctx.translate(0, 1/2);
-    for (let i = 0; i < 4; i++) {
-      ctx.drawImage(img, 0, 0, nw, nh, 0, 0, 1/2, 1/2);
-      ctx.translate(1/2, -1/2);
-      ctx.rotate(TAU/4);
-    }
-    ctx.restore();
-    },
+  "tiles A"(ctx) { drawImage4mirror(ctx, imgTile4a); },
+  "tiles B"(ctx) { drawImage4mirror(ctx, imgTile4b); },
+  "tiles C"(ctx) { drawImage4rotate(ctx, imgTile4c); },
+  "tiles D"(ctx) { drawImage4rotate(ctx, imgTile4d); },
 };
 
 export const grid4Backgrounds = Obj.keys(grid4BackgroundPainters);
