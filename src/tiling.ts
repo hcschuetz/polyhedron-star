@@ -9,6 +9,22 @@ import tile4c from './assets/tile4c.png';
 import tile4d from './assets/tile4d.png';
 
 
+// A single image element with changing `src` property would be more elegant.
+// But that requires asynchronously waiting for the resource to be loaded
+// before we can draw backgrounds and other features on top.
+// So I've tried to make larger parts of the code async, but there was still
+// a bug related to display-config updates from the tasks.
+// (Even if I found a fix for this, things would be too brittle.  It must be
+// ensured that updates involving an image change are not "overtaken" by updates
+// without an image change.  Furthermore the UX benefits from immediately
+// available images.)
+const imgTile3a = Object.assign(new Image(), {src: tile3a});
+const imgTile4a = Object.assign(new Image(), {src: tile4a});
+const imgTile4b = Object.assign(new Image(), {src: tile4b});
+const imgTile4c = Object.assign(new Image(), {src: tile4c});
+const imgTile4d = Object.assign(new Image(), {src: tile4d});
+
+
 export type Grid3Background =
 | "plain"
 | "subTriangles"
@@ -68,12 +84,6 @@ export type Grid3Feature =
 ;
 
 const r3 = Math.sqrt(3);
-
-const imgTile3a = new Image(); imgTile3a.src = tile3a;
-const imgTile4a = new Image(); imgTile4a.src = tile4a;
-const imgTile4b = new Image(); imgTile4b.src = tile4b;
-const imgTile4c = new Image(); imgTile4c.src = tile4c;
-const imgTile4d = new Image(); imgTile4d.src = tile4d;
 
 const grid3Painters: Record<Grid3Feature, (ctx: B.ICanvasRenderingContext) => void> = {
   triangles(ctx) {
