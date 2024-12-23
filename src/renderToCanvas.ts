@@ -6,7 +6,7 @@ import * as G from '@babylonjs/gui';
 import { assert, fail } from './utils';
 import { angleToRad, Task, stepToV2, Step } from './taskspec';
 import { arcPath, interpolateV2, intersectLineSegments, rotateAroundInPlace, TAU, UVFrame, v2, v3 } from './geom-utils';
-import { computed, effect, Signal } from '@preact/signals';
+import { batch, computed, effect, Signal } from '@preact/signals';
 import { Edge, EdgeBreak, HalfEdge, Loop, loopHalfEdges, makeSegment, Vertex } from './Shape';
 import computeBends from './computeBends';
 import { grids, makeTexture, GridSignals } from './tiling';
@@ -554,7 +554,7 @@ export default function renderToCanvas(
     // Or treat grid type and grid density as manifold properties rather than
     // display properties?  So they would no more be (GUI-modifiable) signals.
 
-    {
+    batch(() => {
       function setSignal<T>(signal: Signal<T>, value: T | undefined) {
         if (value !== undefined) signal.value = value;
       }
@@ -591,8 +591,7 @@ export default function renderToCanvas(
         setSignal(grid4Signals.background, grid4.background);
         setSignal(grid4Signals.quads, grid4.quads);
       }
-    }
-
+    });
   } catch(error) {
     console.error(`In renderToCanvas(...): ${error}`);
   } finally {
