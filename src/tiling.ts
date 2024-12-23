@@ -10,8 +10,6 @@ import tile4c from './assets/tile4c.png';
 import tile4d from './assets/tile4d.png';
 
 
-// It would be cool to also have M. C. Escher-style creatures.
-
 export type Grid3Background =
 | "plain"
 | "subTriangles"
