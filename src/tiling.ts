@@ -1,4 +1,3 @@
-import { Signal } from '@preact/signals';
 import * as B from '@babylonjs/core';
 
 import { Obj } from './utils';
@@ -140,13 +139,13 @@ export type DrawTile = (
   ctx: B.ICanvasRenderingContext,
   width: number,
   height: number,
-  signals: GridSignals,
+  config: GridConfig,
 ) => void;
 
 export const drawTile3: DrawTile = (ctx, width, height, features) => {
   ctx.save();
   ctx.scale(height, height);
-  grid3BackgroundPainters[features.grid3.background.value](ctx);
+  grid3BackgroundPainters[features.grid3.background](ctx);
   ctx.restore();
 
   ctx.save();
@@ -155,7 +154,7 @@ export const drawTile3: DrawTile = (ctx, width, height, features) => {
   ctx.strokeStyle = "#000";
 
   for (const [name, painter] of Obj.entries(grid3Painters)) {
-    if (!features?.grid3?.[name].value) continue;
+    if (!features?.grid3?.[name]) continue;
     for (const [x, y] of [
             [0,  2],
       [-r3,  1], [ r3,  1],
@@ -263,9 +262,9 @@ export const grid4Features = Obj.keys(grid4Painters);
 const drawTile4: DrawTile = (ctx, width, height, signals) => {
   ctx.save();
   ctx.scale(width, height);
-  grid4BackgroundPainters[signals.grid4.background.value](ctx);
+  grid4BackgroundPainters[signals.grid4.background](ctx);
   for (const [k, v] of Obj.entries(grid4Painters)) {
-    if (signals.grid4[k].value) {
+    if (signals.grid4[k]) {
       v(ctx);
     }
   }
@@ -316,14 +315,14 @@ export type GridType =
 
 export const gridTypes = Obj.keys(grids);
 
-export type GridSignals = {
-  grid: Signal<GridType>,
-  grid3: Record<Grid3Feature, Signal<boolean>> & {background: Signal<Grid3Background>},
-  grid4: Record<Grid4Feature, Signal<boolean>> & {background: Signal<Grid4Background>},
+export type GridConfig = {
+  grid: GridType,
+  grid3: Record<Grid3Feature, boolean> & {background: Grid3Background},
+  grid4: Record<Grid4Feature, boolean> & {background: Grid4Background},
 };
 
-export function makeTexture(signals: GridSignals): B.DynamicTexture {
-  const {tileRatio, drawTile} = grids[signals.grid.value];
+export function makeTexture(config: GridConfig): B.DynamicTexture {
+  const {tileRatio, drawTile} = grids[config.grid];
   const height = 1 << 8;
   const width = height * tileRatio;
   const texture = new B.DynamicTexture("grid", {width, height});
@@ -331,7 +330,7 @@ export function makeTexture(signals: GridSignals): B.DynamicTexture {
   texture.wrapV = B.Constants.TEXTURE_WRAP_ADDRESSMODE;
 
   const ctx = texture.getContext();
-  drawTile(ctx, width, height, signals);
+  drawTile(ctx, width, height, config);
 
   texture.update();
   return texture;

@@ -9,8 +9,35 @@ import { arcPath, interpolateV2, intersectLineSegments, rotateAroundInPlace, TAU
 import { batch, computed, effect, Signal } from '@preact/signals';
 import { Edge, EdgeBreak, HalfEdge, Loop, loopHalfEdges, makeSegment, Vertex } from './Shape';
 import computeBends from './computeBends';
-import { grids, makeTexture, GridSignals } from './tiling';
+import { Grid3Background, Grid3Feature, Grid4Background, Grid4Feature, GridConfig, grids, GridType, makeTexture } from './tiling';
 
+
+type GridSignals = {
+  grid: Signal<GridType>,
+  grid3: Record<Grid3Feature, Signal<boolean>> & {background: Signal<Grid3Background>},
+  grid4: Record<Grid4Feature, Signal<boolean>> & {background: Signal<Grid4Background>},
+};
+
+function gridSignalsToConfig(signals: GridSignals): GridConfig {
+  const {grid, grid3, grid4} = signals;
+  return {
+    grid: grid.value,
+    grid3: {
+      background: grid3.background.value,
+      triangles: grid3.triangles.value,
+      diamonds: grid3.diamonds.value,
+      hexagons1: grid3.hexagons1.value,
+      hexagons2: grid3.hexagons2.value,
+      arrows: grid3.arrows.value,
+      ball: grid3.ball.value,
+      zigzag: grid3.zigzag.value,
+    },
+    grid4: {
+      background: grid4.background.value,
+      quads: grid4.quads.value,
+    },
+  }
+}
 
 export type Signals = {
   bending: Signal<number>,
@@ -359,7 +386,7 @@ export default function renderToCanvas(
 
     disposableEffect(() => {
       const oldTexture = faceMaterial.diffuseTexture;
-      faceMaterial.diffuseTexture = makeTexture(signals);
+      faceMaterial.diffuseTexture = makeTexture(gridSignalsToConfig(signals));
       // Disposing *after* setting the new texture to avoid flickering:
       oldTexture?.dispose(); // Is this actually needed?
     });
