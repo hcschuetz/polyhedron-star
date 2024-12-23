@@ -318,7 +318,7 @@ export type GridConfig = {
 
 export function makeTexture(config: GridConfig): B.DynamicTexture {
   const {tileRatio, drawTile} = grids[config.grid];
-  const height = 1 << 8;
+  const height = 1 << 9;
   const width = height * tileRatio;
   const texture = new B.DynamicTexture("grid", {width, height});
   texture.wrapU = B.Constants.TEXTURE_WRAP_ADDRESSMODE;
