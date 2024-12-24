@@ -180,7 +180,7 @@ Consider a tetrahedron with 6 given edge lengths.  You can proceed like this.
 - Select yet another vertex $c$ and place it somewhere on the intersection
   of the spheres $Sph(a,c)$ and $Sph(b,c)$.
 - Finally place the remaining vertex $d$ on the intersection of 
-  $Sph(a,d)$, $Sph(b,d)$, and $Sph(c,cd)$.
+  $Sph(a,d)$, $Sph(b,d)$, and $Sph(c,d)$.
 
 For this you just have to solve some quadratic equations.
 Solutions do not exist for the quadratic equations if the spheres do not intersect.
