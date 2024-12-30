@@ -1,0 +1,41 @@
+// Hexagonal Prism #1
+// ------------------
+//
+// by Gerard Westendorp
+// https://github.com/hcschuetz/polyhedron-star/discussions/1
+{
+  starGaps: {
+    a: {angleDeficit: "60deg", steps: ["4h", "2h", "2h", "2h", "2h"]},
+    b: {angleDeficit: "60deg", steps: ["2h"]},
+    c: {angleDeficit: "60deg", steps: ["2h", "12h"]},
+    d: {angleDeficit: "60deg", steps: ["12h", "12h"]},
+    e: {angleDeficit: "60deg", steps: ["12h", "10h"]},
+    f: {angleDeficit: "60deg", steps: ["10h"]},
+    g: {angleDeficit: "60deg", steps: ["10h", "10h", "10h", "10h"]},
+    h: {angleDeficit: "60deg", steps: ["10h", "8h", "8h", "8h"]},
+    i: {angleDeficit: "60deg", steps: ["8h", "8h", "6h", "6h"]},
+    j: {angleDeficit: "60deg", steps: ["6h", "6h", "6h", "4h"]},
+    k: {angleDeficit: "60deg", steps: ["4h", "4h", "4h", "4h"]},
+  },
+  edges: [
+    "i",
+    {bend: "90deg", from: "b", to: "c"},
+    {bend: "90deg", from: "c", to: "d"},
+    {bend: "90deg", from: "d", to: "e"},
+    {bend: "90deg", from: "e", to: "f"},
+    {bend: "90deg", from: "a", to: "g"},
+    {bend: "90deg", from: "g", to: "h"},
+    {bend: "90deg", from: "h", to: "i"},
+    {bend: "90deg", from: "i", to: "j"},
+    {bend: "90deg", from: "j", to: "k"},
+    {bend: "90deg", from: "k", to: "a"},
+    {bend: "60deg", from: "a", to: "d"},
+    {bend: "60deg", from: "g", to: "e"},
+    {bend: "60deg", from: "k", to: "c", through: ["a"]},
+    {bend: "60deg", from: "f", to: "h", through: ["g"]},
+    {bend: "60deg", from: "j", to: "b", through: ["k", "a"]},
+  ],
+  display: {
+    grid: "triangular even",
+  },
+}

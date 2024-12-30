@@ -1,0 +1,72 @@
+// Hexagonal Prism #2
+// ------------------
+//
+// A variation of Gerard Westendorp's hexagonal prism #1
+{
+  // The star definition is as in #1, except that I am using the short-hand
+  // notation for gaps:
+  starGaps: {
+    a: "4h 2h 2h 2h 2h  60deg",
+    b: "2h              60deg",
+    c: "2h 12h          60deg",
+    d: "12h 12h         60deg",
+    e: "12h 10h         60deg",
+    f: "10h             60deg",
+    g: "10h 10h 10h 10h 60deg",
+    h: "10h 8h 8h 8h    60deg",
+    i: "8h 8h 6h 6h     60deg",
+    j: "6h 6h 6h 4h     60deg",
+    k: "4h 4h 4h 4h     60deg",
+  },
+  // The edge definitions differ from #1:
+  // - I am using the short-hand notation for edges.
+  // - I provide wrong initial bending angles just to see if the "autobend"
+  //   algorithm is able to fix them.  (It is.)
+  // - The 30 edges form a full triangulation with 20 triangular faces.
+  //   (The autobend algorithm needs the additional edge lengths since otherwise
+  //   the polyhedron shape is underspecified.)
+  edges: [
+    // Edges along cuts.  No bending angles to be given here.
+    "b", "c", "d", "e", "f", "h", "i", "j",
+
+    // Edges around the hexagons.  The bending angles will be 90°, but we
+    // pretend not know this and let the autobend algorithm start with 30°.
+    "b c 30deg",
+    "c d 30deg",
+    "d e 30deg",
+    "e f 30deg",
+    "a g 30deg",
+    "g h 30deg",
+    "h i 30deg",
+    "i j 30deg",
+    "j k 30deg",
+    "k a 30deg",
+
+    // Edges of the "barrel".  The bending angles will be 60°, but we will
+    // initialize the autobend algorithm with 30° again.
+    "a d     30deg",
+    "g e     30deg",
+    "k a c   30deg",
+    "f g h   30deg",
+    "j k a b 30deg",
+
+    // Auxiliary edges within the prism faces.  These ensure that the edges
+    // provide a full triangulation.  The bending angles will be 0°, but we will
+    // initialize the autobend algorithm with 30° again just to give it some
+    // challenge.
+    "a c   30deg",
+    "a e   30deg",
+    "a h   30deg",
+    "a i   30deg",
+    "a j   30deg",
+    "f g   30deg",
+    "k a b 30deg",
+  ],
+  display: {
+    edges: true,
+    cuts: true,
+    bending: 1,
+    autobend: true,
+    grid: "triangular even",
+  },
+}
