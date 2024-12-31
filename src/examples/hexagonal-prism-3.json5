@@ -1,0 +1,78 @@
+// Hexagonal Prism #3
+// ------------------
+//
+// This hexagonal prism is based on a more symmetric star shape.
+// (And it is less tall than the previous ones.)
+//
+// To achieve the symmetry, the cut center (where all the star tips coincide in
+// the folded polyhedron) is not placed on a vertex of the prism but in the
+// center of one of the hexagons.  Thus the star has 12 gaps with angle deficit
+// 60°.  The remaining angle deficit for the cut center is 0°, representing the
+// flatness of the manifold at this position.
+//
+// Unfortunately for a flat cut center the autobend algorithm converges slowly.
+// (To try this out, enable the last 15 edges below and set the bending angles
+// for all edges to some wrong initial value of, say, 30°.) But actually we do
+// not need to autobend since the correct angles are easy.
+{
+  starGaps: {
+    a: "12h 12h 10h 60°",
+    b: "10h         60°",
+    c: "10h 10h 8h  60°",
+    d: "8h          60°",
+    e: "8h 8h 6h    60°",
+    f: "6h          60°",
+    g: "6h 6h 4h    60°",
+    h: "4h          60°",
+    i: "4h 4h 2h    60°",
+    j: "2h          60°",
+    k: "2h 2h 12h   60°",
+    l: "12h         60°",
+  },
+  edges: [
+    "a c 90°",
+    "c e 90°",
+    "e g 90°",
+    "g i 90°",
+    "i k 90°",
+    "k a 90°",
+
+    "b c d 90°",
+    "d e f 90°",
+    "f g h 90°",
+    "h i j 90°",
+    "j k l 90°",
+    "l a b 90°",
+
+    "a b 60°",
+    "c d 60°",
+    "e f 60°",
+    "g h 60°",
+    "i j 60°",
+    "k l 60°",
+
+    // "a e 0°",
+    // "e i 0°",
+    // "i a 0°",
+
+    // "b c 0°",
+    // "d e 0°",
+    // "f g 0°",
+    // "h i 0°",
+    // "j k 0°",
+    // "l a 0°",
+
+    // "b", "d", "f", "h", "j", "l"
+  ],
+  display: {
+    edges: true,
+    cuts: true,
+    bending: 0,
+    autobend: false,
+    grid: "triangular even",
+    grid3: {
+      background: "subTriangles",
+      triangles: false, diamonds: false, hexagons1: false, hexagons2: false,
+    },
+  },
+}

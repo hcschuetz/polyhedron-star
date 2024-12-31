@@ -3,6 +3,7 @@ import icosahedron from "./examples/icosahedron.json5?raw";
 import wrinkledIcosahedron from "./examples/wrinkled-icosahedron.json5?raw";
 import hexagonalPrism1 from './examples/hexagonal-prism.json5?raw';
 import hexagonalPrism2 from './examples/hexagonal-prism-2.json5?raw';
+import hexagonalPrism3 from './examples/hexagonal-prism-3.json5?raw';
 import cube from "./examples/cube.json5?raw";
 import octahedron from "./examples/octahedron.json5?raw";
 import tetrahedron from "./examples/tetrahedron.json5?raw";
@@ -15,6 +16,7 @@ export const examples: {name: string, value: string}[] = [
   {name: "wrinkled icosahedron", value: wrinkledIcosahedron},
   {name: "hexagonal prism #1", value: hexagonalPrism1},
   {name: "hexagonal prism #2", value: hexagonalPrism2},
+  {name: "hexagonal prism #3", value: hexagonalPrism3},
   {name: "cube", value: cube},
   {name: "regular octahedron", value: octahedron},
   {name: "regular tetrahedron", value: tetrahedron},
