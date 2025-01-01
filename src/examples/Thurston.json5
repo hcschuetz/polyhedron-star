@@ -28,6 +28,9 @@
     // This example walks around the polygon in counter-clockwise direction.
     // You can also walk around in clockwise direction.  The direction used
     // here will be called the "positive" direction.
+    // [Update: It is easier to use the counter-clockwise direction.  Walking
+    // clockwise causes some more complications.  In particular angle-deficit
+    // values must be negative.]
     a: "12h 10h         60°",
     b: "10h             60°",
     c: "10h 10h 8h      60°",

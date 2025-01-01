@@ -173,7 +173,7 @@ using the 1D positions.
 #### Closed-Form Solver
 
 For specific situations there are closed-form solutions.
-Consider a tetrahedron with 6 given edge lengths.  You can proceed like this.
+Consider a tetrahedron with 6 given edge lengths.  You can proceed like this:
 - Select one vertex $a$ and place it somewhere.
 - Select another vertex $b$ and place it somewhere on the sphere with center
   $a$ and radius $|ab|$.  We call this sphere $Sph(a, b)$.
