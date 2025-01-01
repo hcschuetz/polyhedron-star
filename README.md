@@ -185,7 +185,8 @@ Consider a tetrahedron with 6 given edge lengths.  You can proceed like this:
 For this you just have to solve some quadratic equations.
 Solutions do not exist for the quadratic equations if the spheres do not intersect.
 
-This method is also applicable in more complex polyhedra at vertices of degree 3.
+This method is also applicable in more complex polyhedra with triangular faces
+at vertices of degree 3.
 And if you have a vertex of degree 4 where the bend angle for one adjacent edge
 is already known, then the solution is similar.  And so on.
 
