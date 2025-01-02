@@ -1,0 +1,81 @@
+// This one is based on the GIF in
+// https://mathstodon.xyz/@GerardWestendorp/113747350228343701.
+// I wrote it while Gerard was still struggling with autobend.
+// Now that we have Gerard's configuration, the example here is not really
+// needed.  And actually it is not even a proper "near-miss Johnson solid" as
+// it is slightly concave.
+//
+// But it still serves as an example with a large number of edge breaks.
+// With 11 gaps and 17 edge breaks it has 2*11 + 2*17 = 56 vertices.
+// Some loop in the code crashed after 50 iterations to prevent infinite loops
+// and an unresponsive browser.  To make this example work I increased
+// the iteration limit to 200.
+{
+  starGaps: {
+    a: "12h 10h 10h 60°",
+    b: "10h 8h      60°",
+    c: "8h 8h       60°",
+    d: "8h 6h 6h    60°",
+    e: "6h 4h       60°",
+    f: "4h          60°",
+    g: "4h 4h 2h    60°",
+    h: "2h          60°",
+    i: "2h 12h      60°",
+    j: "12h         60°",
+    k: "12h         60°",
+  },
+  edges: [
+
+    // These 120° bend angles are correct:
+    "e f      120°",
+    "g i      120°",
+    "k a b    120°",
+
+    // These bend angles are just rough guesses:
+    "b c       90°",
+    "c d e     90°",
+    "e d       90°",
+    "d g       90°",
+    "g a       90°",
+    "a b       90°",
+
+    "a c       30°",
+    "a d       30°",
+    "c d       30°",
+
+    "f g h     90°",
+    "h i       90°",
+    "i j       90°",
+    "j k       90°",
+    "k",
+    "f",
+
+    "h",
+    "j",
+    "h i j     30°",
+
+    // Hexagon diagonals should have bend angle 0° (but it's a near miss!):
+    "b c d e       0°",
+    "b c d e f     0°",
+    "k a b c d e f 0°",
+
+    "g k           0°",
+    "i k           0°",
+    "g a b         0°",
+
+    "e g           0°",
+    "f g i         0°",
+    "e g i         0°",
+  ],
+  display: {
+    bending: 1,
+    autobend: true,
+    edges: true,
+    breaks: true,
+    cuts: true,
+    grid: "triangular even",
+    grid3: {
+      background: "subTriangles",
+    },
+  },
+}

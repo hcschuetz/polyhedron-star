@@ -235,7 +235,7 @@ export default function renderToCanvas(
       heTmp.next = nextHE;
       nextHE.loop = loop;
       heTmp = nextHE;
-      if (++count > 50) { throw "runaway iteration"; }
+      if (++count > 200) { throw "runaway iteration"; }
     } while (heTmp !== he);
     loop.name = loopName;
   }

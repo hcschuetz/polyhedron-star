@@ -1,0 +1,60 @@
+// A near-miss Johnson solid
+// -------------------------
+//
+// Provided by Gerard Westendorp.  See
+// https://github.com/hcschuetz/polyhedron-star/discussions/2
+// and the Mastodon post
+// https://mathstodon.xyz/@GerardWestendorp/113747350228343701
+// or the entire thread at
+// https://phanpy.social/#/mastodon.social/s/113747350352271505?view=full
+{
+  starGaps: {
+    a: "10h 8h        60°",
+    b: "8h 8h         60°",
+    c: "8h 6h 6h      60°",
+    d: "6h 4h         60°",
+    e: "4h            60°",
+    f: "4h 4h 2h      60°",
+    g: "2h            60°",
+    h: "2h 12h        60°",
+    i: "12h           60°",
+    j: "12h           60°",
+    k: "12h 10h 10h   60°",
+
+  },
+  edges: [
+"g", "j", "b", "e", "i", 
+     "a b    70°",
+     "b c    35°",
+     "c f    70°",
+     "f k    70°",
+     "b k    30°",
+     "d e    100°",
+     "g h    70°",
+     "i j    70°",
+     "h i    70°",
+     "f h    100°",
+     "k i    5°",
+     "k a    70°",
+     "c d    70°",
+     "c k    30°",
+     "e f g  70°",
+     "j k a  100°",
+     "b c d  70°",
+     "c f g  5°",
+     "g h i  30°",
+
+// auxiliary edges for autobend
+
+     "k h   30°",
+     "k j   30°",
+     "c e   30°",
+     "f g   30°",
+     "b c d e   30°",
+     "j k a b   30°",
+
+  ],
+  display: {
+    grid: "triangular even",
+  }
+}
