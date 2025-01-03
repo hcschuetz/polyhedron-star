@@ -1,0 +1,64 @@
+// Hexagonal Antiprism
+// -------------------
+//
+// As in the "hexagonal prism #3", the cut center here is in the center of a
+// hexagonal face.  This simplified the modelling but slows down the convergence
+// of the constraint solver.
+{
+  starGaps: {
+    a: "12h     60°",
+    b: "12h 10h 60°",
+    c: "10h     60°",
+    d: "10h  8h 60°",
+    e: " 8h     60°",
+    f: " 8h  6h 60°",
+    g: " 6h     60°",
+    h: " 6h  4h 60°",
+    i: " 4h     60°",
+    j: " 4h  2h 60°",
+    k: " 2h     60°",
+    l: " 2h 12h 60°",
+  },
+  edges: [
+    "a", "c", "e", "g", "i", "k",
+
+    "a b c 30°",
+    "c d e 30°",
+    "e f g 30°",
+    "g h i 30°",
+    "i j k 30°",
+    "k l a 30°",
+
+    "b d 30°",
+    "d f 30°",
+    "f h 30°",
+    "h j 30°",
+    "j l 30°",
+    "l b 30°",
+
+    "a b 30°",
+    "b c 30°",
+    "c d 30°",
+    "d e 30°",
+    "e f 30°",
+    "f g 30°",
+    "g h 30°",
+    "h i 30°",
+    "i j 30°",
+    "j k 30°",
+    "k l 30°",
+    "l a 30°",
+
+    "b f 0°",
+    "f j 0°",
+    "j b 0°",
+  ],
+  display: {
+    bending: 1,
+    autobend: true,
+    grid: "triangular even",
+    grid3: {
+      triangles: true,
+    }
+  }
+ }
