@@ -313,5 +313,5 @@ In particular:
     Warnings about an inconsistency here are helpful
     but the absence of such a warning does not completely ensure a triangulation.
   - If you provide correct bending angles in the input,
-    autobend typically usually does not change them by a significant amount.
+    autobend usually does not change them by a significant amount.
     In this case you can ignore a warning about an unexpected number of edges.
