@@ -211,13 +211,13 @@ The vertex positions are defined iteratively.
 - Now each iteration step works as follows:
   - For each edge $pq$ with given length $l$ compute a "force"
 
-        $$\left({l-\left|q-p\right|}\right){q-p\over\left|q-p\right|} = \left({{l\over\left|q-p\right|}-1}\right) \left(q-p\right)$$
+      $$\left({l-\left|q-p\right|}\right){q-p\over\left|q-p\right|} = \left({{l\over\left|q-p\right|}-1}\right) \left(q-p\right)$$
 
     acting on $q$
     and the opposite force acting on $p$.
   - For certain pairs $(p, q)$ of outer vertices compute a force
 
-        $$p-q$$
+      $$p-q$$
 
     acting on $q$ and the opposite force on $p$.
 
