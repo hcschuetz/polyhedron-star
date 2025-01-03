@@ -210,11 +210,15 @@ The vertex positions are defined iteratively.
 
 - Now each iteration step works as follows:
   - For each edge $pq$ with given length $l$ compute a "force"
+
     $$\left({l-\left|q-p\right|}\right){q-p\over\left|q-p\right|} = \left({{l\over\left|q-p\right|}-1}\right) \left(q-p\right)$$
+
     acting on $q$
     and the opposite force acting on $p$.
   - For certain pairs $(p, q)$ of outer vertices compute a force
+
     $$p-q$$
+
     acting on $q$ and the opposite force on $p$.
 
     Notes:
@@ -257,10 +261,15 @@ the number of vertices, edges, and faces of the polyhedron.
 If all faces are triangular, each face is adjacent to 3 edges
 and of course each edge is adjacent to 2 faces.
 So we have
+
 $$3f = 2e$$
+
 Together with Euler's formula
+
 $$v + f = e + 2$$
+
 we can derive the number of edges as
+
 $$e = 3(v - 2)$$
 
 So for example any triangulated polyhedron with 12 vertices must have 30 edges.
