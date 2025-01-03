@@ -27,8 +27,8 @@ export function App() {
   const [exampleIdx, setExampleIdx] = useState(0);
   const [task, setTask] = useState(examples[exampleIdx].value.trim());
   const [count, setCount] = useState(0); // just to trigger canvas updates
-  const [errors, setErrors] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
+  const [errors, setErrors] = useState<string[]>([]);
   function emitWarning(warning: string) {
     setWarnings(warnings => [...warnings, warning]);
   }
@@ -118,14 +118,14 @@ export function App() {
         rows={20} spellcheck={false}
         value={task} onChange={e => setTask(e.currentTarget.value)}
       />
-      {errors.length > 0 && (
-      <ul class="errors">
-        {errors.map(issue => <li>{issue}</li>)}
-      </ul>
-      )}
       {warnings.length > 0 && (
       <ul class="warnings">
         {warnings.map(issue => <li>{issue}</li>)}
+      </ul>
+      )}
+      {errors.length > 0 && (
+      <ul class="errors">
+        {errors.map(issue => <li>{issue}</li>)}
       </ul>
       )}
       <div>

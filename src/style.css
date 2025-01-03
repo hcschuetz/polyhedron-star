@@ -22,13 +22,24 @@ body {
 .errors, .warnings {
   margin: 0;
   padding: 0;
-  padding-left: 1em;
+  /* hack: compensate for 🗲 and ⚠ being a bit wider than a bullet: */
+  padding-left: 1.2em;
   & > li {
     white-space-collapse: preserve-breaks;
   }
 }
-.errors   { color: #c00; }
-.warnings { color: #aa0; }
+.errors   {
+  color: #c00;
+  & > li::marker {
+    content: "🗲 ";
+  }
+}
+.warnings {
+  color: #aa0;
+  & > li::marker {
+    content: '⚠ ';
+  }
+}
 
 .flex-row {
   display: flex;
