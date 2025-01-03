@@ -2,8 +2,10 @@
 // -------------------
 //
 // As in the "hexagonal prism #3", the cut center here is in the center of a
-// hexagonal face.  This simplified the modelling but slows down the convergence
-// of the constraint solver.
+// hexagonal face.  This simplified the modelling but slows down the
+// convergence of the constraint solver.  So I took the dihedral angles from
+// https://polytope.miraheze.org/wiki/Hexagonal_antiprism. (Set all edge bending
+// angles to, say, 30° and activate "autobend" to see the convergence problem.)
 {
   starGaps: {
     a: "12h     60°",
@@ -22,32 +24,32 @@
   edges: [
     "a", "c", "e", "g", "i", "k",
 
-    "a b c 30°",
-    "c d e 30°",
-    "e f g 30°",
-    "g h i 30°",
-    "i j k 30°",
-    "k l a 30°",
+    "a b c 81.10057°",
+    "c d e 81.10057°",
+    "e f g 81.10057°",
+    "g h i 81.10057°",
+    "i j k 81.10057°",
+    "k l a 81.10057°",
 
-    "b d 30°",
-    "d f 30°",
-    "f h 30°",
-    "h j 30°",
-    "j l 30°",
-    "l b 30°",
+    "b   d 81.10057°",
+    "d   f 81.10057°",
+    "f   h 81.10057°",
+    "h   j 81.10057°",
+    "j   l 81.10057°",
+    "l   b 81.10057°",
 
-    "a b 30°",
-    "b c 30°",
-    "c d 30°",
-    "d e 30°",
-    "e f 30°",
-    "f g 30°",
-    "g h 30°",
-    "h i 30°",
-    "i j 30°",
-    "j k 30°",
-    "k l 30°",
-    "l a 30°",
+    "a b 34.77811°",
+    "b c 34.77811°",
+    "c d 34.77811°",
+    "d e 34.77811°",
+    "e f 34.77811°",
+    "f g 34.77811°",
+    "g h 34.77811°",
+    "h i 34.77811°",
+    "i j 34.77811°",
+    "j k 34.77811°",
+    "k l 34.77811°",
+    "l a 34.77811°",
 
     "b f 0°",
     "f j 0°",
@@ -55,7 +57,7 @@
   ],
   display: {
     bending: 1,
-    autobend: true,
+    autobend: false,
     grid: "triangular even",
     grid3: {
       triangles: true,
