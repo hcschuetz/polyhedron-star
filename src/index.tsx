@@ -28,6 +28,10 @@ export function App() {
   const [task, setTask] = useState(examples[exampleIdx].value.trim());
   const [count, setCount] = useState(0); // just to trigger canvas updates
   const [errors, setErrors] = useState<string[]>([]);
+  const [warnings, setWarnings] = useState<string[]>([]);
+  function emitWarning(warning: string) {
+    setWarnings(warnings => [...warnings, warning]);
+  }
   const signals: Signals = {
     vertices: useSignal(false),
     labels: useSignal(true),
@@ -59,6 +63,7 @@ export function App() {
 
   useEffect(
     () => {
+      setWarnings([]);
       let parsedTask: unknown;
       try {
         parsedTask = JSON5.parse(task);
@@ -75,7 +80,7 @@ export function App() {
       }
       setErrors([]);
       try {
-        return renderToCanvas(canvas.current, validity.output, signals);
+        return renderToCanvas(canvas.current, validity.output, signals, emitWarning);
       } catch (e) {
         setErrors([`Exception caught: ${e}`]);
       }
@@ -116,6 +121,11 @@ export function App() {
       {errors.length > 0 && (
       <ul class="errors">
         {errors.map(issue => <li>{issue}</li>)}
+      </ul>
+      )}
+      {warnings.length > 0 && (
+      <ul class="warnings">
+        {warnings.map(issue => <li>{issue}</li>)}
       </ul>
       )}
       <div>

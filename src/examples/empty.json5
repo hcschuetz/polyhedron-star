@@ -4,7 +4,6 @@
     a: {angleDeficit: "360deg", steps: []},
   },
   edges: [
-    "a",
   ],
   display: {
     grid: "none",

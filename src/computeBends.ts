@@ -17,6 +17,7 @@ export default function computeBends(
   boundary: Loop,
   maxIterations: number,
   costLimit: number,
+  emitWarning: (warning: string) => void,
 ) {
   // Copy vertexPositions so that we can modify them without side effects to the
   // caller:
@@ -92,7 +93,7 @@ export default function computeBends(
 
     for (const [to, {sources, totalForce}] of forces) {
       if (sources.length === 0) {
-        console.warn(`no forces exerted on vertex "${to.name}"`);
+        emitWarning(`no forces exerted on vertex "${to.name}"`);
         continue;
       }
       totalForce.scaleAndAddToRef(1 / sources.length, pos(to));
@@ -100,6 +101,9 @@ export default function computeBends(
   }
   const endTime = performance.now();
   console.log(`after ${i} steps (${endTime - startTime}ms): cost = ${cost}`);
+  if (cost > 1e-10) {
+    emitWarning(`Autobend "cost" (sum of squared errors) after ${i} steps: ${cost}`);
+  }
 
   // Get the positions of secondary vertices (edge-breaks) by interpolating
   // along the edges.  (Edges should be straight and the two ends of a break
@@ -159,9 +163,9 @@ export default function computeBends(
       for (let j = i+1; j < segments.length; j++) {
         const seg_j = segments[j];
         const diff = Math.abs(seg_i.computedBend - seg_j.computedBend);
-        if (diff > 1e-8) console.warn(
-          `computed bend angles for edge segments differ by`,
-          diff.toExponential(3),
+        if (diff > 1e-6) emitWarning(
+          `Computed bend angles for edge segments differ by ` +
+          diff.toExponential(3) +
           `\n  ${seg_i.twin.to.name} - ${seg_i.to.name}: ${seg_i.computedBend}` +
           `\n  ${seg_j.twin.to.name} - ${seg_j.to.name}: ${seg_j.computedBend}`,
         );

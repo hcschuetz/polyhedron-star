@@ -56,6 +56,7 @@ export default function renderToCanvas(
   canvas: HTMLCanvasElement,
   task: Task,
   signals: Signals,
+  emitWarning: (warning: string) => void,
 ) {
   const gaps = Object.entries(task.starGaps).map(([name, gap]) => {
     if (typeof gap === "string") {
@@ -86,6 +87,9 @@ export default function renderToCanvas(
     primaryVertices.push({name         , pos1D: primaryVertices.length, pos2D: inner});
     primaryVertices.push({name: tipName, pos1D: primaryVertices.length, pos2D: pos  });
   });
+  if (pos.length() > 1e-8) {
+    emitWarning(`The polygon around the star is not closed. Offset: (${pos.x}, ${pos.y})`);
+  }
   const remainingAngleDeficit = 2*TAU - totalAngleDeficit;
   console.log(
     `Total angle deficit: ${totalAngleDeficit} = ${
@@ -192,6 +196,18 @@ export default function renderToCanvas(
         segments,
         breaks,
       });
+    }
+  }
+
+  {
+    const nVertices = gaps.length + 1;
+    const nEdges = edges.length;
+    const nEdgesExpected = 3 * (nVertices -2);
+    if (nEdges !== nEdgesExpected) {
+      emitWarning(
+        `For ${nVertices} vertices (${gaps.length} gaps + 1 cut center) ` +
+        `autobend expects ${nEdgesExpected} edges, but ${nEdges} edges were provided.`
+      );
     }
   }
 
@@ -312,6 +328,7 @@ export default function renderToCanvas(
     boundary,
     1000,
     1e-16,
+    emitWarning,
   );
 
   // ---------------------------------------------------------------------------
@@ -618,7 +635,7 @@ export default function renderToCanvas(
       }
     });
   } catch(error) {
-    console.error(`In renderToCanvas(...): ${error}`);
+    emitWarning(`In renderToCanvas(...): ${error}`);
   } finally {
     return cleanup;
   }

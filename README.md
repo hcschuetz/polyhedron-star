@@ -207,19 +207,16 @@ The vertex positions are defined iteratively.
 - We use both the "inner" and "outer" vertices of the star.
   (In the result the outer vertices should approximately coincide.)
   Their initial positions are computed based on the provided bending angles.
+
 - Now each iteration step works as follows:
   - For each edge $pq$ with given length $l$ compute a "force"
-
-      $$\left({l-\left|q-p\right|}\right){q-p\over\left|q-p\right|} = \left({{l\over\left|q-p\right|}-1}\right) \left(q-p\right)$$
-
+    $$\left({l-\left|q-p\right|}\right){q-p\over\left|q-p\right|} = \left({{l\over\left|q-p\right|}-1}\right) \left(q-p\right)$$
     acting on $q$
     and the opposite force acting on $p$.
   - For certain pairs $(p, q)$ of outer vertices compute a force
-
-      $$p-q$$
-
+    $$p-q$$
     acting on $q$ and the opposite force on $p$.
-    <br>
+
     Notes:
     - These forces are like the forces for an edge $pq$ of length $0$.
     - I do not use all pairs or outer vertices because this turned out to slow
@@ -236,32 +233,76 @@ Or it might be replaced by something more theoretically sound.
 But it turned out to converge quite fast on my examples (< 30ms on a
 not-so-new and non-high-end laptop).
 
-More remarks:
-- The edge lengths do not uniquely determine the polyhedron geometry.
-  In particular, the mirror image of a polyhedron has the same edge
-  lengths.  Or think of a regular icosahedron with one vertex pushed inward to
-  make it concave.  This is the reason why some initial edge angles are needed.
-- The position and attitude of the polyhedron in 3D space is not determined
-  by our constraints.
-  But this is not a problem since we are only interested in the "internal"
-  geometry.
-  Actually leaving the degrees of freedom for position and attitude
-  unconstrained speeds up convergence.
+#### Expected Number Of Edges
 
+The provided edges must form a triangulation of the folded polyhedron.
+In other words, the folded polyhedron must have triangular faces.
+(Essentially this is because triangles are the only polygons
+whose shapes are fully determined by the edge lengths.)
+
+If you want to build a polyhedron with faces having $n>3$ edges, you
+must add $n-3$ (non-intersecting) diagonals to these faces.
+The bending angles of these extra edges should be 0° in the solution.
+
+Without this extra "stiffening" the polyhedron geometry is underspecified.
+Think of a cube where only the 12 (identical) edge lengths are given.
+Since the angles at the vertices are not yet fixed,
+there are lots of solutions for the constraint problem, for example
+any rhombic hexahedron with the given edge length.
+Diagonal stiffeners are needed to enforce the 90° angles between the cube
+edges.
+
+More generally, let $v$, $e$, and $f$ be
+the number of vertices, edges, and faces of the polyhedron.
+If all faces are triangular, each face is adjacent to 3 edges
+and of course each edge is adjacent to 2 faces.
+So we have
+$$3f = 2e$$
+Together with Euler's formula
+$$v + f = e + 2$$
+we can derive the number of edges as
+$$e = 3(v - 2)$$
+
+So for example any triangulated polyhedron with 12 vertices must have 30 edges.
+Or a cube (8 vertices) must have $2(8-2) = 18$ edges.
+This fits with the 12 "normal" cube edges
+plus one diagonal in each of the 6 faces of the cube.
+
+But even with the stiffening the edge lengths
+do not uniquely determine the polyhedron geometry.
+In particular, the mirror image of a polyhedron has the same edge
+lengths.  Or think of a regular icosahedron with one vertex pushed inward to
+make it concave.
+This is the reason why some rough initial edge angles are needed
+to let the solver converge towards a particular solution.
+
+The position and attitude of the polyhedron in 3D space is not determined
+by our constraints.
+But this is not a problem since we are only interested in the "internal"
+geometry of the rigid body.
+Actually leaving the degrees of freedom for position and attitude
+unconstrained speeds up convergence.
+
+This consideration leads us to the required number of edges in a different way:
+Each vertex position has 3 coordinates.
+That gives the constraint solver $3v$ degrees of freedom.
+From that we subtract 3 degrees of freedom since we don't care about the
+position and 3 more degrees for the attitude (pitch, yaw and roll).
+That leaves us with $3v - 6$ degrees of freedom,
+which require the same number of constraints, that is, edge lengths.
 
 ## Limitations
 
-For the time being the code does not explicitly check for correct/consistent
-input.  So you have to take care of this by yourself.
-For example:
-- The JSON5 input must be syntactically correct and also have the appropriate
-  structure
-  (which is not yet documented, but should be clear from the examples).
-- The initial polygon (connecting the star tips) should be closed.
-- The edges you provide should not intersect.
-- Let $v$ be the number of polyhedron vertices
-  (one for each star gap plus one more vertex where all the jag tips meet).
-  Then there should be $3(v-2)$ edges defining $2(v-2)$ triangular polygon faces.
-- The constraint system given by the edge lengths should be solvable.
-
-Text output is currently written to the browser console, not to the web page.
+The application checks the input for certain correctness/consistency conditions,
+but you have to take care of other conditions by yourself.
+In particular:
+- The edges you provide must not intersect.
+  (But intersecting edges frequently lead to runaway loops, which are reported.)
+- For "autobend" the edges must form a triangulation of the polyhedron.
+  - The total number of edges is actually checked against the expected number of
+    edges of a fully triangulated polyhedron.
+    Warnings about an inconsistency here are helpful
+    but the absence of such a warning does not completely ensure a triangulation.
+  - If you provide correct bending angles in the input,
+    autobend typically usually does not change them by a significant amount.
+    In this case you can ignore a warning about an unexpected number of edges.
