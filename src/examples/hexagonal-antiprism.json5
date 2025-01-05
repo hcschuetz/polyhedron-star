@@ -56,7 +56,7 @@
     "j b 0°",
   ],
   display: {
-    bending: 1,
+    bending: 0,
     autobend: false,
     grid: "triangular even",
     grid3: {

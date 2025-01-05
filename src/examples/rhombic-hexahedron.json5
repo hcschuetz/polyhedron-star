@@ -1,0 +1,44 @@
+// Rhombic Hexahedron
+// ------------------
+{
+  starGaps: {
+    a: " 8h     60°",
+    b: " 8h  6h 60°",
+    c: " 6h     60°",
+    d: " 6h  4h 60°",
+    e: " 4h     60°",
+    f: " 4h  2h 60°",
+    g: " 2h 2h 12h 12h 12h 10h 10h 10h 8h 180°",
+  },
+  edges: [
+    "a", "c", "e",
+
+    "a b c 30°",
+    "c d e 30°",
+    "e f g a 30°",
+
+    "a b 30°",
+    "b c 30°",
+    "c d 30°",
+    "d e 30°",
+    "e f 30°",
+    "f g a 30°",
+
+    "b d 30°",
+    "d f 30°",
+    "f g b 30°",
+    
+    "g b 30°",
+    "g d 30°",
+    "g f 30°",
+  ],
+  display: {
+    // With bending 0 we get problems with arcs around the 180° angle at g:
+    bending: 0.01,
+    autobend: true,
+    grid: "triangular even",
+    grid3: {
+      triangles: true,
+    }
+  }
+ }

@@ -1,0 +1,60 @@
+// Gyroelongated Square Bipyramid
+// ------------------------------
+// (Johnson solid 17)
+//
+// Compare the following shapes:
+// - hexagonal antiprism (could be called a "gyroelongated hexagonal bipyramid")
+// - icosahedron (= gyroelongated pentagonal bipyramid)
+// - gyroelongated square bipyramid (this file)
+// - rhombic hexahedron (could be called a "gyroelongated triangular bipyramid")
+//
+// They have similar stars and we could have modeled them in an even more
+// analogous way.
+{
+  starGaps: {
+    a: " 8h     60°",
+    b: " 8h  6h 60°",
+    c: " 6h     60°",
+    d: " 6h  4h 60°",
+    e: " 4h     60°",
+    f: " 4h  2h 60°",
+    g: " 2h     60°",
+    h: " 2h 12h 60°",
+    i: "12h 12h 10h 10h 10h 8h 120°",
+  },
+  edges: [
+    "a", "c", "e", "g",
+
+    "a b c 30°",
+    "c d e 30°",
+    "e f g 30°",
+    "g h i a 30°",
+
+    "a b 30°",
+    "b c 30°",
+    "c d 30°",
+    "d e 30°",
+    "e f 30°",
+    "f g 30°",
+    "g h 30°",
+    "h i a 30°",
+
+    "b d 30°",
+    "d f 30°",
+    "f h 30°",
+    "h i b 30°",
+    
+    "i b 30°",
+    "i d 30°",
+    "i f 30°",
+    "i h 30°",
+  ],
+  display: {
+    bending: 0,
+    autobend: true,
+    grid: "triangular even",
+    grid3: {
+      triangles: true,
+    }
+  }
+ }

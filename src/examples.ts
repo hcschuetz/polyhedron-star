@@ -5,6 +5,8 @@ import hexagonalPrism1 from './examples/hexagonal-prism.json5?raw';
 import hexagonalPrism2 from './examples/hexagonal-prism-2.json5?raw';
 import hexagonalPrism3 from './examples/hexagonal-prism-3.json5?raw';
 import hexagonalAntiprism from './examples/hexagonal-antiprism.json5?raw';
+import geSqBipyramid from './examples/gyroelongated-square-bipyramid.json5?raw';
+import rhombicHexahedron from './examples/rhombic-hexahedron.json5?raw';
 import nearMissJohnsonSolid from './examples/near-miss-Johnson-solid.json5?raw';
 import nearMissJohnsonSolid2 from './examples/near-miss-Johnson-solid-2.json5?raw';
 import cube from "./examples/cube.json5?raw";
@@ -21,6 +23,8 @@ export const examples: {name: string, value: string}[] = [
   {name: "hexagonal prism #2", value: hexagonalPrism2},
   {name: "hexagonal prism #3", value: hexagonalPrism3},
   {name: "hexagonal antiprism", value: hexagonalAntiprism},
+  {name: "Johnson solid 17", value: geSqBipyramid},
+  {name: "rhombic hexahedron", value: rhombicHexahedron},
   {name: "near-miss Johnson solid", value: nearMissJohnsonSolid},
   {name: "near-miss Johnson solid #2", value: nearMissJohnsonSolid2},
   {name: "cube", value: cube},
