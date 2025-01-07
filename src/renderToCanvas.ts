@@ -401,11 +401,18 @@ export default function renderToCanvas(
       backFaceCulling: false,
     }, scene);
 
-    disposableEffect(() => {
+    disposableEffect(async () => {
       const oldTexture = faceMaterial.diffuseTexture;
-      faceMaterial.diffuseTexture = makeTexture(gridSignalsToConfig(signals));
-      // Disposing *after* setting the new texture to avoid flickering:
-      oldTexture?.dispose(); // Is this actually needed?
+      await makeTexture(gridSignalsToConfig(signals), texture => {
+        faceMaterial.diffuseTexture = texture;
+      });
+      // TODO There might be a memory leak:  makeTexture(...) might not return
+      // (if the user has meanwhile selected another background image) and thus
+      // .dispose() is never called.
+      // I also tried to dispose the old texture already inside the callback
+      // (after the assignment) but that leads to an exception which I do not
+      // yet understand.
+      oldTexture?.dispose();
     });
 
     const flowerMaterial = standardMaterial("flowerMaterial", {

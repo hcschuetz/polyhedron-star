@@ -2,27 +2,37 @@ import * as B from '@babylonjs/core';
 
 import { Obj } from './utils';
 import { TAU } from './geom-utils';
-import tile3a from './assets/tile3a.png';
-import tile4a from './assets/tile4a.png';
-import tile4b from './assets/tile4b.png';
-import tile4c from './assets/tile4c.png';
-import tile4d from './assets/tile4d.png';
 
 
-// A single image element with changing `src` property would be more elegant.
-// But that requires asynchronously waiting for the resource to be loaded
-// before we can draw backgrounds and other features on top.
-// So I've tried to make larger parts of the code async, but there was still
-// a bug related to display-config updates from the tasks.
-// (Even if I found a fix for this, things would be too brittle.  It must be
-// ensured that updates involving an image change are not "overtaken" by updates
-// without an image change.  Furthermore the UX benefits from immediately
-// available images.)
-const imgTile3a = Object.assign(new Image(), {src: tile3a});
-const imgTile4a = Object.assign(new Image(), {src: tile4a});
-const imgTile4b = Object.assign(new Image(), {src: tile4b});
-const imgTile4c = Object.assign(new Image(), {src: tile4c});
-const imgTile4d = Object.assign(new Image(), {src: tile4d});
+const img = new Image();
+let usingImage = false;
+
+function noImage() {
+  usingImage = false;
+}
+
+function loadImage(src: string, loading: () => void): Promise<undefined> {
+  usingImage = true;
+  src = new URL(src, document.baseURI).href;
+  const {promise, resolve} = Promise.withResolvers<undefined>();
+  console.log("ldIm", src, img.src);
+  if (img.src === src) {
+    resolve(undefined);
+    return promise;
+  }
+  loading();
+  img.onload = async () => {
+    // Delay just for debugging:
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    console.log("ldIm onload", usingImage, src, img. src);
+
+    // Only resolve if the loaded image is (still) requested.
+    if (usingImage && img.src === src) resolve(undefined);
+  };
+  img.src = src;
+  return promise;
+}
 
 
 export type Grid3Background =
@@ -31,12 +41,14 @@ export type Grid3Background =
 | "tiles"
 ;
 
-const grid3BackgroundPainters: Record<Grid3Background, (ctx: B.ICanvasRenderingContext) => void> = {
-  plain(ctx) {
+const grid3BackgroundPainters: Record<Grid3Background, (ctx: B.ICanvasRenderingContext, update: () => void) => Promise<void>> = {
+  async plain(ctx) {
+    noImage();
     ctx.fillStyle = "#dd0";
     ctx.fillRect(0, 0, r3, 1);
   },
-  subTriangles(ctx) {
+  async subTriangles(ctx) {
+    noImage();
     this.plain(ctx);
 
     ctx.fillStyle = "#cc0";
@@ -66,10 +78,18 @@ const grid3BackgroundPainters: Record<Grid3Background, (ctx: B.ICanvasRenderingC
     // Why does BabylonJS use its own type instead of CanvasRenderingContext2D?
     (ctx as CanvasRenderingContext2D).fill('evenodd');
   },
-  tiles(ctx) {
-    ctx.drawImage(imgTile3a, 0, 0, r3, 1);
+  async tiles(ctx, update) {
+    await loadImage("./tile3a.png", loading(ctx, update, r3, 1));
+    ctx.drawImage(img, 0, 0, r3, 1);
   },
 };
+
+const loading = (ctx: B.ICanvasRenderingContext, update: () => void, width: number, height: number) => () => {
+  console.log("loading...", width, height);
+  ctx.fillStyle = "#888";
+  ctx.fillRect(0, 0, width, height);
+  update();
+}
 
 export const grid3Backgrounds = Obj.keys(grid3BackgroundPainters);
 
@@ -147,15 +167,16 @@ export const grid3Features = Obj.keys(grid3Painters);
 
 export type DrawTile = (
   ctx: B.ICanvasRenderingContext,
+  update: () => void,
   width: number,
   height: number,
   config: GridConfig,
-) => void;
+) => Promise<void>;
 
-export const drawTile3: DrawTile = (ctx, width, height, features) => {
+export const drawTile3: DrawTile = async (ctx, update, width, height, features) => {
   ctx.save();
   ctx.scale(height, height);
-  grid3BackgroundPainters[features.grid3.background](ctx);
+  await grid3BackgroundPainters[features.grid3.background](ctx, update);
   ctx.restore();
 
   ctx.save();
@@ -221,15 +242,16 @@ function drawImage4rotate(ctx: B.ICanvasRenderingContext, img: HTMLImageElement)
   ctx.restore();
 }
 
-const grid4BackgroundPainters: Record<Grid4Background, (ctx: B.ICanvasRenderingContext) => void> = {
-  plain(ctx) {
+const grid4BackgroundPainters: Record<Grid4Background, (ctx: B.ICanvasRenderingContext, update: () => void) => Promise<void>> = {
+  async plain(ctx) {
+    noImage();
     ctx.fillStyle = "#dd0";
     ctx.fillRect(0, 0, 1, 1);
   },
-  "tiles A"(ctx) { drawImage4mirror(ctx, imgTile4a); },
-  "tiles B"(ctx) { drawImage4mirror(ctx, imgTile4b); },
-  "tiles C"(ctx) { drawImage4rotate(ctx, imgTile4c); },
-  "tiles D"(ctx) { drawImage4rotate(ctx, imgTile4d); },
+  async "tiles A"(ctx, update) { await loadImage("./tile4a.png", loading(ctx, update, 1, 1)); drawImage4mirror(ctx, img); },
+  async "tiles B"(ctx, update) { await loadImage("./tile4b.png", loading(ctx, update, 1, 1)); drawImage4mirror(ctx, img); },
+  async "tiles C"(ctx, update) { await loadImage("./tile4c.png", loading(ctx, update, 1, 1)); drawImage4rotate(ctx, img); },
+  async "tiles D"(ctx, update) { await loadImage("./tile4d.png", loading(ctx, update, 1, 1)); drawImage4rotate(ctx, img); },
 };
 
 export const grid4Backgrounds = Obj.keys(grid4BackgroundPainters);
@@ -254,10 +276,10 @@ const grid4Painters: Record<Grid4Feature, (ctx: B.ICanvasRenderingContext) => vo
 
 export const grid4Features = Obj.keys(grid4Painters);
 
-const drawTile4: DrawTile = (ctx, width, height, signals) => {
+const drawTile4: DrawTile = async (ctx, update, width, height, signals) => {
   ctx.save();
   ctx.scale(width, height);
-  grid4BackgroundPainters[signals.grid4.background](ctx);
+  await grid4BackgroundPainters[signals.grid4.background](ctx, update);
   for (const [k, v] of Obj.entries(grid4Painters)) {
     if (signals.grid4[k]) {
       v(ctx);
@@ -277,7 +299,7 @@ const uScaleN = 1 / r3;
 export const grids: Record<GridType, GridDef> = {
   "none": {
     tileRatio: 1,
-    drawTile(ctx, width, height, features) {
+    async drawTile(ctx, update, width, height, features) {
       ctx.fillStyle = "#dd0";
       ctx.fillRect(0, 0, width, height);
     },
@@ -319,17 +341,22 @@ export type GridConfig = {
   grid4: Record<Grid4Feature, boolean> & {background: Grid4Background},
 };
 
-export function makeTexture(config: GridConfig): B.DynamicTexture {
+export async function makeTexture(config: GridConfig, assign: (texture: B.Texture) => void): Promise<void> {
   const {tileRatio, drawTile} = grids[config.grid];
   const height = 1 << 9;
   const width = height * tileRatio;
-  const texture = new B.DynamicTexture("grid", {width, height});
+  const texture = new B.DynamicTexture("grid", {width, height}, {});
+  assign(texture);
   texture.wrapU = B.Constants.TEXTURE_WRAP_ADDRESSMODE;
   texture.wrapV = B.Constants.TEXTURE_WRAP_ADDRESSMODE;
 
   const ctx = texture.getContext();
-  drawTile(ctx, width, height, config);
+  function update() {
+    console.log("updating...");
+    texture.update();
+    console.log("updating...done");
+  }
+  await drawTile(ctx, update, width, height, config);
 
   texture.update();
-  return texture;
 }
