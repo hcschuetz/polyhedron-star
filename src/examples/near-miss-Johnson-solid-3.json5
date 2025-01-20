@@ -1,0 +1,52 @@
+// Another variant of the "near-miss Johnson solid"
+//
+// This version has correct angles directly in the spec so that autobend is
+// not needed.  This also allows to omit 6 edges from the original spec, which
+// became flat (0° bending angle) after autobend.  Those edges were only needed
+// to have a full triangulation as required by autobend.
+//
+// Provided by Gerard Westendorp, see
+// https://github.com/hcschuetz/polyhedron-star/discussions/2#discussioncomment-11721218
+
+{
+  starGaps: {
+    a: "10h 8h        60°",
+    b: "8h 8h         60°",
+    c: "8h 6h 6h      60°",
+    d: "6h 4h         60°",
+    e: "4h            60°",
+    f: "4h 4h 2h      60°",
+    g: "2h            60°",
+    h: "2h 12h        60°",
+    i: "12h           60°",
+    j: "12h           60°",
+    k: "12h 10h 10h   60°",
+
+  },
+  edges: [
+"g", "j", "b", "e", "i", 
+     "a b    70.529°",
+     "b c    35.2645°",
+     "c f    70.529°",
+     "f k    70.529°",
+     "b k    35.2645°",
+     "d e    109.471°",
+     "g h    70.529°",
+     "i j    70.529°",
+     "h i    70.529°",
+     "f h    109.471°",
+     "k i    10.529°",
+     "k a    70.529°",
+     "c d    70.529°",
+     "c k    35.2645°",
+     "e f g  70.529°",
+     "j k a  109.471°",
+     "b c d  70.529°",
+     "c f g  10.529°",
+     "g h i  35.2645°",
+
+  ],
+  display: {
+    grid: "triangular even",
+  }
+}
