@@ -7,6 +7,7 @@ import tile4a from './assets/tile4a.png';
 import tile4b from './assets/tile4b.png';
 import tile4c from './assets/tile4c.png';
 import tile4d from './assets/tile4d.png';
+import { drawTurtles } from './turtle-tiling';
 
 
 // A single image element with changing `src` property would be more elegant.
@@ -192,6 +193,8 @@ export type Grid4Background =
 | "tiles B"
 | "tiles C"
 | "tiles D"
+| "turtles"
+| "turtlesBW"
 ;
 
 // Mirroring (as opposed to rotating) hides small differences between
@@ -230,6 +233,8 @@ const grid4BackgroundPainters: Record<Grid4Background, (ctx: B.ICanvasRenderingC
   "tiles B"(ctx) { drawImage4mirror(ctx, imgTile4b); },
   "tiles C"(ctx) { drawImage4rotate(ctx, imgTile4c); },
   "tiles D"(ctx) { drawImage4rotate(ctx, imgTile4d); },
+  turtles  (ctx) { drawTurtles(ctx, false); },
+  turtlesBW(ctx) { drawTurtles(ctx, true); },
 };
 
 export const grid4Backgrounds = Obj.keys(grid4BackgroundPainters);
