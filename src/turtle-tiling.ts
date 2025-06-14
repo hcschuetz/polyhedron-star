@@ -1,10 +1,5 @@
 // Inspired by https://mathstodon.xyz/@DaniLaura/114658815682032097
 
-// But we rotate the image to the right by 30° so that
-// red turtles look upward, orange ones downward, green ones left and
-// blue ones right.
-
-import * as B from '@babylonjs/core';
 import { TAU } from './geom-utils';
 
 
@@ -105,7 +100,7 @@ const turtles = [
   ["#ff8", "#ee0", [[0,1], [+.5,.5]], ([x, y]) => [+y, -x]],
 ] as Array<[Color, Color, Array<Point2D>, MapPoint2D]>;
 
-export function drawTurtles(ctx: B.ICanvasRenderingContext, sameColor: boolean) {
+export function drawTurtles(ctx: CanvasRenderingContext2D, sameColor: boolean) {
   ctx.strokeStyle = "#000";
 
   function transform(
@@ -133,51 +128,33 @@ export function drawTurtles(ctx: B.ICanvasRenderingContext, sameColor: boolean) 
   }
 
   for (const [color1, color2, offsets, mapPoint] of turtles) {
-    ctx.fillStyle = sameColor ? "#ff8" : color1;
-    ctx.lineWidth = .01
     for (const off of offsets) {
+      // Fill full turtle (for head, hands, and feet):
+      ctx.fillStyle = sameColor ? "#ff8" : color1;
+      ctx.lineWidth = .01
       makePath(list, off, mapPoint);
-      // Why does BabylonJS use its own type instead of CanvasRenderingContext2D?
-      (ctx as CanvasRenderingContext2D).fill('evenodd');
-    }
-    ctx.fillStyle = sameColor ? "#ee0" : color2;
-    ctx.lineWidth = .005
-    for (const off of offsets) {
+      ctx.fill();
+
+      // Fill the shell:
+      ctx.fillStyle = sameColor ? "#ee0" : color2;
       makePath(shell, off, mapPoint);
-      // Why does BabylonJS use its own type instead of CanvasRenderingContext2D?
-      (ctx as CanvasRenderingContext2D).fill('evenodd');
-    }
-  }
-  for (const [,, offsets, map] of turtles) {
-    ctx.lineWidth = .01
-    for (const off of offsets) {
-      // Outline:
-      makePath(list, off, map);
+      ctx.fill();
+
+      // Turtle outline:
+      ctx.lineWidth = .01
+      makePath(list, off, mapPoint);
       ctx.stroke();
 
       // Eyes:
-      const [xxxl, yyyl] = transform(named.lHead, off, map);
-      const [xxxr, yyyr] = transform(named.rHead, off, map);
-
       ctx.fillStyle = "#000";
-      ctx.beginPath();
-      (ctx as CanvasRenderingContext2D).arc(
-        2/3*xxxl + 1/3*xxxr,
-        2/3*yyyl + 1/3*yyyr,
-        .02,
-        0, TAU,
-      );
-      ctx.closePath();
-      ctx.fill();
-      ctx.beginPath();
-      (ctx as CanvasRenderingContext2D).arc(
-        1/3*xxxl + 2/3*xxxr,
-        1/3*yyyl + 2/3*yyyr,
-        .02,
-        0, TAU,
-      );
-      ctx.closePath();
-      ctx.fill();
+      const sides =
+        ["lHead", "rHead"].map(name => transform(named[name], off, mapPoint));
+      for (const [[ax, ay], [bx, by]] of [sides, sides.toReversed()]) {
+        ctx.beginPath();
+        ctx.arc(.7*ax + .3*bx, .7*ay + .3*by, .02, 0, TAU);
+        ctx.closePath();
+        ctx.fill();
+      }
     }
   }
 }

@@ -32,7 +32,7 @@ export type Grid3Background =
 | "tiles"
 ;
 
-const grid3BackgroundPainters: Record<Grid3Background, (ctx: B.ICanvasRenderingContext) => void> = {
+const grid3BackgroundPainters: Record<Grid3Background, (ctx: CanvasRenderingContext2D) => void> = {
   plain(ctx) {
     ctx.fillStyle = "#dd0";
     ctx.fillRect(0, 0, r3, 1);
@@ -65,7 +65,7 @@ const grid3BackgroundPainters: Record<Grid3Background, (ctx: B.ICanvasRenderingC
     ctx.lineTo(  0   , 1  );
     ctx.closePath();
     // Why does BabylonJS use its own type instead of CanvasRenderingContext2D?
-    (ctx as CanvasRenderingContext2D).fill('evenodd');
+    ctx.fill('evenodd');
   },
   tiles(ctx) {
     ctx.drawImage(imgTile3a, 0, 0, r3, 1);
@@ -86,7 +86,7 @@ export type Grid3Feature =
 
 const r3 = Math.sqrt(3);
 
-const grid3Painters: Record<Grid3Feature, (ctx: B.ICanvasRenderingContext) => void> = {
+const grid3Painters: Record<Grid3Feature, (ctx: CanvasRenderingContext2D) => void> = {
   triangles(ctx) {
     ctx.lineWidth = 1 / 20;
     ctx.beginPath();
@@ -147,7 +147,7 @@ const grid3Painters: Record<Grid3Feature, (ctx: B.ICanvasRenderingContext) => vo
 export const grid3Features = Obj.keys(grid3Painters);
 
 export type DrawTile = (
-  ctx: B.ICanvasRenderingContext,
+  ctx: CanvasRenderingContext2D,
   width: number,
   height: number,
   config: GridConfig,
@@ -199,7 +199,7 @@ export type Grid4Background =
 
 // Mirroring (as opposed to rotating) hides small differences between
 // horizontal and vertical direction.
-function drawImage4mirror(ctx: B.ICanvasRenderingContext, img: HTMLImageElement) {
+function drawImage4mirror(ctx: CanvasRenderingContext2D, img: HTMLImageElement) {
   const {naturalWidth: nw, naturalHeight: nh} = img;
   ctx.save();
   ctx.drawImage(img, 0, 0, nw, nh, 0, 0, 1/2, 1/2);
@@ -213,7 +213,7 @@ function drawImage4mirror(ctx: B.ICanvasRenderingContext, img: HTMLImageElement)
 };
 
 // Some patterns have rotational symmetry.
-function drawImage4rotate(ctx: B.ICanvasRenderingContext, img: HTMLImageElement) {
+function drawImage4rotate(ctx: CanvasRenderingContext2D, img: HTMLImageElement) {
   const {naturalWidth: nw, naturalHeight: nh} = img;
   ctx.save();
   for (let i = 0; i < 4; i++) {
@@ -224,7 +224,7 @@ function drawImage4rotate(ctx: B.ICanvasRenderingContext, img: HTMLImageElement)
   ctx.restore();
 }
 
-const grid4BackgroundPainters: Record<Grid4Background, (ctx: B.ICanvasRenderingContext) => void> = {
+const grid4BackgroundPainters: Record<Grid4Background, (ctx: CanvasRenderingContext2D) => void> = {
   plain(ctx) {
     ctx.fillStyle = "#dd0";
     ctx.fillRect(0, 0, 1, 1);
@@ -243,7 +243,7 @@ export type Grid4Feature =
 | "quads"
 ;
 
-const grid4Painters: Record<Grid4Feature, (ctx: B.ICanvasRenderingContext) => void> = {
+const grid4Painters: Record<Grid4Feature, (ctx: CanvasRenderingContext2D) => void> = {
   quads: ctx => {
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 1 / 20
@@ -332,7 +332,9 @@ export function makeTexture(config: GridConfig): B.DynamicTexture {
   texture.wrapU = B.Constants.TEXTURE_WRAP_ADDRESSMODE;
   texture.wrapV = B.Constants.TEXTURE_WRAP_ADDRESSMODE;
 
-  const ctx = texture.getContext();
+  // Why does BabylonJS use its own home-grown context type?
+  // It is actually a CanvasRenderingContext2D at runtime.
+  const ctx = texture.getContext() as CanvasRenderingContext2D;
   drawTile(ctx, width, height, config);
 
   texture.update();
