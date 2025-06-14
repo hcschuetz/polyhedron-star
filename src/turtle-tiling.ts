@@ -105,7 +105,7 @@ const turtles = [
   ["#ff8", "#ee0", [[0,1], [+.5,.5]], ([x, y]) => [+y, -x]],
 ] as Array<[Color, Color, Array<Point2D>, MapPoint2D]>;
 
-export function drawTurtles(ctx: B.ICanvasRenderingContext, bw: boolean) {
+export function drawTurtles(ctx: B.ICanvasRenderingContext, sameColor: boolean) {
   ctx.strokeStyle = "#000";
 
   function transform(
@@ -133,14 +133,14 @@ export function drawTurtles(ctx: B.ICanvasRenderingContext, bw: boolean) {
   }
 
   for (const [color1, color2, offsets, mapPoint] of turtles) {
-    ctx.fillStyle = bw ? "#ccc" : color1;
+    ctx.fillStyle = sameColor ? "#ff8" : color1;
     ctx.lineWidth = .01
     for (const off of offsets) {
       makePath(list, off, mapPoint);
       // Why does BabylonJS use its own type instead of CanvasRenderingContext2D?
       (ctx as CanvasRenderingContext2D).fill('evenodd');
     }
-    ctx.fillStyle = bw ? "#888" : color2;
+    ctx.fillStyle = sameColor ? "#ee0" : color2;
     ctx.lineWidth = .005
     for (const off of offsets) {
       makePath(shell, off, mapPoint);

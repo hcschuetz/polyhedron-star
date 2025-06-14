@@ -193,8 +193,8 @@ export type Grid4Background =
 | "tiles B"
 | "tiles C"
 | "tiles D"
-| "turtles"
-| "turtlesBW"
+| "turtles (1 color)"
+| "turtles (4 colors)"
 ;
 
 // Mirroring (as opposed to rotating) hides small differences between
@@ -233,8 +233,8 @@ const grid4BackgroundPainters: Record<Grid4Background, (ctx: B.ICanvasRenderingC
   "tiles B"(ctx) { drawImage4mirror(ctx, imgTile4b); },
   "tiles C"(ctx) { drawImage4rotate(ctx, imgTile4c); },
   "tiles D"(ctx) { drawImage4rotate(ctx, imgTile4d); },
-  turtles  (ctx) { drawTurtles(ctx, false); },
-  turtlesBW(ctx) { drawTurtles(ctx, true); },
+  "turtles (1 color)" (ctx) { drawTurtles(ctx, true ); },
+  "turtles (4 colors)"(ctx) { drawTurtles(ctx, false); },
 };
 
 export const grid4Backgrounds = Obj.keys(grid4BackgroundPainters);

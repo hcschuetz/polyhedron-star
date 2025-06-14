@@ -30,6 +30,7 @@
     grid: "quad diagonal",
     density: 1,
     edges: false,
+    breaks: false,
     cuts: false,
     labels: false,
     bending: 1,
@@ -37,11 +38,12 @@
       // Turtle pattern inspired by
       // https://mathstodon.xyz/@DaniLaura/114658815682032097
 
-      // With colors the pattern is not sufficiently symmetric:
-      // background: "turtles",
+      // If all turtles have the same color, we get the appropriate symmetry:
+      background: "turtles (1 color)",
 
-      // But with uniform coloring (here in grey) the symmetry works:
-      background: "turtlesBW",
+      // With 4 kinds of turtles having different colors, the pattern is not
+      // sufficiently symmetric:
+      // background: "turtles (4 colors)",
 
       quads: false,
     },
