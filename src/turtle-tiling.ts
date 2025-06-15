@@ -4,7 +4,7 @@ import { TAU } from './geom-utils';
 
 
 function walk(path: Array<string | number>) {
-  const p = 1/6, q = Math.sqrt(3)/18;
+  const p = 1/12, q = Math.sqrt(3)/36;
   // x and y are represented as linear combinations of p and q
   // where the coefficients happen to be integers.
   let xp = 0, xq = 0;
@@ -110,7 +110,7 @@ export function drawTurtles(ctx: CanvasRenderingContext2D, sameColor: boolean) {
   ): Point2D {
       // It's a bit strange, but at least it is in a single place now.
       const [xm, ym] = mapPoint(point);
-      const xx = xOff + xm/2, yy = yOff + ym/2;
+      const xx = xOff + xm, yy = yOff + ym;
       return [xx + yy, yy - xx];
   }
 
