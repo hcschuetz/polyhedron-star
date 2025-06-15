@@ -3,7 +3,7 @@
 import { TAU } from './geom-utils';
 
 
-function walk(path) {
+function walk(path: Array<string | number>) {
   const p = 1/6, q = Math.sqrt(3)/18;
   // x and y are represented as linear combinations of p and q
   // where the coefficients happen to be integers.
@@ -13,7 +13,7 @@ function walk(path) {
     xp * p + xq * q,
     yp * p + yq * q,
   ];
-  const step = (dxp, dxq, dyp, dyq) => {
+  const step = (dxp: number, dxq: number, dyp: number, dyq: number) => {
     xp += dxp; xq += dxq;
     yp += dyp; yq += dyq;
   };
