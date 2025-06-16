@@ -35,6 +35,7 @@ function gridSignalsToConfig(signals: GridSignals): GridConfig {
     grid4: {
       background: grid4.background.value,
       quads: grid4.quads.value,
+      "dual quads": grid4["dual quads"].value,
       cairo: grid4.cairo.value,
     },
   }
@@ -87,6 +88,7 @@ function setSignals(signals: Signals, display: DisplaySettings) {
       const grid4 = display.grid4 ?? {};
       grid4Signals.background.value = grid4.background ?? "plain";
       grid4Signals.quads.value = grid4.quads ?? false;
+      grid4Signals["dual quads"].value = grid4["dual quads"] ?? false;
       grid4Signals.cairo.value = grid4.cairo ?? false;
       break;
     }

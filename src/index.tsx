@@ -57,6 +57,7 @@ export function App() {
     grid4: {
       background: useSignal("plain"),
       quads: useSignal(true),
+      "dual quads": useSignal(false),
       cairo: useSignal(false),
     },
   };

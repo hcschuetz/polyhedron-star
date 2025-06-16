@@ -240,7 +240,7 @@ const grid4BackgroundPainters: Record<Grid4Background, (ctx: CanvasRenderingCont
 export const grid4Backgrounds = Obj.keys(grid4BackgroundPainters);
 
 export type Grid4Feature =
-| "quads"
+| "quads" | "dual quads"
 | "cairo"
 ;
 
@@ -254,6 +254,14 @@ const grid4Painters: Record<Grid4Feature, (ctx: CanvasRenderingContext2D) => voi
     ctx.lineTo(1, 1);
     ctx.lineTo(1, 0);
     ctx.closePath();
+    ctx.stroke();  
+  },
+  "dual quads": ctx => {
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 1 / 20;
+    ctx.beginPath();
+    ctx.moveTo(0  , 1/2); ctx.lineTo(1  , 1/2);
+    ctx.moveTo(1/2, 0  ); ctx.lineTo(1/2, 1  );
     ctx.stroke();  
   },
   cairo: ctx => {
