@@ -12,6 +12,7 @@ import nearMissJohnsonSolid2 from './examples/near-miss-Johnson-solid-2.json5?ra
 import nearMissJohnsonSolid3 from './examples/near-miss-Johnson-solid-3.json5?raw';
 import cube from "./examples/cube.json5?raw";
 import turtleCube from "./examples/turtle-cube.json5?raw";
+import cairoCube from "./examples/cairo-cube.json5?raw"
 import octahedron from "./examples/octahedron.json5?raw";
 import tetrahedron from "./examples/tetrahedron.json5?raw";
 import dihedron from "./examples/dihedron.json5?raw";
@@ -32,6 +33,7 @@ export const examples: {name: string, value: string}[] = [
   {name: "near-miss Johnson solid #3", value: nearMissJohnsonSolid3},
   {name: "cube", value: cube},
   {name: "cube with turtles", value: turtleCube},
+  {name: "cube with cairo tiles", value: cairoCube},
   {name: "regular octahedron", value: octahedron},
   {name: "regular tetrahedron", value: tetrahedron},
   {name: "triangular dihedron", value: dihedron},

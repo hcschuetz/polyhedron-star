@@ -1,0 +1,35 @@
+{
+  starGaps: {
+    a: {angleDeficit: "90deg", steps: ["w", "w"]},
+    b: {angleDeficit: "90deg", steps: ["w", "s"]},
+    c: {angleDeficit: "90deg", steps: ["s", "s"]},
+    d: {angleDeficit: "90deg", steps: ["s", "e"]},
+    e: {angleDeficit: "90deg", steps: ["e", "e"]},
+    f: {angleDeficit: "90deg", steps: ["e", "n"]},
+    g: {angleDeficit: "90deg", steps: ["w", "n", "n", "n"]},
+  },
+  edges: [
+    "b", "d", "f",
+    {bend: "90deg", from: "a", to: "b"},
+    {bend: " 0deg", from: "a", to: "c"},
+    {bend: "90deg", from: "a", to: "g"},
+    {bend: "90deg", from: "b", to: "c"},
+    {bend: "90deg", from: "c", to: "d"},
+    {bend: " 0deg", from: "c", to: "e"},
+    {bend: "90deg", from: "c", to: "g"},
+    {bend: "90deg", from: "d", to: "e"},
+    {bend: "90deg", from: "e", to: "g"},
+    {bend: "90deg", from: "e", to: "f"},
+    {bend: " 0deg", from: "e", to: "a", through: ["g"]},
+    {bend: " 0deg", from: "b", to: "d", through: ["c"]},
+    {bend: " 0deg", from: "d", to: "f", through: ["e"]},
+    {bend: "90deg", from: "f", to: "a", through: ["g"]},
+    {bend: " 0deg", from: "f", to: "b", through: ["g", "a"]},
+  ],
+  display: {
+    grid: "quad diagonal",
+    grid4: {
+      cairo: true,
+    },
+  }
+}
