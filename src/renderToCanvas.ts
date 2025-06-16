@@ -36,7 +36,8 @@ function gridSignalsToConfig(signals: GridSignals): GridConfig {
       background: grid4.background.value,
       quads: grid4.quads.value,
       "dual quads": grid4["dual quads"].value,
-      cairo: grid4.cairo.value,
+      cairo1: grid4.cairo1.value,
+      cairo2: grid4.cairo2.value,
     },
   }
 }
@@ -89,7 +90,8 @@ function setSignals(signals: Signals, display: DisplaySettings) {
       grid4Signals.background.value = grid4.background ?? "plain";
       grid4Signals.quads.value = grid4.quads ?? false;
       grid4Signals["dual quads"].value = grid4["dual quads"] ?? false;
-      grid4Signals.cairo.value = grid4.cairo ?? false;
+      grid4Signals.cairo1.value = grid4.cairo1 ?? false;
+      grid4Signals.cairo2.value = grid4.cairo2 ?? false;
       break;
     }
     default: throw "unexpected grid type: " + display.grid;

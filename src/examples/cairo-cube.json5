@@ -29,7 +29,7 @@
   display: {
     grid: "quad diagonal",
     grid4: {
-      cairo: true,
+      cairo1: true,
     },
   }
 }

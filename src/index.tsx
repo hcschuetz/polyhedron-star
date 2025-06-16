@@ -58,7 +58,8 @@ export function App() {
       background: useSignal("plain"),
       quads: useSignal(true),
       "dual quads": useSignal(false),
-      cairo: useSignal(false),
+      cairo1: useSignal(false),
+      cairo2: useSignal(false),
     },
   };
   const canvas = useRef<HTMLCanvasElement>();
