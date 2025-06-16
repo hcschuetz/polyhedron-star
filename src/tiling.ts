@@ -64,7 +64,6 @@ const grid3BackgroundPainters: Record<Grid3Background, (ctx: CanvasRenderingCont
     ctx.lineTo(  r3  , 1  );
     ctx.lineTo(  0   , 1  );
     ctx.closePath();
-    // Why does BabylonJS use its own type instead of CanvasRenderingContext2D?
     ctx.fill('evenodd');
   },
   tiles(ctx) {
