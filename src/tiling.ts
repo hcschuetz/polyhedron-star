@@ -188,6 +188,7 @@ export const drawTile3: DrawTile = (ctx, width, height, features) => {
 
 export type Grid4Background =
 | "plain"
+| "subTriangles"
 | "tiles A"
 | "tiles B"
 | "tiles C"
@@ -227,6 +228,22 @@ const grid4BackgroundPainters: Record<Grid4Background, (ctx: CanvasRenderingCont
   plain(ctx) {
     ctx.fillStyle = "#dd0";
     ctx.fillRect(0, 0, 1, 1);
+  },
+  subTriangles(ctx) {
+    this.plain(ctx);
+    ctx.fillStyle = "#cc0";
+    ctx.beginPath();
+    ctx.moveTo(  0   , 0  );
+    ctx.lineTo(  1   , 1  );
+    ctx.lineTo(  1   , 1/2);
+    ctx.lineTo(  0   , 1/2);
+    ctx.lineTo(  0   , 1  );
+    ctx.lineTo(  1   , 0  );
+    ctx.lineTo(  1/2 , 0  );
+    ctx.lineTo(  1/2 , 1  );
+    ctx.lineTo(  0   , 1  );
+    ctx.closePath();
+    ctx.fill('evenodd');
   },
   "tiles A"(ctx) { drawImage4mirror(ctx, imgTile4a); },
   "tiles B"(ctx) { drawImage4mirror(ctx, imgTile4b); },
