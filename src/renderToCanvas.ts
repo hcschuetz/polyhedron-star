@@ -35,6 +35,7 @@ function gridSignalsToConfig(signals: GridSignals): GridConfig {
     grid4: {
       background: grid4.background.value,
       quads: grid4.quads.value,
+      cairo: grid4.cairo.value,
     },
   }
 }
@@ -632,6 +633,7 @@ export default function renderToCanvas(
         const grid4Signals = signals.grid4;
         setSignal(grid4Signals.background, grid4.background);
         setSignal(grid4Signals.quads, grid4.quads);
+        setSignal(grid4Signals.cairo, grid4.cairo);
       }
     });
   } catch(error) {

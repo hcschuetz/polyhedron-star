@@ -241,6 +241,7 @@ export const grid4Backgrounds = Obj.keys(grid4BackgroundPainters);
 
 export type Grid4Feature =
 | "quads"
+| "cairo"
 ;
 
 const grid4Painters: Record<Grid4Feature, (ctx: CanvasRenderingContext2D) => void> = {
@@ -254,7 +255,30 @@ const grid4Painters: Record<Grid4Feature, (ctx: CanvasRenderingContext2D) => voi
     ctx.lineTo(1, 0);
     ctx.lineTo(0, 0);
     ctx.stroke();  
-  }
+  },
+  cairo: ctx => {
+    ctx.strokeStyle = "#000";
+    ctx.save();
+    ctx.translate(1/2, 1/2);
+      ctx.rotate(TAU/8); ctx.scale(Math.SQRT2, Math.SQRT2);
+    ctx.translate(-1/2, -1/2);
+    ctx.lineWidth = .02;
+    ctx.beginPath();
+
+    ctx.moveTo(1/6, 1/4); ctx.lineTo(2/6, 1/4);
+    ctx.lineTo(4/6, 3/4); ctx.lineTo(5/6, 3/4);
+
+    ctx.moveTo(1/4, 5/6); ctx.lineTo(1/4, 4/6);
+    ctx.lineTo(3/4, 2/6); ctx.lineTo(3/4, 1/6);
+
+    ctx.moveTo(1/3, 1/4); ctx.lineTo(1/2, 0  ); ctx.lineTo(3/4, 1/6);
+    ctx.moveTo(1/4, 2/3); ctx.lineTo(  0, 1/2); ctx.lineTo(1/6, 1/4);
+    ctx.moveTo(2/3, 3/4); ctx.lineTo(1/2, 1  ); ctx.lineTo(1/4, 5/6);
+    ctx.moveTo(3/4, 1/3); ctx.lineTo(  1, 1/2); ctx.lineTo(5/6, 3/4);
+
+    ctx.stroke();
+    ctx.restore();
+  },
 }
 
 export const grid4Features = Obj.keys(grid4Painters);

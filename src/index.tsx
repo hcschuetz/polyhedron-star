@@ -57,6 +57,7 @@ export function App() {
     grid4: {
       background: useSignal("plain"),
       quads: useSignal(true),
+      cairo: useSignal(false),
     },
   };
   const canvas = useRef<HTMLCanvasElement>();
