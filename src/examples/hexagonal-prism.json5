@@ -36,6 +36,9 @@
     {bend: "60deg", from: "j", to: "b", through: ["k", "a"]},
   ],
   display: {
+    bending: 0,
+    edges: true,
+    cuts: true,
     grid: "triangular even",
   },
 }

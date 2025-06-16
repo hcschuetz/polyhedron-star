@@ -6,6 +6,9 @@
   edges: [
   ],
   display: {
-    grid: "none",
+    vertices: true,
+    labels: true,
+    edges: true,
+    cuts: true,
   }
 }

@@ -55,6 +55,7 @@
 
   ],
   display: {
+    autobend: true,
     grid: "triangular even",
   }
 }

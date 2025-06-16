@@ -4,7 +4,7 @@ import { Vector2 as V2, Vector3 as V3 } from '@babylonjs/core';
 import * as G from '@babylonjs/gui';
 
 import { assert, fail } from './utils';
-import { angleToRad, Task, stepToV2, Step } from './taskspec';
+import { angleToRad, Task, stepToV2, Step, DisplaySettings } from './taskspec';
 import { arcPath, interpolateV2, intersectLineSegments, rotateAroundInPlace, TAU, UVFrame, v2, v3 } from './geom-utils';
 import { batch, computed, effect, Signal } from '@preact/signals';
 import { Edge, EdgeBreak, HalfEdge, Loop, loopHalfEdges, makeSegment, Vertex } from './Shape';
@@ -52,6 +52,47 @@ export type Signals = {
   flower: Signal<boolean>,
   density: Signal<number>,
 } & GridSignals;
+
+function setSignals(signals: Signals, display: DisplaySettings) {
+  signals.vertices.value = display.vertices ?? false;
+  signals.labels.value = display.labels ?? false;
+  signals.edges.value = display.edges ?? false;
+  signals.cuts.value = display.cuts ?? false;
+  signals.faces.value = display.faces ?? true;
+  signals.breaks.value = display.breaks ?? false;
+  signals.flower.value = display.flower ?? false;
+  signals.bending.value = display.bending ?? 1;
+  signals.autobend.value = display.autobend ?? false;
+  signals.grid.value = display.grid ?? "none";
+  signals.density.value = display.density ?? 1;
+  switch (display.grid) {
+    case "none": break;
+    case "triangular even":
+    case "triangular odd": {
+      const grid3Signals = signals.grid3;
+      const grid3 = display.grid3 ?? {};
+      grid3Signals.background.value = grid3.background ?? "subTriangles";
+      grid3Signals.triangles.value = grid3.triangles ?? false;
+      grid3Signals.diamonds.value = grid3.diamonds ?? false;
+      grid3Signals.hexagons1.value = grid3.hexagons1 ?? false;
+      grid3Signals.hexagons2.value = grid3.hexagons2 ?? false;
+      grid3Signals.arrows.value = grid3.arrows ?? false;
+      grid3Signals.ball.value = grid3.ball ?? false;
+      grid3Signals.zigzag.value = grid3.zigzag ?? false;
+      break;
+    }
+    case "quad":
+    case "quad diagonal": {
+      const grid4Signals = signals.grid4;
+      const grid4 = display.grid4 ?? {};
+      grid4Signals.background.value = grid4.background ?? "plain";
+      grid4Signals.quads.value = grid4.quads ?? false;
+      grid4Signals.cairo.value = grid4.cairo ?? false;
+      break;
+    }
+    default: throw "unexpected grid type: " + display.grid;
+  }
+}
 
 export default function renderToCanvas(
   canvas: HTMLCanvasElement,
@@ -590,7 +631,6 @@ export default function renderToCanvas(
     engine.runRenderLoop(renderScene);
     window.addEventListener("resize", resizeEngine);
 
-    // -------------------------------------------------------------------------
 
     // TODO Figure out why setting the signals (actually signal.grid) earlier
     // leads to an exception due to an undefined context in the DynamicTexture.
@@ -598,44 +638,8 @@ export default function renderToCanvas(
     // re-evaluation.
     // Or treat grid type and grid density as manifold properties rather than
     // display properties?  So they would no more be (GUI-modifiable) signals.
-
-    batch(() => {
-      function setSignal<T>(signal: Signal<T>, value: T | undefined) {
-        if (value !== undefined) signal.value = value;
-      }
-
-      const {display} = task;
-      const {grid3, grid4} = display;
-
-      setSignal(signals.vertices, display.vertices);
-      setSignal(signals.labels, display.labels);
-      setSignal(signals.edges, display.edges);
-      setSignal(signals.cuts, display.cuts);
-      setSignal(signals.faces, display.faces);
-      setSignal(signals.breaks, display.breaks);
-      setSignal(signals.flower, display.flower);
-      setSignal(signals.bending, display.bending);
-      setSignal(signals.autobend, display.autobend);
-      setSignal(signals.grid, display.grid);
-      setSignal(signals.density, display.density);
-      if (grid3) {
-        const grid3Signals = signals.grid3;
-        setSignal(grid3Signals.background, grid3.background);
-        setSignal(grid3Signals.triangles, grid3.triangles);
-        setSignal(grid3Signals.diamonds, grid3.diamonds);
-        setSignal(grid3Signals.hexagons1, grid3.hexagons1);
-        setSignal(grid3Signals.hexagons2, grid3.hexagons2);
-        setSignal(grid3Signals.arrows, grid3.arrows);
-        setSignal(grid3Signals.ball, grid3.ball);
-        setSignal(grid3Signals.zigzag, grid3.zigzag);
-      }
-      if (grid4) {
-        const grid4Signals = signals.grid4;
-        setSignal(grid4Signals.background, grid4.background);
-        setSignal(grid4Signals.quads, grid4.quads);
-        setSignal(grid4Signals.cairo, grid4.cairo);
-      }
-    });
+    // UPDATE: Check if this issue still exists now after some refactoring.
+    batch(() => setSignals(signals, task.display));
   } catch(error) {
     emitWarning(`In renderToCanvas(...): ${error}`);
   } finally {
