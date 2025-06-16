@@ -44,8 +44,6 @@
       // With 4 kinds of turtles having different colors, the pattern is not
       // sufficiently symmetric:
       // background: "turtles (4 colors)",
-
-      quads: false,
     },
   }
 }
