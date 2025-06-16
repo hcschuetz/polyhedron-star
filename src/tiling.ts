@@ -247,13 +247,13 @@ export type Grid4Feature =
 const grid4Painters: Record<Grid4Feature, (ctx: CanvasRenderingContext2D) => void> = {
   quads: ctx => {
     ctx.strokeStyle = "#000";
-    ctx.lineWidth = 1 / 20
+    ctx.lineWidth = 1 / 20;
     ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.lineTo(0, 1);
     ctx.lineTo(1, 1);
     ctx.lineTo(1, 0);
-    ctx.lineTo(0, 0);
+    ctx.closePath();
     ctx.stroke();  
   },
   cairo: ctx => {
