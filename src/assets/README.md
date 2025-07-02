@@ -19,3 +19,7 @@ One tile is drawn by myself (Heribert Schütz):
   It's a bad variation of one of M. C. Escher's lizard patterns
   (so that the copyright holders of Escher's work need not be worried that
   my image will cost them any business.)
+
+By permission of Mastodon user n-gons (@ngons@mathstodon.xyz):
+- **tile3b.png**
+  https://mathstodon.xyz/@ngons/114636901870731820

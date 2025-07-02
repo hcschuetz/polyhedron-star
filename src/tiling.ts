@@ -3,6 +3,7 @@ import * as B from '@babylonjs/core';
 import { Obj } from './utils';
 import { TAU } from './geom-utils';
 import tile3a from './assets/tile3a.png';
+import tile3b from './assets/tile3b.png';
 import tile4a from './assets/tile4a.png';
 import tile4b from './assets/tile4b.png';
 import tile4c from './assets/tile4c.png';
@@ -20,6 +21,7 @@ import { drawTurtles } from './turtle-tiling';
 // without an image change.  Furthermore the UX benefits from immediately
 // available images.)
 const imgTile3a = Object.assign(new Image(), {src: tile3a});
+const imgTile3b = Object.assign(new Image(), {src: tile3b});
 const imgTile4a = Object.assign(new Image(), {src: tile4a});
 const imgTile4b = Object.assign(new Image(), {src: tile4b});
 const imgTile4c = Object.assign(new Image(), {src: tile4c});
@@ -29,7 +31,8 @@ const imgTile4d = Object.assign(new Image(), {src: tile4d});
 export type Grid3Background =
 | "plain"
 | "subTriangles"
-| "tiles"
+| "tile3a"
+| "tile3b"
 ;
 
 const grid3BackgroundPainters: Record<Grid3Background, (ctx: CanvasRenderingContext2D) => void> = {
@@ -66,9 +69,8 @@ const grid3BackgroundPainters: Record<Grid3Background, (ctx: CanvasRenderingCont
     ctx.closePath();
     ctx.fill('evenodd');
   },
-  tiles(ctx) {
-    ctx.drawImage(imgTile3a, 0, 0, r3, 1);
-  },
+  tile3b(ctx) { ctx.drawImage(imgTile3b, 0, 0, r3, 1); },
+  tile3a(ctx) { ctx.drawImage(imgTile3a, 0, 0, r3, 1); },
 };
 
 export const grid3Backgrounds = Obj.keys(grid3BackgroundPainters);

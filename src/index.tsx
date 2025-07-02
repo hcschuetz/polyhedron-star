@@ -13,7 +13,8 @@ import { Obj } from './utils';
 
 
 const background3Names: Partial<Record<Grid3Background, string>> = {
-  tiles: "Alhambra tiles"
+  tile3a: "Alhambra tiles",
+  tile3b: "Hexagonal tiles by n-gons",
 }
 
 const background4Names: Partial<Record<Grid4Background, string>> = {
