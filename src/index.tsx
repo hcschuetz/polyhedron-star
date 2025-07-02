@@ -214,6 +214,10 @@ export function App() {
         </div>
       }
       <canvas ref={canvas}/>
+      <div>
+        <a href="https://github.com/hcschuetz/polyhedron-star/tree/main/src/assets"
+        >Attribution of background tilings</a>
+      </div>
     </div>
   </>);
 }

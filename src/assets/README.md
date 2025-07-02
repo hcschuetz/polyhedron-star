@@ -1,4 +1,10 @@
-Most tiles are from the Alhambra in Granada, Spain.
+Tiling Attribution
+==================
+
+Raster Graphics
+---------------
+
+Various tiles are from the Alhambra in Granada, Spain.
 I have cut them out from images on Wikimedia Commons:
 - **tile3a.png**
   https://commons.wikimedia.org/wiki/File:Mosaico_alhambra2.jpg
@@ -23,3 +29,12 @@ One tile is drawn by myself (Heribert Schütz):
 By permission of Mastodon user n-gons (@ngons@mathstodon.xyz):
 - **tile3b.png**
   https://mathstodon.xyz/@ngons/114636901870731820
+
+
+Vector Graphics
+---------------
+(in the code, not in this folder)
+
+- The turtle tilings are inspired by
+  https://mathstodon.xyz/@DaniLaura/114658815682032097
+  but simplified
