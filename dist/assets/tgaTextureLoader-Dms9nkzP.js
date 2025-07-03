@@ -1,1 +1,0 @@
-import{_TGATextureLoader as e}from"./index-DW81hSw1.js";export{e as _TGATextureLoader};

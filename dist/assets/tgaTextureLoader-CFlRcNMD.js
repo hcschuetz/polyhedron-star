@@ -1,0 +1,1 @@
+import{_TGATextureLoader as e}from"./index-BEJ9flNp.js";export{e as _TGATextureLoader};

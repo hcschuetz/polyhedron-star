@@ -1,1 +1,0 @@
-import{defaultPixelShader as e}from"./index-DW81hSw1.js";export{e as defaultPixelShader};

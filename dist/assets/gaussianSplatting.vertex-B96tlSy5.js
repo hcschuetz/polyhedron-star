@@ -1,0 +1,1 @@
+import{gaussianSplattingVertexShaderWGSL as e}from"./index-BEJ9flNp.js";export{e as gaussianSplattingVertexShaderWGSL};

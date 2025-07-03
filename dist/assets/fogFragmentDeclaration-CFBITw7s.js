@@ -1,0 +1,1 @@
+import{fogFragmentDeclaration as e}from"./index-BEJ9flNp.js";export{e as fogFragmentDeclaration};

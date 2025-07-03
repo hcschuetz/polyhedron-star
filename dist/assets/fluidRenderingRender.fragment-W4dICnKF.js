@@ -1,0 +1,1 @@
+import{fluidRenderingRenderPixelShaderWGSL as e}from"./index-BEJ9flNp.js";export{e as fluidRenderingRenderPixelShaderWGSL};

@@ -1,0 +1,1 @@
+import{morphTargetsVertexWGSL as e}from"./index-BEJ9flNp.js";export{e as morphTargetsVertexWGSL};

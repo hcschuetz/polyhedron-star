@@ -1,1 +1,0 @@
-import{defaultVertexShader as e}from"./index-DW81hSw1.js";export{e as defaultVertexShader};

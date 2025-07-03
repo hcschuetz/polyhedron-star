@@ -1,1 +1,0 @@
-import{lightsFragmentFunctionsWGSL as e}from"./index-DW81hSw1.js";export{e as lightsFragmentFunctionsWGSL};
