@@ -1,0 +1,1 @@
+import{morphTargetsVertexDeclarationWGSL as e}from"./index-DW81hSw1.js";export{e as morphTargetsVertexDeclarationWGSL};

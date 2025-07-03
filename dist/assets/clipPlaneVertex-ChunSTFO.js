@@ -1,0 +1,1 @@
+import{clipPlaneVertex as e}from"./index-DW81hSw1.js";export{e as clipPlaneVertex};

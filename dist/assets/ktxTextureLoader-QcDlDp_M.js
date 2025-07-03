@@ -1,0 +1,1 @@
+import{_KTXTextureLoader as e}from"./index-DW81hSw1.js";export{e as _KTXTextureLoader};

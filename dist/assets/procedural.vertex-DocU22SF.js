@@ -1,0 +1,1 @@
+import{proceduralVertexShaderWGSL as e}from"./index-DW81hSw1.js";export{e as proceduralVertexShaderWGSL};
