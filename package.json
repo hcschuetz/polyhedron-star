@@ -30,8 +30,7 @@
 		"@preact/preset-vite": "^2.9.0",
 		"eslint": "^8.57.1",
 		"eslint-config-preact": "^1.5.0",
-		"typescript": "^5.7.2",
-		"vite": "^5.3.3"
+		"rolldown-vite": "^7.0.4"
 	},
 	"eslintConfig": {
 		"extends": "preact"
