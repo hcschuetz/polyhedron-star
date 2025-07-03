@@ -117,6 +117,13 @@ export function App() {
       For a description of this demo see {}
       <a href="https://github.com/hcschuetz/polyhedron-star">the project README</a>.
     </p>
+    <p>
+      References to third-party material: {}
+      <a href="https://github.com/hcschuetz/polyhedron-star/tree/main/src/examples"
+      >stars/polyhedra</a> (in the respective JSON5 files); {}
+      <a href="https://github.com/hcschuetz/polyhedron-star/tree/main/src/assets"
+      >tilings</a>
+    </p>
     <div class="rows">
       <textarea
         rows={20} spellcheck={false}
@@ -214,10 +221,6 @@ export function App() {
         </div>
       }
       <canvas ref={canvas}/>
-      <div>
-        <a href="https://github.com/hcschuetz/polyhedron-star/tree/main/src/assets"
-        >Attribution of background tilings</a>
-      </div>
     </div>
   </>);
 }

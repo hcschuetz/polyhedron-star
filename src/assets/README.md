@@ -1,5 +1,5 @@
-Tiling Attribution
-==================
+Tiling References
+=================
 
 Raster Graphics
 ---------------

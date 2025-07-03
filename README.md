@@ -68,10 +68,11 @@ Most of them should be self-explanatory, but some notes might be helpful:
   provided angles.
 
 
-## Your Stars And Polyhedra
+## Your Objects and Tilings
 
-If you have an interesting shape, let me know so I can include it in the
+If you have an interesting star/polyhedron, let me know so I can include it in the
 list of examples.
+Also let me know of interesting (triangular/hexagonal or quad) tilings.
 You can
 - use the [discussion area](https://github.com/hcschuetz/polyhedron-star/discussions)
   of this project (or even provide a pull request)
