@@ -67,7 +67,7 @@ function setSignals(signals: Signals, display: DisplaySettings) {
   signals.autobend.value = display.autobend ?? false;
   signals.grid.value = display.grid ?? "none";
   signals.density.value = display.density ?? 1;
-  switch (display.grid) {
+  switch (display.grid ?? "none") {
     case "none": break;
     case "triangular even":
     case "triangular odd": {
@@ -643,7 +643,7 @@ export default function renderToCanvas(
     // Or treat grid type and grid density as manifold properties rather than
     // display properties?  So they would no more be (GUI-modifiable) signals.
     // UPDATE: Check if this issue still exists now after some refactoring.
-    batch(() => setSignals(signals, task.display));
+    batch(() => setSignals(signals, task.display ?? {}));
   } catch(error) {
     emitWarning(`In renderToCanvas(...): ${error}`);
   } finally {
