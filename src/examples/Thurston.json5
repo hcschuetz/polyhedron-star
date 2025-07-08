@@ -90,8 +90,8 @@
   ],
   // Set display parameters here so that you need not set them manually.
   // You can still change them in the GUI later.
-  // (Omit components or the "display" element as a whole to leave settings
-  // unchanged.)
+  // (Omit components or the "display" element as a whole to use default
+  // settings.)
   display: {
     vertices: false,
     labels: true,
