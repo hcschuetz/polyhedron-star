@@ -1,1 +1,0 @@
-import{morphTargetsVertexDeclaration as e}from"./index-BEJ9flNp.js";export{e as morphTargetsVertexDeclaration};

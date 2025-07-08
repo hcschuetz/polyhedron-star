@@ -1,0 +1,1 @@
+import{_KTXTextureLoader as e}from"./index-jvPyiwml.js";export{e as _KTXTextureLoader};

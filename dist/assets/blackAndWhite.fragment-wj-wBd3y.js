@@ -1,0 +1,1 @@
+import{blackAndWhitePixelShader as e}from"./index-jvPyiwml.js";export{e as blackAndWhitePixelShader};

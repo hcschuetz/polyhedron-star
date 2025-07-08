@@ -1,0 +1,1 @@
+import{OptimizeIndices as e}from"./index-jvPyiwml.js";export{e as OptimizeIndices};

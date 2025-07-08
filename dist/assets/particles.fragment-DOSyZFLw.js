@@ -1,0 +1,1 @@
+import{particlesPixelShaderWGSL as e}from"./index-jvPyiwml.js";export{e as particlesPixelShaderWGSL};

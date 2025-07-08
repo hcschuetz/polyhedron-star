@@ -1,0 +1,1 @@
+import{passCubePixelShader as e}from"./index-jvPyiwml.js";export{e as passCubePixelShader};

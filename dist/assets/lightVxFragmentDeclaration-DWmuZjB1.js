@@ -1,0 +1,1 @@
+import{lightVxFragmentDeclaration as e}from"./index-jvPyiwml.js";export{e as lightVxFragmentDeclaration};

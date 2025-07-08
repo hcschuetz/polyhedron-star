@@ -1,0 +1,1 @@
+import{bonesVertex as e}from"./index-jvPyiwml.js";export{e as bonesVertex};

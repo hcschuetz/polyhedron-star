@@ -1,1 +1,0 @@
-import{lightFragmentDeclaration as e}from"./index-BEJ9flNp.js";export{e as lightFragmentDeclaration};

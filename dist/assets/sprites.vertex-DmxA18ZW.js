@@ -1,0 +1,1 @@
+import{spritesVertexShaderWGSL as e}from"./index-jvPyiwml.js";export{e as spritesVertexShaderWGSL};

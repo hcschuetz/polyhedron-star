@@ -1,0 +1,1 @@
+import{bumpFragmentWGSL as e}from"./index-jvPyiwml.js";export{e as bumpFragmentWGSL};

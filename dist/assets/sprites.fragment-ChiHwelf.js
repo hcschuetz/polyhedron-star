@@ -1,0 +1,1 @@
+import{spritesPixelShader as e}from"./index-jvPyiwml.js";export{e as spritesPixelShader};

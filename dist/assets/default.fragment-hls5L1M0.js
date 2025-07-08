@@ -1,0 +1,1 @@
+import{defaultPixelShader as e}from"./index-jvPyiwml.js";export{e as defaultPixelShader};

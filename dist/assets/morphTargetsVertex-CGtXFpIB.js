@@ -1,0 +1,1 @@
+import{morphTargetsVertex as e}from"./index-jvPyiwml.js";export{e as morphTargetsVertex};

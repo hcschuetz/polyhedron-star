@@ -1,0 +1,1 @@
+import{defaultPixelShaderWGSL as e}from"./index-jvPyiwml.js";export{e as defaultPixelShaderWGSL};

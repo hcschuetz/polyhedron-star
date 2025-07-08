@@ -1,0 +1,1 @@
+import{bumpFragment as e}from"./index-jvPyiwml.js";export{e as bumpFragment};

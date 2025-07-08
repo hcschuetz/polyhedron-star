@@ -1,1 +1,0 @@
-import{morphTargetsVertexGlobal as e}from"./index-BEJ9flNp.js";export{e as morphTargetsVertexGlobal};

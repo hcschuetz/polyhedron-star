@@ -1,0 +1,1 @@
+import{boundingBoxRendererVertexShaderWGSL as e}from"./index-jvPyiwml.js";export{e as boundingBoxRendererVertexShaderWGSL};

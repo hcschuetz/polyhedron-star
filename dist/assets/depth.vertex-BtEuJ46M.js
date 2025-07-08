@@ -1,0 +1,1 @@
+import{depthVertexShaderWGSL as e}from"./index-jvPyiwml.js";export{e as depthVertexShaderWGSL};

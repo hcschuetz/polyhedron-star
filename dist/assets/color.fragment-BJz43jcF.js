@@ -1,0 +1,1 @@
+import{colorPixelShaderWGSL as e}from"./index-jvPyiwml.js";export{e as colorPixelShaderWGSL};

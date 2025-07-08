@@ -1,0 +1,1 @@
+import{clipPlaneVertexDeclaration as e}from"./index-jvPyiwml.js";export{e as clipPlaneVertexDeclaration};

@@ -1,0 +1,1 @@
+import{morphTargetsVertexGlobal as e}from"./index-jvPyiwml.js";export{e as morphTargetsVertexGlobal};
